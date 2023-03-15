@@ -7,6 +7,7 @@ package manifest
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -196,7 +197,22 @@ func (m *Manifest) GetFile(
 
 
 
+// 
+func (m *Manifest) URLExists(url_ url.URL) bool {
 
+	if m == nil {
+		return false
+	}
+
+	src := url_.Path
+	manifest := m.GetNameURL().String()
+	if src == manifest {
+		return true
+	} else if src[0] != '/' && `/`+src == manifest {
+		return true
+	}
+	return false
+}
 
 
 func default_get() *Manifest {
