@@ -171,7 +171,27 @@ func (m *Manifest) GetFile(
 	exists bool,
 	err error,
 ){
+	already_exists := m.cache.get_file_exists()
+	switch already_exists {
+	case types_.FileExistsOK:
+		if fpath := m.cache.get_filepath(); fpath != `` {
+			return fpath, true, nil
+		}
+	case types_.FileExistsNOT:
+		return ``, false, nil
+	}
 
+	fpath, state_create, err := m.file_create(folder_work, thumbs)
+	if err != nil {
+		// return error
+	}
+	if !state_create {
+		m.cache.set_file_exists(types_.FileExistsNOT)
+		return ``, false, nil
+	}
+	m.cache.set_filepath(fpath)
+	m.cache.set_file_exists(types_.FileExistsOK)
+	return fpath, true, nil
 }
 
 
