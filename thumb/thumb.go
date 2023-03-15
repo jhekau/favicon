@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	create_ "github.com/jhekau/favicon/thumb/create"
 	types_ "github.com/jhekau/favicon/types"
 )
 
@@ -32,8 +33,13 @@ type Thumb struct {
 }
 
 // ...
-func (t *Thumb) file_create(filepath types_.FilePath) error {
-	
+func (t *Thumb) file_create(save_img, source_img, source_svg types_.FilePath) (complite bool, err error) {
+	os.Remove(save_img.String())
+	complite, err = create_.File(source_img, source_svg, save_img, t.typ, t.size_px)
+	if err != nil {
+		// return error
+	}
+	return complite, nil
 }
 
 // ...
@@ -70,9 +76,13 @@ func (t *Thumb) get_filepath(folder_work types_.Folder, original_name types_.Fil
 }
 
 // ...
-func (t *Thumb) GetFile(folder_work types_.Folder, original_name types_.FileName) (types_.FilePath, error) {
+func (t *Thumb) GetFile(folder_work types_.Folder, source_img, source_svg types_.FilePath) (types_.FilePath, error) {
 
-	fpath := t.get_filepath(folder_work, original_name)
+	original_filename := types_.FileName(
+		filepath.Base(source_img.String()),
+	)
+
+	save_img := t.get_filepath(folder_work, original_filename)
 	var check_exists types_.FileExists
 
 	t.RLock()
@@ -80,7 +90,7 @@ func (t *Thumb) GetFile(folder_work types_.Folder, original_name types_.FileName
 	t.RUnlock()
 
 	if check_exists == types_.FileExistsOK {
-		return fpath, nil
+		return save_img, nil
 	}
 	
 	if check_exists == types_.FileExistsNOT {
@@ -91,11 +101,14 @@ func (t *Thumb) GetFile(folder_work types_.Folder, original_name types_.FileName
 	defer t.Unlock()
 
 
-	if err := t.file_create(fpath); err != nil {
+	if complite, err := t.file_create(save_img, source_img, source_svg); err != nil {
+		// return error
+	} else if !complite {
+		t.cache.set_file_exists_state(types_.FileExistsNOT)
 		// return error
 	}
 
-	if f, err := os.Stat(fpath.String()); err != nil {
+	if f, err := os.Stat(save_img.String()); err != nil {
 		t.cache.set_file_exists_state(types_.FileExistsNOT)
 		if os.IsNotExist(err) {
 			// return ``, error - file not exists
@@ -107,7 +120,7 @@ func (t *Thumb) GetFile(folder_work types_.Folder, original_name types_.FileName
 	}
 
 	t.cache.set_file_exists_state(types_.FileExistsOK)
-	return fpath, nil
+	return save_img, nil
 }
 
 // ...
