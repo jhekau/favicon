@@ -5,6 +5,8 @@ package thumb
  * 10 March 2023
  */
 import (
+	"html"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,13 +19,36 @@ import (
 
 var (
 	// ~~ interface ~~
+
+
+	URLExists = url_Exists
 )
 
+///
+///
+type attr_size_state int
+
+const (
+	attr_size_state_empty attr_size_state = -1
+	attr_size_state_default attr_size_state = 0
+	attr_size_state_custom attr_size_state = 1
+)
+
+type attr_size struct {
+	state attr_size_state
+	value string
+}
+
+
+///
+///
 type Thumb struct {
 	sync.RWMutex
-	size_px int
+	size_px uint16
+	size_attr_value attr_size
 	comment string // <!-- comment -->
-	url_path string // domain{/name_url}, first -> `/`
+	url_href types_.URLHref // domain{/name_url}, first -> `/`
+	url_href_clear types_.URLHref 
 	filename string // [folder/file] [file] [.file]
 	tag_rel string
 	manifest bool
@@ -32,10 +57,15 @@ type Thumb struct {
 	cache *cache
 }
 
+//
 // ...
 func (t *Thumb) file_create(save_img, source_img, source_svg types_.FilePath) (complite bool, err error) {
+
+	t.Lock()
+	defer t.Unlock()
+
 	os.Remove(save_img.String())
-	complite, err = create_.File(source_img, source_svg, save_img, t.typ, t.size_px)
+	complite, err = create_.File(source_img, source_svg, save_img, t.typ, int(t.size_px))
 	if err != nil {
 		// return error
 	}
@@ -59,11 +89,10 @@ func (t *Thumb) get_filepath(folder_work types_.Folder, original_name types_.Fil
 		t.filename = strings.Join(
 			[]string{
 				original_name.String(),
-				strconv.Itoa(t.size_px),
-				t.mimetype.String(),
+				strconv.Itoa(int(t.size_px)),
 			},
 			`_`,
-		)
+		) + `.` + t.mimetype.String()
 	}
 	
 	fpath = types_.FilePath(
@@ -124,62 +153,247 @@ func (t *Thumb) GetFile(folder_work types_.Folder, source_img, source_svg types_
 }
 
 // ...
-func (t *Thumb) SetSize(px int) *Thumb {
+func (t *Thumb) SetSize(px uint16) *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
 	t.cache.clean()
+	t.size_px = px
+	return t
 }
 
-func (t *Thumb) GetSize() int {
+func (t *Thumb) GetSize() uint16 {
+
+	t.RLock()
+	defer t.RUnlock()
+
 	return t.size_px
 }
 
 // ...
-func (t *Thumb) SetNameURL( nameURL string ) *Thumb {
-	t.cache.clean()
-}
+// func (t *Thumb) SetNameURL( nameURL string ) *Thumb {
+// 	t.cache.clean()
+// 	t.url_path = nameURL
+// 	return t
+// }
 
 // ...
 func (t *Thumb) SetNameFile( nameFile string ) *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
 	t.cache.clean()
+	t.filename = nameFile
+	return t
 }
 
 // ...
 func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
 	t.cache.clean()
+	t.tag_rel = tagRel
+	return t
 }
 
 // ...
 func (t *Thumb) SetManifestUsed() *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
 	t.cache.clean()
+	t.manifest = true
+	return t
+}
+
+// <!-- comment -->
+func (t *Thumb) SetHTMLComment(comment string) {
+
+	t.Lock()
+	defer t.Unlock()
+
+	t.comment = comment
 }
 
 // ...
 func (t *Thumb) SetType(typ types_.FileType) *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
 	t.cache.clean()
+	t.typ = typ
+	return t
 }
 
 func (t *Thumb) GetType() types_.FileType {
+
+	t.RLock()
+	defer t.RUnlock()
+
 	return t.typ
 }
 
 // ...
-func (t *Thumb) SetSRC(src types_.URLName) *Thumb {
+func (t *Thumb) SetHREF(src string) *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
 	t.cache.clean()
+	t.url_href = types_.URLHref(src)
+	{
+		u, err := url.Parse(`http://domain.com`)
+		if err != nil {
+			// error
+		} else {
+			t.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
+		}
+	}
+	return t
 }
 
-func (t *Thumb) GetSRC() types_.URLName {
-	return types_.URLName(t.url_path)
+func (t *Thumb) GetHREF() types_.URLHref {
+
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.url_href
 }
+func (t *Thumb) GetHREFClear() types_.URLHref {
+
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.url_href_clear
+}
+
 
 
 // ...
-func (t *Thumb) StatusManifest() bool // ( string, bool /*true - used*/ )
+func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
+
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.manifest
+}
 
 // ...
-func (T *Thumb) GetTAG() string
+func (t *Thumb) GetTAG() string {
+
+	t.RLock()
+	if str := t.cache.get_tag(); str != `` {
+		t.Unlock()
+		return str
+	}
+
+	// <link rel="apple-touch-icon" sizes="180x180" href="touch-icon-iphone-retina.png" type="image/png">
+
+	attr := map[string]string{}
+
+	// size
+	switch t.size_attr_value.state {
+	case attr_size_state_empty:
+	case attr_size_state_default:
+		sz := strconv.Itoa(int(t.size_px))
+		attr[`sizes`] = sz+`x`+sz
+	case attr_size_state_custom:
+		attr[`sizes`] = html.EscapeString(t.size_attr_value.value)
+	}
+
+	// href
+	if s := t.url_href.String(); s != `` {
+		attr[`href`] = html.EscapeString(s)
+	}
+
+	// rel
+	if t.tag_rel != `` {
+		attr[`rel`] = html.EscapeString(t.tag_rel)
+	}
+	
+	// type
+	if t.mimetype != `` {
+		attr[`type`] = html.EscapeString(t.mimetype.String())
+	}
+
+	// if comment <tag /> <!-- comment -->
+	comment := t.comment
+
+	t.RUnlock()
+
+	str := ``
+	if len(attr) > 0 {
+
+		str += `<`
+		for name, val := range attr {
+			str += ` `+name+`="`+val+`" `
+		}
+		str += `>`
+
+		if comment != `` {
+			str += `<!-- `+html.EscapeString(comment)+` -->`
+		}
+		t.Lock()
+		t.cache.set_tag(str)
+		t.Unlock()
+	}
+
+	return str
+}
 
 // ...
 func (t *Thumb) SetTypeImage( typ types_.FileType ) *Thumb {
+	
+	t.Lock()
+	defer t.Unlock()
+
 	t.cache.clean()
+	t.typ = typ
+	return t
+}
+
+// ...
+func (t *Thumb) SetSizeAttrEmpty() *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
+	t.cache.clean()
+	t.size_attr_value = attr_size{
+		state: attr_size_state_empty,
+	}
+	return t
+}
+
+func (t *Thumb) SetSizeAttrDefault() *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
+	t.cache.clean()
+	t.size_attr_value = attr_size{
+		state: attr_size_state_custom,
+	}
+	return t
+}
+
+func (t *Thumb) SetSizeAttrCustom(val string) *Thumb {
+
+	t.Lock()
+	defer t.Unlock()
+
+	t.cache.clean()
+	t.size_attr_value = attr_size{
+		state: attr_size_state_custom,
+		value: val,
+	}
+	return t
 }
 
 
@@ -275,9 +489,9 @@ func (c *cache) clean() {
 
 
 
-// URLExists : проверка наличия превьюхи в запросе 
+// url_Exists : проверка наличия превьюхи в запросе 
 // http.Request.URL.Path -> URLpath
-func URLExists( URLpath string, thumbs map[string /*nameurl*/]*Thumb ) ( *Thumb, bool /*exists*/ ) {
+func url_Exists( URLpath string, thumbs map[string /*url_href_clear*/]*Thumb ) ( *Thumb, bool /*exists*/ ) {
 	t, ok := thumbs[URLpath]
 	return t, ok
 }

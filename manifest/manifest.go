@@ -25,7 +25,7 @@ var (
 )
 
 const (
-	default_name_url types_.URLName = `manifest.webmanifest`
+	default_name_url types_.URLHref = `manifest.webmanifest`
 	default_name_file types_.FileName = `manifest.webmanifest`
 )
 
@@ -33,28 +33,40 @@ type Manifest struct {
 	sync.RWMutex
 	cache *cache
 
-	url_src string
+	url_href types_.URLHref
+	url_href_clear types_.URLHref
 	filename string
 }
 
 //
-func (m *Manifest) SetNameURL(n string) *Manifest {
+func (m *Manifest) SetNameURL(src string) *Manifest {
 
 	if m == nil {
 		m = &Manifest{}
 	}
 	m.cache.clean()
 	
-	if len(n) > 0 && n[0] != '/' {
-		m.filename = `/`+n
-	} else {
-		m.filename = n
+	m.url_href = types_.URLHref(src)
+	{
+		u, err := url.Parse(`http://domain.com`)
+		if err != nil {
+			// error
+		} else {
+			m.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
+		}
 	}
+
 	return m
 }
-func (m *Manifest) GetNameURL() types_.URLName {
+func (m *Manifest) GetNameURL() types_.URLHref {
 	if m != nil {
-		return types_.URLName(m.url_src)
+		return m.url_href
+	}
+	return ``
+}
+func (m *Manifest) GetNameURLClear() types_.URLHref {
+	if m != nil {
+		return m.url_href_clear
 	}
 	return ``
 }
@@ -78,7 +90,7 @@ func (m *Manifest) GetNameFile() types_.FileName {
 }
 
 func (m *Manifest) generate(
-	thumbs map[types_.URLName]*thumb_.Thumb,
+	thumbs map[types_.URLHref]*thumb_.Thumb,
 )(
 	filebody []byte,
 	status_generate bool,
@@ -111,9 +123,9 @@ func (m *Manifest) generate(
 	for _, thumb := range thumbs {
 		if thumb.StatusManifest() {
 			list = append(list, icon{
-				Src: thumb.GetSRC().String(),
+				Src: thumb.GetHREF().String(),
 				Type: thumb.GetType().String(),
-				Size: thumb.GetSize(),
+				Size: int(thumb.GetSize()),
 			})
 		}
 	}
@@ -133,7 +145,7 @@ func (m *Manifest) generate(
 //
 func (m *Manifest) file_create(
 	folder_work types_.Folder,
-	thumbs map[types_.URLName]*thumb_.Thumb,
+	thumbs map[types_.URLHref]*thumb_.Thumb,
 )(
 	fpath types_.FilePath,
 	status_create bool,
@@ -166,7 +178,7 @@ func (m *Manifest) file_create(
 //
 func (m *Manifest) GetFile(
 	folder_work types_.Folder,
-	thumbs map[types_.URLName]*thumb_.Thumb,
+	thumbs map[types_.URLHref]*thumb_.Thumb,
 )(
 	fpath types_.FilePath,
 	exists bool,
@@ -204,11 +216,16 @@ func (m *Manifest) URLExists(url_ url.URL) bool {
 		return false
 	}
 
+	/*
 	src := url_.Path
-	manifest := m.GetNameURL().String()
+	manifest := m.GetNameURLClear().String()
 	if src == manifest {
 		return true
 	} else if src[0] != '/' && `/`+src == manifest {
+		return true
+	}
+	*/
+	if url_.Path == m.GetNameURLClear().String() {
 		return true
 	}
 	return false

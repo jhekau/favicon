@@ -52,7 +52,7 @@ const (
 
 
 //
-type URLName string
-func (n URLName) String() string {
+type URLHref string
+func (n URLHref) String() string {
 	return string(n)
 }
