@@ -25,10 +25,19 @@ func do(source, save types_.FilePath, size_px int, typ types_.FileType) error {
         // return error
     }
 	encoder := imgio.PNGEncoder()
-	if typ == types_.ICO() {
+	// if typ == types_.ICO() {
+	// 	encoder = imgio.Encoder(
+	// 		ico_.Encode,
+	// 	)
+	// }
+	switch typ {
+	case types_.ICO():
 		encoder = imgio.Encoder(
 			ico_.Encode,
 		)
+	case types_.PNG():
+	default:
+		// return error type image save
 	}
 	
 	if err = imgio.Save(

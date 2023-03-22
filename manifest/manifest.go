@@ -58,7 +58,7 @@ func (m *Manifest) GetNameFile() types_.FileName {
 	return m.get_name_file()
 }
 
-func (m *Manifest) URLExists(url_ url.URL) bool {
+func (m *Manifest) URLExists(url_ *url.URL) bool {
 	return m.url_exists(url_)
 }
 
@@ -80,9 +80,11 @@ func (m *Manifest) GetFile(
 //
 func (m *Manifest) set_name_url(src string) *Manifest {
 
-	if m == nil {
-		m = &Manifest{}
-	}
+	// if m == nil {
+	// 	m = &Manifest{}
+	// }
+	m.Lock()
+	defer m.Unlock()
 	m.cache.clean()
 	
 	m.url_href = types_.URLHref(src)
@@ -98,23 +100,27 @@ func (m *Manifest) set_name_url(src string) *Manifest {
 	return m
 }
 func (m *Manifest) get_name_url() types_.URLHref {
-	if m != nil {
-		return m.url_href
-	}
-	return ``
+	
+	m.RLock()
+	defer m.RUnlock()
+	
+	return m.url_href
 }
+
 func (m *Manifest) get_name_url_clear() types_.URLHref {
-	if m != nil {
-		return m.url_href_clear
-	}
-	return ``
+	
+	m.RLock()
+	defer m.RUnlock()
+
+	return m.url_href_clear
 }
 
 //
 func (m *Manifest) set_name_file(f string) *Manifest {
-	if m == nil {
-		m = &Manifest{}
-	}
+	
+	m.Lock()
+	defer m.Unlock()
+
 	m.cache.clean()
 
 	m.filename = f
@@ -122,10 +128,11 @@ func (m *Manifest) set_name_file(f string) *Manifest {
 }
 
 func (m *Manifest) get_name_file() types_.FileName {
-	if m != nil {
-		return types_.FileName(m.filename)
-	}
-	return ``
+
+	m.RLock()
+	defer m.RUnlock()
+	
+	return types_.FileName(m.filename)
 }
 
 func (m *Manifest) generate(
@@ -135,6 +142,9 @@ func (m *Manifest) generate(
 	status_generate bool,
 	err error,
 ){
+
+	m.RLock()
+	defer m.RUnlock()
 
 	if len(thumbs) == 0 {
 		return nil, false, nil
@@ -198,8 +208,15 @@ func (m *Manifest) file_create(
 		return ``, false, nil
 	}
 
-	if m.filename == `` {
+	filename := ``
+	m.RLock()
+	filename = m.filename
+	m.RUnlock()
+	
+	if filename == `` {
+		m.Lock()
 		m.filename = strconv.FormatInt(time.Now().Unix(), 10)+`.manifest`
+		m.Unlock()
 	}
 
 	fpath = types_.FilePath(
@@ -249,11 +266,11 @@ func (m *Manifest) get_file(
 
 
 // 
-func (m *Manifest) url_exists(url_ url.URL) bool {
+func (m *Manifest) url_exists(url_ *url.URL) bool {
 
-	if m == nil {
-		return false
-	}
+	// if m == nil {
+	// 	return false
+	// }
 
 	/*
 	src := url_.Path
@@ -264,10 +281,7 @@ func (m *Manifest) url_exists(url_ url.URL) bool {
 		return true
 	}
 	*/
-	if url_.Path == m.GetNameURLClear().String() {
-		return true
-	}
-	return false
+	return url_.Path == m.GetNameURLClear().String()
 }
 
 
