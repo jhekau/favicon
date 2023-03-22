@@ -170,7 +170,7 @@ func (t *Thumb) get_filepath(folder_work types_.Folder, original_name types_.Fil
 	if t.filename == `` {
 		t.filename = strings.Join(
 			[]string{
-				original_name.String(),
+				filepath.Base( original_name.String() ),
 				strconv.Itoa(int(t.size_px)),
 			},
 			`_`,
@@ -195,8 +195,13 @@ func (t *Thumb) get_file(
 	error,
 ){
 
+	source_file := source_img
+	if source_file == `` {
+		source_file = source_svg
+	}
+
 	original_filename := types_.FileName(
-		filepath.Base(source_img.String()),
+		filepath.Base(source_file.String()),
 	)
 
 	save_img := t.get_filepath(folder_work, original_filename)
@@ -562,8 +567,8 @@ func (c *cache) clean() {
 
 // url_Exists : проверка наличия превьюхи в запросе 
 // http.Request.URL.Path -> URLpath
-func url_Exists( URLpath string, thumbs map[string /*url_href_clear*/]*Thumb ) ( *Thumb, bool /*exists*/ ) {
-	t, ok := thumbs[URLpath]
+func url_Exists( url_ *url.URL, thumbs map[types_.URLHref /*url_href_clear*/]*Thumb ) ( *Thumb, bool /*exists*/ ) {
+	t, ok := thumbs[types_.URLHref(url_.Path)]
 	return t, ok
 }
 
