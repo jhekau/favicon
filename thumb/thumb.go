@@ -54,8 +54,90 @@ type Thumb struct {
 	manifest bool
 	mimetype types_.FileType
 	typ types_.FileType
-	cache *cache
+	cache cache
 }
+
+func (t *Thumb) SetSize(px uint16) *Thumb {
+	return t.set_size(px)
+}
+
+func (t *Thumb) GetSize() uint16 {
+	return t.get_size()
+}
+
+func (t *Thumb) SetNameFile( nameFile string ) *Thumb {
+	return t.set_name_file(nameFile)
+}
+
+func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
+	return t.set_tag_rel(tagRel)
+}
+
+func (t *Thumb) SetManifestUsed() *Thumb {
+	return t.set_manifest_used()
+}
+
+func (t *Thumb) SetHTMLComment(comment string) *Thumb {
+	return t.set_html_comment(comment)
+}
+
+func (t *Thumb) SetType(typ types_.FileType) *Thumb {
+	return t.set_type(typ)
+}
+
+func (t *Thumb) GetType() types_.FileType {
+	return t.get_type()
+}
+
+func (t *Thumb) SetHREF(src string) *Thumb {
+	return t.set_href(src)
+}
+
+func (t *Thumb) GetHREF() types_.URLHref {
+	return t.get_href()
+}
+
+func (t *Thumb) GetHREFClear() types_.URLHref {
+	return t.get_href_clear()
+}
+
+func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
+	return t.status_manifest()
+}
+
+func (t *Thumb) GetTAG() string {
+	return t.get_tag()
+}
+
+func (t *Thumb) SetTypeImage( typ types_.FileType ) *Thumb {
+	return t.set_type_image(typ)
+}
+
+func (t *Thumb) SetSizeAttrEmpty() *Thumb {
+	return t.set_size_attr_empty()
+}
+
+func (t *Thumb) SetSizeAttrDefault() *Thumb {
+	return t.set_size_attr_default()
+}
+
+func (t *Thumb) SetSizeAttrCustom(val string) *Thumb {
+	return t.set_size_attr_custom(val)
+}
+
+func (t *Thumb) GetFile(
+	folder_work types_.Folder,
+	source_img, source_svg types_.FilePath,
+)(
+	types_.FilePath,
+	error,
+){
+	return t.get_file(folder_work, source_img, source_svg)
+}
+
+
+
+
 
 //
 // ...
@@ -105,7 +187,13 @@ func (t *Thumb) get_filepath(folder_work types_.Folder, original_name types_.Fil
 }
 
 // ...
-func (t *Thumb) GetFile(folder_work types_.Folder, source_img, source_svg types_.FilePath) (types_.FilePath, error) {
+func (t *Thumb) get_file(
+	folder_work types_.Folder,
+	source_img, source_svg types_.FilePath,
+)(
+	types_.FilePath,
+	error,
+){
 
 	original_filename := types_.FileName(
 		filepath.Base(source_img.String()),
@@ -153,7 +241,7 @@ func (t *Thumb) GetFile(folder_work types_.Folder, source_img, source_svg types_
 }
 
 // ...
-func (t *Thumb) SetSize(px uint16) *Thumb {
+func (t *Thumb) set_size(px uint16) *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -163,7 +251,7 @@ func (t *Thumb) SetSize(px uint16) *Thumb {
 	return t
 }
 
-func (t *Thumb) GetSize() uint16 {
+func (t *Thumb) get_size() uint16 {
 
 	t.RLock()
 	defer t.RUnlock()
@@ -179,7 +267,7 @@ func (t *Thumb) GetSize() uint16 {
 // }
 
 // ...
-func (t *Thumb) SetNameFile( nameFile string ) *Thumb {
+func (t *Thumb) set_name_file( nameFile string ) *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -190,7 +278,7 @@ func (t *Thumb) SetNameFile( nameFile string ) *Thumb {
 }
 
 // ...
-func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
+func (t *Thumb) set_tag_rel( tagRel string ) *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -201,7 +289,7 @@ func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
 }
 
 // ...
-func (t *Thumb) SetManifestUsed() *Thumb {
+func (t *Thumb) set_manifest_used() *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -212,16 +300,17 @@ func (t *Thumb) SetManifestUsed() *Thumb {
 }
 
 // <!-- comment -->
-func (t *Thumb) SetHTMLComment(comment string) {
+func (t *Thumb) set_html_comment(comment string) *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
 
 	t.comment = comment
+	return t
 }
 
 // ...
-func (t *Thumb) SetType(typ types_.FileType) *Thumb {
+func (t *Thumb) set_type(typ types_.FileType) *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -231,7 +320,7 @@ func (t *Thumb) SetType(typ types_.FileType) *Thumb {
 	return t
 }
 
-func (t *Thumb) GetType() types_.FileType {
+func (t *Thumb) get_type() types_.FileType {
 
 	t.RLock()
 	defer t.RUnlock()
@@ -240,7 +329,7 @@ func (t *Thumb) GetType() types_.FileType {
 }
 
 // ...
-func (t *Thumb) SetHREF(src string) *Thumb {
+func (t *Thumb) set_href(src string) *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -258,14 +347,14 @@ func (t *Thumb) SetHREF(src string) *Thumb {
 	return t
 }
 
-func (t *Thumb) GetHREF() types_.URLHref {
+func (t *Thumb) get_href() types_.URLHref {
 
 	t.RLock()
 	defer t.RUnlock()
 
 	return t.url_href
 }
-func (t *Thumb) GetHREFClear() types_.URLHref {
+func (t *Thumb) get_href_clear() types_.URLHref {
 
 	t.RLock()
 	defer t.RUnlock()
@@ -276,7 +365,7 @@ func (t *Thumb) GetHREFClear() types_.URLHref {
 
 
 // ...
-func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
+func (t *Thumb) status_manifest() bool { // ( string, bool /*true - used*/ )
 
 	t.RLock()
 	defer t.RUnlock()
@@ -285,7 +374,7 @@ func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
 }
 
 // ...
-func (t *Thumb) GetTAG() string {
+func (t *Thumb) get_tag() string {
 
 	t.RLock()
 	if str := t.cache.get_tag(); str != `` {
@@ -348,7 +437,7 @@ func (t *Thumb) GetTAG() string {
 }
 
 // ...
-func (t *Thumb) SetTypeImage( typ types_.FileType ) *Thumb {
+func (t *Thumb) set_type_image( typ types_.FileType ) *Thumb {
 	
 	t.Lock()
 	defer t.Unlock()
@@ -359,7 +448,7 @@ func (t *Thumb) SetTypeImage( typ types_.FileType ) *Thumb {
 }
 
 // ...
-func (t *Thumb) SetSizeAttrEmpty() *Thumb {
+func (t *Thumb) set_size_attr_empty() *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -371,7 +460,7 @@ func (t *Thumb) SetSizeAttrEmpty() *Thumb {
 	return t
 }
 
-func (t *Thumb) SetSizeAttrDefault() *Thumb {
+func (t *Thumb) set_size_attr_default() *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -383,7 +472,7 @@ func (t *Thumb) SetSizeAttrDefault() *Thumb {
 	return t
 }
 
-func (t *Thumb) SetSizeAttrCustom(val string) *Thumb {
+func (t *Thumb) set_size_attr_custom(val string) *Thumb {
 
 	t.Lock()
 	defer t.Unlock()
@@ -422,16 +511,10 @@ func (c *cache) get_filepath() types_.FilePath {
 	c.RLock()
 	defer c.RUnlock()
 
-	if c != nil {
-		return c.filepath
-	}
-	return ``
+	return c.filepath
 }
 func (c *cache) set_filepath( filepath types_.FilePath ) {
 	c.Lock()
-	if c == nil {
-		c = &cache{}
-	}
 	c.filepath = filepath
 	c.Unlock()
 }
@@ -442,16 +525,10 @@ func (c *cache) get_tag() string {
 	c.RLock()
 	defer c.RUnlock()
 
-	if c != nil {
-		return c.tag
-	}
-	return ``
+	return c.tag
 }
 func (c *cache) set_tag( tag string ) {
 	c.Lock()
-	if c == nil {
-		c = &cache{}
-	}
 	c.tag = tag
 	c.Unlock()
 }
@@ -462,17 +539,11 @@ func (c *cache) get_file_exists_state() types_.FileExists {
 	c.RLock()
 	defer c.RUnlock()
 
-	if c != nil {
-		return c.file_exists_state
-	}
-	return types_.FileExistsNotCheck
+	return c.file_exists_state
 }
 
 func (c *cache) set_file_exists_state( exists types_.FileExists ) {
 	c.Lock()
-	if c == nil {
-		c = &cache{}
-	}
 	c.file_exists_state = exists
 	c.Unlock()
 }
@@ -480,7 +551,7 @@ func (c *cache) set_file_exists_state( exists types_.FileExists ) {
 //
 func (c *cache) clean() {
 	c.Lock()
-	c = nil
+	c = &cache{}
 	c.Unlock()
 }
 

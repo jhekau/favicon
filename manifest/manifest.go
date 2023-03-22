@@ -31,15 +31,54 @@ const (
 
 type Manifest struct {
 	sync.RWMutex
-	cache *cache
+	cache cache
 
 	url_href types_.URLHref
 	url_href_clear types_.URLHref
 	filename string
 }
 
-//
 func (m *Manifest) SetNameURL(src string) *Manifest {
+	return m.set_name_url(src)
+}
+
+func (m *Manifest) GetNameURL() types_.URLHref {
+	return m.get_name_url()
+}
+
+func (m *Manifest) GetNameURLClear() types_.URLHref {
+	return m.get_name_url_clear()
+}
+
+func (m *Manifest) SetNameFile(f string) *Manifest {
+	return m.set_name_file(f)
+}
+
+func (m *Manifest) GetNameFile() types_.FileName {
+	return m.get_name_file()
+}
+
+func (m *Manifest) URLExists(url_ url.URL) bool {
+	return m.url_exists(url_)
+}
+
+func (m *Manifest) GetFile(
+	folder_work types_.Folder,
+	thumbs map[types_.URLHref]*thumb_.Thumb,
+)(
+	fpath types_.FilePath,
+	exists bool,
+	err error,
+){
+	return m.get_file(folder_work, thumbs)
+}
+
+
+
+
+
+//
+func (m *Manifest) set_name_url(src string) *Manifest {
 
 	if m == nil {
 		m = &Manifest{}
@@ -58,13 +97,13 @@ func (m *Manifest) SetNameURL(src string) *Manifest {
 
 	return m
 }
-func (m *Manifest) GetNameURL() types_.URLHref {
+func (m *Manifest) get_name_url() types_.URLHref {
 	if m != nil {
 		return m.url_href
 	}
 	return ``
 }
-func (m *Manifest) GetNameURLClear() types_.URLHref {
+func (m *Manifest) get_name_url_clear() types_.URLHref {
 	if m != nil {
 		return m.url_href_clear
 	}
@@ -72,7 +111,7 @@ func (m *Manifest) GetNameURLClear() types_.URLHref {
 }
 
 //
-func (m *Manifest) SetNameFile(f string) *Manifest {
+func (m *Manifest) set_name_file(f string) *Manifest {
 	if m == nil {
 		m = &Manifest{}
 	}
@@ -82,7 +121,7 @@ func (m *Manifest) SetNameFile(f string) *Manifest {
 	return m
 }
 
-func (m *Manifest) GetNameFile() types_.FileName {
+func (m *Manifest) get_name_file() types_.FileName {
 	if m != nil {
 		return types_.FileName(m.filename)
 	}
@@ -176,7 +215,7 @@ func (m *Manifest) file_create(
 
 
 //
-func (m *Manifest) GetFile(
+func (m *Manifest) get_file(
 	folder_work types_.Folder,
 	thumbs map[types_.URLHref]*thumb_.Thumb,
 )(
@@ -210,7 +249,7 @@ func (m *Manifest) GetFile(
 
 
 // 
-func (m *Manifest) URLExists(url_ url.URL) bool {
+func (m *Manifest) url_exists(url_ url.URL) bool {
 
 	if m == nil {
 		return false
@@ -252,30 +291,18 @@ func (c *cache) clean() {
 
 //
 func (c *cache) set_file_exists( state types_.FileExists ) {
-	if c == nil {
-		c = &cache{}
-	}
 	c.file_exists = state
 }
 
 func (c *cache) get_file_exists() types_.FileExists {
-	if c != nil {
-		return c.file_exists
-	}
-	return types_.FileExistsNotCheck
+	return c.file_exists
 }
 
 //
 func (c *cache) set_filepath( fpath types_.FilePath ) {
-	if c == nil {
-		c = &cache{}
-	}
 	c.filepath  = fpath
 }
 
 func (c *cache) get_filepath() types_.FilePath {
-	if c != nil {
-		return c.filepath
-	}
-	return ``
+	return c.filepath
 }
