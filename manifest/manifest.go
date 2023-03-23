@@ -62,6 +62,10 @@ func (m *Manifest) URLExists(url_ *url.URL) bool {
 	return m.url_exists(url_)
 }
 
+func (m *Manifest) GetTAG() string {
+	return m.get_tag()
+}
+
 func (m *Manifest) GetFile(
 	folder_work types_.Folder,
 	thumbs map[types_.URLHref]*thumb_.Thumb,
@@ -263,7 +267,13 @@ func (m *Manifest) get_file(
 	return fpath, true, nil
 }
 
+//
+func (m *Manifest) get_tag() string {
+	m.RLock()
+	defer m.RUnlock()
 
+	return `<link rel="manifest" href="`+m.get_name_url().String()+`">`
+}
 
 // 
 func (m *Manifest) url_exists(url_ *url.URL) bool {

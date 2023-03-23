@@ -7,6 +7,7 @@ package favicon
 import (
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 
 	manifest_ "github.com/jhekau/favicon/manifest"
@@ -158,7 +159,10 @@ func (t *Thumbs) serve_file( url_ *url.URL ) ( fpath string, exists bool, err er
 
 func (t *Thumbs) server_file_thumb( url_ *url.URL ) (fpath types_.FilePath, exists bool, err error) {
 
+	t.RLock()
 	thumb, exists := thumb_.URLExists(url_, t.thumbs)
+	t.RUnlock()
+
 	if !exists {
 		return ``, false, nil
 	}
@@ -185,9 +189,21 @@ func (t *Thumbs) server_file_manifest( url_ *url.URL ) (manifest types_.FilePath
 }
 
 // func (T *Thumbs) manifest_url_exists( URLpath string ) ( fpath string, exists bool, err error )
-func (t *Thumbs) get_thumbs() map[types_.URLHref/*clear*/]*thumb_.Thumb
+// func (t *Thumbs) get_thumbs() map[types_.URLHref/*clear*/]*thumb_.Thumb
 
-func (t *Thumbs) tags_html() string
+func (t *Thumbs) tags_html() string {
+
+	var tags strings.Builder
+
+	t.RLock()
+	for _, thumb := range t.thumbs {
+		tags.WriteString(thumb.GetTAG())
+	}
+	tags.WriteString(t.manifest.GetTAG())
+	t.RUnlock()
+
+	return tags.String()
+}
 
 
 func default_list( ) *Thumbs
