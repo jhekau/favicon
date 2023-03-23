@@ -71,18 +71,50 @@ func (t *Thumbs) TagsHTML() string {
 
 
 func (t *Thumbs) append(thumb *thumb_.Thumb) *Thumbs {
+	t.Lock()
+	defer t.Unlock()
+	
 	t.thumbs[thumb.GetHREFClear()] = thumb
 	return t
 }
 
-func (t *Thumbs) set_folder_work( folder string ) *Thumbs
-func (t *Thumbs) get_folder_work() types_.Folder
-func (t *Thumbs) set_filepath_source_svg( fpath string ) *Thumbs
+func (t *Thumbs) set_folder_work( folder string ) *Thumbs {
+	t.Lock()
+	defer t.Unlock()
+
+	t.folder_work = types_.Folder(folder)
+	return t
+}
+func (t *Thumbs) get_folder_work() types_.Folder {
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.folder_work
+}
+func (t *Thumbs) set_filepath_source_svg( fpath string ) *Thumbs {
+	t.Lock()
+	defer t.RUnlock()
+
+	t.source_svg = types_.FilePath(fpath)
+	return t
+}
 func (t *Thumbs) get_filepath_source_svg() types_.FilePath {
+	t.RLock()
+	defer t.RUnlock()
+
 	return t.source_svg
 }
-func (t *Thumbs) set_filepath_source_img( fpath string ) *Thumbs
+func (t *Thumbs) set_filepath_source_img( fpath string ) *Thumbs {
+	t.Lock()
+	defer t.Unlock()
+
+	t.source_img = types_.FilePath(fpath)
+	return t
+}
 func (t *Thumbs) get_filepath_source_img() types_.FilePath {
+	t.RLock()
+	defer t.RUnlock()
+
 	return t.source_img
 }
 
