@@ -307,8 +307,8 @@ func (m *Manifest) url_exists(url_ *url.URL) bool {
 }
 
 
-func default_get() *Manifest {
-	return (&Manifest{}).
+func default_get() Manifest {
+	return *(&Manifest{}).
 				SetNameURL(default_name_url.String()).
 				SetNameFile(default_name_file.String())
 }

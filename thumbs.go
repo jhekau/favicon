@@ -229,6 +229,7 @@ func default_list() *Thumbs {
 			}
 			return m
 		}(),
+		manifest: manifest_.Default(),
 	}
 }
 
