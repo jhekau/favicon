@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	defaults_ "github.com/jhekau/favicon/defaults"
 	manifest_ "github.com/jhekau/favicon/manifest"
 	thumb_ "github.com/jhekau/favicon/thumb"
 	types_ "github.com/jhekau/favicon/types"
@@ -206,5 +207,26 @@ func (t *Thumbs) tags_html() string {
 }
 
 
-func default_list( ) *Thumbs
-func custom_list( thumbs ...*Thumbs ) *Thumbs
+func default_list() *Thumbs {
+	return &Thumbs{
+		thumbs: func() map[types_.URLHref]*thumb_.Thumb {
+			m := map[types_.URLHref]*thumb_.Thumb{}
+			for _, thumb := range defaults_.Defaults() {
+				m[thumb.GetHREFClear()] = thumb
+			}
+			return m
+		}(),
+	}
+}
+
+func custom_list( thumbs ...*thumb_.Thumb ) *Thumbs {
+	return &Thumbs{
+		thumbs: func() map[types_.URLHref]*thumb_.Thumb {
+			m := map[types_.URLHref]*thumb_.Thumb{}
+			for _, thumb := range thumbs {
+				m[thumb.GetHREFClear()] = thumb
+			}
+			return m
+		}(),
+	}
+}
