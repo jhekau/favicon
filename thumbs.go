@@ -5,16 +5,29 @@ package favicon
  * 09 March 2023
  */
 import (
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 
 	defaults_ "github.com/jhekau/favicon/defaults"
+	err_ "github.com/jhekau/favicon/err"
 	manifest_ "github.com/jhekau/favicon/manifest"
 	thumb_ "github.com/jhekau/favicon/thumb"
 	types_ "github.com/jhekau/favicon/types"
 )
+
+const (
+	logT01 = `T01: get serve file`
+	logT02 = `T02: get file manifest`
+	logT03 = `T03: get file thumb`
+	logT04 = `T04: get file thumb`
+	logT05 = `T05: get file manifest`
+)
+func errT(i... interface{}) error {
+	return err_.Err(err_.TypeError, `/thumbs.go`, i)
+} 
 
 var (
 
@@ -131,7 +144,7 @@ func (t *Thumbs) handle() {
 
 		fpath, exists, err := t.ServeFile(r.URL)
 		if err != nil {
-			// error
+			log.Println(errT(logT01, err))
 			w.WriteHeader(http.StatusInternalServerError)
 		} else if !exists {
 			w.WriteHeader(http.StatusNotFound)
@@ -144,13 +157,13 @@ func (t *Thumbs) handle() {
 func (t *Thumbs) serve_file( url_ *url.URL ) ( fpath string, exists bool, err error ) {
 
 	if manifest, exists, err := t.server_file_manifest(url_); err != nil {
-		// return error
+		return ``, false, errT(logT02, err)
 	} else if exists {
 		return manifest.String(), true, nil
 	}
 
 	if thumb, exists, err := t.server_file_thumb(url_); err != nil {
-		// return error
+		return ``, false, errT(logT03, err)
 	} else if exists {
 		return thumb.String(), true, nil
 	}
@@ -170,7 +183,7 @@ func (t *Thumbs) server_file_thumb( url_ *url.URL ) (fpath types_.FilePath, exis
 
 	fpath, err = thumb.GetFile(t.get_folder_work(), t.get_filepath_source_img(), t.get_filepath_source_svg())
 	if err != nil {
-		// return error
+		return ``, false, errT(logT04, err)
 	}
 
 	return fpath, true, nil
@@ -184,7 +197,7 @@ func (t *Thumbs) server_file_manifest( url_ *url.URL ) (manifest types_.FilePath
 
 	manifest, exists, err = t.manifest.GetFile(t.get_folder_work(), t.thumbs)
 	if err != nil {
-		// return error
+		return ``, false, errT(logT05, err)
 	}
 	return manifest, exists, nil
 }

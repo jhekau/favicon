@@ -5,9 +5,22 @@ package create
  * 10 March 2023
  */
 import (
+	err_ "github.com/jhekau/favicon/err"
 	types_ "github.com/jhekau/favicon/types"
 	converter_ "github.com/jhekau/favicon/thumb/convert"
 )
+
+
+const (
+	logF01 = `F01: thumb is SVG, false convert`
+	logF02 = `F02: check source image`
+	logF03 = `F03: convert thumb`
+	logF04 = `F04: convert ico`
+	logF05 = `F05: convert png`
+)
+func errF(i... interface{}) error {
+	return err_.Err(err_.TypeError, `/thumb/create/file.go`, i)
+} 
 
 var (
 	// ~~ interface ~~
@@ -17,14 +30,21 @@ var (
 
 
 //
-func convert_file( source, source_svg, save types_.FilePath, typ types_.FileType, size_px int ) (complete bool, err error) {
+func convert_file( 
+	source, source_svg, save types_.FilePath,
+	typ types_.FileType,
+	size_px int,
+)(
+	complete bool,
+	err error,
+){
 
 	// default: условно
 	source_type := types_.PNG()
 
 	if source == `` {
 		if source_svg == `` {
-			// return error
+			return false, errF(logF01, err)
 		}
 		source = source_svg
 		source_type = types_.SVG()
@@ -32,7 +52,7 @@ func convert_file( source, source_svg, save types_.FilePath, typ types_.FileType
 
 	err = source_check(source, source_type, size_px)
 	if err != nil {
-		// return error
+		return false, errF(logF02, err)
 	}
 
 	for _, fn := range []func(s,sv types_.FilePath, sz int, tp types_.FileType) (bool, error) {
@@ -40,7 +60,7 @@ func convert_file( source, source_svg, save types_.FilePath, typ types_.FileType
 		convert_png,
 	}{
 		if ok, err := fn(source, save, size_px, typ); err != nil {
-			// return error
+			return false, errF(logF03, err)
 		} else if ok {
 			return true, nil
 		}
@@ -54,7 +74,7 @@ func convert_ico(source, save types_.FilePath, size_px int, typ types_.FileType)
 		return false, nil
 	}
     if err := converter_.Do(source, save, size_px, typ); err != nil {
-		// return error
+		return false, errF(logF04, err)
 	}
 	return true, nil
 }
@@ -65,7 +85,7 @@ func convert_png(source, save types_.FilePath, size_px int, typ types_.FileType)
 		return false, nil
 	}
     if err := converter_.Do(source, save, size_px, typ); err != nil {
-		// return error
+		return false, errF(logF05, err)
 	}
 	return true, nil
 }
