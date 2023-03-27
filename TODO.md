@@ -1,10 +1,10 @@
 Favicon TODO list
 
 #
-[ ] Create test
+- [ ] Create test
 
 #
-[ ] Adding comments
+- [ ] Adding comments
 
 #
-[ ] Adding Docs
+- [ ] Adding Docs
