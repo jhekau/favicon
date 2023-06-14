@@ -43,7 +43,7 @@ const (
 )
 
 type Manifest struct {
-	sync.RWMutex
+	s sync.RWMutex
 	cache cache
 
 	url_href types_.URLHref
@@ -97,8 +97,8 @@ func (m *Manifest) GetFile(
 //
 func (m *Manifest) set_name_url(src string) *Manifest {
 
-	m.Lock()
-	defer m.Unlock()
+	m.s.Lock()
+	defer m.s.Unlock()
 	m.cache.clean()
 	
 	m.url_href = types_.URLHref(src)
@@ -115,16 +115,16 @@ func (m *Manifest) set_name_url(src string) *Manifest {
 }
 func (m *Manifest) get_name_url() types_.URLHref {
 	
-	m.RLock()
-	defer m.RUnlock()
+	m.s.RLock()
+	defer m.s.RUnlock()
 	
 	return m.url_href
 }
 
 func (m *Manifest) get_name_url_clear() types_.URLHref {
 	
-	m.RLock()
-	defer m.RUnlock()
+	m.s.RLock()
+	defer m.s.RUnlock()
 
 	return m.url_href_clear
 }
@@ -132,8 +132,8 @@ func (m *Manifest) get_name_url_clear() types_.URLHref {
 //
 func (m *Manifest) set_name_file(f string) *Manifest {
 	
-	m.Lock()
-	defer m.Unlock()
+	m.s.Lock()
+	defer m.s.Unlock()
 
 	m.cache.clean()
 
@@ -143,8 +143,8 @@ func (m *Manifest) set_name_file(f string) *Manifest {
 
 func (m *Manifest) get_name_file() types_.FileName {
 
-	m.RLock()
-	defer m.RUnlock()
+	m.s.RLock()
+	defer m.s.RUnlock()
 	
 	return types_.FileName(m.filename)
 }
@@ -157,8 +157,8 @@ func (m *Manifest) generate(
 	err error,
 ){
 
-	m.RLock()
-	defer m.RUnlock()
+	m.s.RLock()
+	defer m.s.RUnlock()
 
 	if len(thumbs) == 0 {
 		return nil, false, nil
@@ -225,14 +225,14 @@ func (m *Manifest) file_create(
 	}
 
 	filename := ``
-	m.RLock()
+	m.s.RLock()
 	filename = m.filename
-	m.RUnlock()
+	m.s.RUnlock()
 	
 	if filename == `` {
-		m.Lock()
+		m.s.Lock()
 		m.filename = strconv.FormatInt(time.Now().Unix(), 10)+`.manifest`
-		m.Unlock()
+		m.s.Unlock()
 	}
 
 	fpath = types_.FilePath(
@@ -281,8 +281,8 @@ func (m *Manifest) get_file(
 
 //
 func (m *Manifest) get_tag() string {
-	m.RLock()
-	defer m.RUnlock()
+	m.s.RLock()
+	defer m.s.RUnlock()
 
 	return `<link rel="manifest" href="`+m.get_name_url().String()+`">`
 }
@@ -316,7 +316,7 @@ func default_get() Manifest {
 
 //
 type cache struct {
-	sync.RWMutex
+	s sync.RWMutex
 	filepath types_.FilePath
 	file_exists types_.FileExists
 }
@@ -327,18 +327,28 @@ func (c *cache) clean() {
 
 //
 func (c *cache) set_file_exists( state types_.FileExists ) {
+	c.s.Lock()
 	c.file_exists = state
+	c.s.Unlock()
 }
 
 func (c *cache) get_file_exists() types_.FileExists {
-	return c.file_exists
+	c.s.RLock()
+	file_exists := c.file_exists
+	c.s.RUnlock()
+	return file_exists
 }
 
 //
 func (c *cache) set_filepath( fpath types_.FilePath ) {
+	c.s.Lock()
 	c.filepath  = fpath
+	c.s.Unlock()
 }
 
 func (c *cache) get_filepath() types_.FilePath {
-	return c.filepath
+	c.s.RLock()
+	filepath := c.filepath
+	c.s.RUnlock()
+	return filepath
 }

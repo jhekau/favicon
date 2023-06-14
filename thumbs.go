@@ -54,7 +54,7 @@ var (
 )
 
 type Thumbs struct {
-	sync.RWMutex
+	s sync.RWMutex
 	source_svg types_.FilePath
 	source_img types_.FilePath
 	folder_work types_.Folder
@@ -86,49 +86,49 @@ func (t *Thumbs) TagsHTML() string {
 
 
 func (t *Thumbs) append(thumb *thumb_.Thumb) *Thumbs {
-	t.Lock()
-	defer t.Unlock()
+	t.s.Lock()
+	defer t.s.Unlock()
 	
 	t.thumbs[thumb.GetHREFClear()] = thumb
 	return t
 }
 
 func (t *Thumbs) set_folder_work( folder string ) *Thumbs {
-	t.Lock()
-	defer t.Unlock()
+	t.s.Lock()
+	defer t.s.Unlock()
 
 	t.folder_work = types_.Folder(folder)
 	return t
 }
 func (t *Thumbs) get_folder_work() types_.Folder {
-	t.RLock()
-	defer t.RUnlock()
+	t.s.RLock()
+	defer t.s.RUnlock()
 
 	return t.folder_work
 }
 func (t *Thumbs) set_filepath_source_svg( fpath string ) *Thumbs {
-	t.Lock()
-	defer t.RUnlock()
+	t.s.Lock()
+	defer t.s.Unlock()
 
 	t.source_svg = types_.FilePath(fpath)
 	return t
 }
 func (t *Thumbs) get_filepath_source_svg() types_.FilePath {
-	t.RLock()
-	defer t.RUnlock()
+	t.s.RLock()
+	defer t.s.RUnlock()
 
 	return t.source_svg
 }
 func (t *Thumbs) set_filepath_source_img( fpath string ) *Thumbs {
-	t.Lock()
-	defer t.Unlock()
+	t.s.Lock()
+	defer t.s.Unlock()
 
 	t.source_img = types_.FilePath(fpath)
 	return t
 }
 func (t *Thumbs) get_filepath_source_img() types_.FilePath {
-	t.RLock()
-	defer t.RUnlock()
+	t.s.RLock()
+	defer t.s.RUnlock()
 
 	return t.source_img
 }
@@ -173,9 +173,9 @@ func (t *Thumbs) serve_file( url_ *url.URL ) ( fpath string, exists bool, err er
 
 func (t *Thumbs) server_file_thumb( url_ *url.URL ) (fpath types_.FilePath, exists bool, err error) {
 
-	t.RLock()
+	t.s.RLock()
 	thumb, exists := thumb_.URLExists(url_, t.thumbs)
-	t.RUnlock()
+	t.s.RUnlock()
 
 	if !exists {
 		return ``, false, nil
@@ -209,12 +209,12 @@ func (t *Thumbs) tags_html() string {
 
 	var tags strings.Builder
 
-	t.RLock()
+	t.s.RLock()
 	for _, thumb := range t.thumbs {
 		tags.WriteString(thumb.GetTAG())
 	}
 	tags.WriteString(t.manifest.GetTAG())
-	t.RUnlock()
+	t.s.RUnlock()
 
 	return tags.String()
 }
