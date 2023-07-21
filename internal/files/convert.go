@@ -5,9 +5,9 @@ package create
  * 10 March 2023
  */
 import (
-	err_ "github.com/jhekau/favicon/err"
-	types_ "github.com/jhekau/favicon/types"
-	converter_ "github.com/jhekau/favicon/thumb/convert"
+	err_ "github.com/jhekau/favicon/core/err"
+	types_ "github.com/jhekau/favicon/core/types"
+	// converter_ "github.com/jhekau/favicon/thumb/convert"
 )
 
 
@@ -23,17 +23,19 @@ func errF(i... interface{}) error {
 } 
 
 var (
-	// ~~ interface ~~
-
 	File = convert_file
 )
 
+type Converter interface {
+	Do(source, save types_.FilePath, size_px int, typ types_.FileType) error
+}
 
 //
 func convert_file( 
 	source, source_svg, save types_.FilePath,
 	typ types_.FileType,
 	size_px int,
+	conv Converter,
 )(
 	complete bool,
 	err error,
@@ -69,22 +71,22 @@ func convert_file(
 }
 
 //
-func convert_ico(source, save types_.FilePath, size_px int, typ types_.FileType) (complete bool, err error) {
+func convert_ico(source, save types_.FilePath, size_px int, typ types_.FileType, conv Converter) (complete bool, err error) {
 	if typ != types_.ICO() {
 		return false, nil
 	}
-    if err := converter_.Do(source, save, size_px, typ); err != nil {
+    if err := conv.Do(source, save, size_px, typ); err != nil {
 		return false, errF(logF04, err)
 	}
 	return true, nil
 }
 
 //
-func convert_png(source, save types_.FilePath, size_px int, typ types_.FileType) (complete bool, err error) {
+func convert_png(source, save types_.FilePath, size_px int, typ types_.FileType, conv Converter) (complete bool, err error) {
 	if typ != types_.PNG() {
 		return false, nil
 	}
-    if err := converter_.Do(source, save, size_px, typ); err != nil {
+    if err := conv.Do(source, save, size_px, typ); err != nil {
 		return false, errF(logF05, err)
 	}
 	return true, nil

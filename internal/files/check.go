@@ -10,8 +10,8 @@ import (
 	"os"
 	"sync"
 
-	err_ "github.com/jhekau/favicon/err"
-	types_ "github.com/jhekau/favicon/types"
+	err_ "github.com/jhekau/favicon/core/err"
+	types_ "github.com/jhekau/favicon/core/types"
 )
 
 const (
@@ -47,7 +47,7 @@ func source_resolution( fpath types_.FilePath ) ( w,h int, err error ) {
 
 var errOK = errors.New(`OK`)
 
-// ...
+// проверка оригинального изображения на корректность
 func source_check( fpath types_.FilePath, source_typ types_.FileType, thumb_size int ) error {
 
 	if e, ok := source_check_list.Load(fpath); ok {
