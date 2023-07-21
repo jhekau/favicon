@@ -5,8 +5,8 @@ package create
  * 10 March 2023
  */
 import (
-	err_ "github.com/jhekau/favicon/core/err"
-	types_ "github.com/jhekau/favicon/core/types"
+	err_ "github.com/jhekau/favicon/internal/core/err"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 	// converter_ "github.com/jhekau/favicon/thumb/convert"
 )
 
@@ -44,6 +44,10 @@ func convert_file(
 	// default: условно
 	source_type := types_.PNG()
 
+	if size_px == 0 {
+		return false, nil
+	}
+
 	if source == `` {
 		if source_svg == `` {
 			return false, errF(logF01, err)
@@ -57,11 +61,11 @@ func convert_file(
 		return false, errF(logF02, err)
 	}
 
-	for _, fn := range []func(s,sv types_.FilePath, sz int, tp types_.FileType) (bool, error) {
+	for _, fn := range []func(s, sv types_.FilePath, sz int, tp types_.FileType, conv Converter) (bool, error) {
 		convert_ico,
 		convert_png,
 	}{
-		if ok, err := fn(source, save, size_px, typ); err != nil {
+		if ok, err := fn(source, save, size_px, typ, conv); err != nil {
 			return false, errF(logF03, err)
 		} else if ok {
 			return true, nil

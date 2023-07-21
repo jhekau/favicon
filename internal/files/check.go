@@ -10,8 +10,8 @@ import (
 	"os"
 	"sync"
 
-	err_ "github.com/jhekau/favicon/core/err"
-	types_ "github.com/jhekau/favicon/core/types"
+	err_ "github.com/jhekau/favicon/internal/core/err"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (
