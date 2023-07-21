@@ -29,7 +29,7 @@ func errS(i... interface{}) error {
 // список оригинальных файлов, ранее проверенных на корректность
 var source_check_list sync.Map // [filepath]error
 
-// ...
+// получние разрешения исходного изображения
 func source_resolution( fpath types_.FilePath ) ( w,h int, err error ) {
 
 	file, err := os.Open(fpath.String())
@@ -47,7 +47,7 @@ func source_resolution( fpath types_.FilePath ) ( w,h int, err error ) {
 
 var errOK = errors.New(`OK`)
 
-// проверка оригинального изображения на корректность
+// проверка исходного изображения на корректность
 func source_check( fpath types_.FilePath, source_typ types_.FileType, thumb_size int ) error {
 
 	if e, ok := source_check_list.Load(fpath); ok {
