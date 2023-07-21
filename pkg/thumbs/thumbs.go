@@ -11,11 +11,11 @@ import (
 	"strings"
 	"sync"
 
-	defaults_ "github.com/jhekau/favicon/defaults"
-	err_ "github.com/jhekau/favicon/err"
-	manifest_ "github.com/jhekau/favicon/manifest"
-	thumb_ "github.com/jhekau/favicon/thumb"
-	types_ "github.com/jhekau/favicon/types"
+	defaults_ "github.com/jhekau/favicon/internal/service/defaults"
+	err_ "github.com/jhekau/favicon/internal/core/err"
+	manifest_ "github.com/jhekau/favicon/internal/service/manifest"
+	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (

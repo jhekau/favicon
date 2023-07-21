@@ -5,8 +5,8 @@ package defaults
  * 23 March 2023
  */
 import (
-	thumb_ "github.com/jhekau/favicon/thumb"
-	"github.com/jhekau/favicon/types"
+	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
+	"github.com/jhekau/favicon/internal/core/types"
 )
 
 func Defaults() []*thumb_.Thumb {

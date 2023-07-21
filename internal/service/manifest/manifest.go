@@ -15,9 +15,9 @@ import (
 	"sync"
 	"time"
 
-	err_ "github.com/jhekau/favicon/err"
-	thumb_ "github.com/jhekau/favicon/thumb"
-	types_ "github.com/jhekau/favicon/types"
+	err_ "github.com/jhekau/favicon/internal/core/err"
+	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (
