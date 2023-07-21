@@ -19,7 +19,7 @@ const (
 	logF05 = `F05: convert png`
 )
 func errF(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/thumb/create/file.go`, i)
+	return err_.Err(err_.TypeError, `/thumb/create/file.go`, i...)
 } 
 
 var (

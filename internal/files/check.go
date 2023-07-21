@@ -23,7 +23,7 @@ const (
 	logS06 = `S06: source size < thumb size`
 )
 func errS(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/thumb/create/source.go`, i)
+	return err_.Err(err_.TypeError, `/thumb/create/source.go`, i...)
 } 
 
 // список оригинальных файлов, ранее проверенных на корректность
