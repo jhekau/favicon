@@ -1,2 +1,9 @@
-# favicon 
-automatic creation of a favicon for a site of different sizes.
+# Favicon — automatic creation of popular icons for browsers, mobile OS
+
+doc 
+
+*use cases*
+
+*pkg use*
+
+...
