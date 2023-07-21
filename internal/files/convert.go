@@ -24,11 +24,30 @@ func errF(i... interface{}) error {
 
 var (
 	Convert = convert_file
+	ConverterICO = convert_ico
+	ConverterPNG = convert_png
 )
 
-// interface
+
+
+// функция, которая непосредственно конвертирует изображение.
+// Можно использовать внешнюю библиотеку, или внешний бинарник
 type Converter interface {
-	Do(source, save types_.FilePath, size_px int, typ types_.FileType) error
+	Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
+}
+
+// функция, которая проверяет, подходит ли она для конвертации запрашиваемого типа
+// и запускает конвертер для конвертации непосредственно файла
+type ConvertType interface {
+
+	// функция, которая запускается для проверки типа и последующего запуска конвертора
+	Do(source, save types_.FilePath, size_px int, typ types_.FileType, conv Converter) (complete bool, err error)
+}
+
+// соб-но пара, интерфейс для конвертера и сам конвертер
+type Converters struct {
+	Converter Converter
+	ConvertType ConvertType
 }
 
 // for testing
@@ -37,12 +56,14 @@ func init(){
 	fn_source_check = source_check
 }
 
-//
+
+
+// конвертирование исходного изображения нужную превьюшку
 func convert_file( 
 	source, source_svg, save types_.FilePath,
 	typ types_.FileType,
 	size_px int,
-	conv Converter,
+	converters []Converters,
 )(
 	complete bool,
 	err error,
@@ -68,11 +89,12 @@ func convert_file(
 		return false, errF(logF02, err)
 	}
 
-	for _, fn := range []func(s, sv types_.FilePath, sz int, tp types_.FileType, conv Converter) (bool, error) {
-		convert_ico,
-		convert_png,
-	}{
-		if ok, err := fn(source, save, size_px, typ, conv); err != nil {
+	// for _, fn := range []func(s, sv types_.FilePath, sz int, tp types_.FileType, conv Converter) (bool, error) {
+	// 	convert_ico,
+	// 	convert_png,
+	// }
+	for _, fn := range converters {
+		if ok, err := fn.ConvertType.Do(source, save, size_px, typ, fn.Converter); err != nil {
 			return false, errF(logF03, err)
 		} else if ok {
 			return true, nil
@@ -81,23 +103,28 @@ func convert_file(
 	return false, nil
 }
 
-//
+
+
+
+// интерфейсы для конвертеров
+
+// интерфейс для конвертора ICO
 func convert_ico(source, save types_.FilePath, size_px int, typ types_.FileType, conv Converter) (complete bool, err error) {
 	if typ != types_.ICO() {
 		return false, nil
 	}
-    if err := conv.Do(source, save, size_px, typ); err != nil {
+    if err := conv.Proc(source, save, size_px, typ); err != nil {
 		return false, errF(logF04, err)
 	}
 	return true, nil
 }
 
-//
+// интерфейс для конвертора PNG
 func convert_png(source, save types_.FilePath, size_px int, typ types_.FileType, conv Converter) (complete bool, err error) {
 	if typ != types_.PNG() {
 		return false, nil
 	}
-    if err := conv.Do(source, save, size_px, typ); err != nil {
+    if err := conv.Proc(source, save, size_px, typ); err != nil {
 		return false, errF(logF05, err)
 	}
 	return true, nil

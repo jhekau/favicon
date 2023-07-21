@@ -16,7 +16,7 @@ func ConvertFileTest(
 	source, source_svg, save types_.FilePath,
 	typ types_.FileType,
 	size_px int,
-	conv Converter,
+	convs []Converters,
 )(
 	complete bool,
 	err error,
@@ -24,7 +24,7 @@ func ConvertFileTest(
 	fn_source_check = func( fpath types_.FilePath, source_typ types_.FileType, thumb_size int ) error {
 		return nil
 	}
-	return convert_file(source, source_svg, save, typ, size_px, conv)
+	return convert_file(source, source_svg, save, typ, size_px, convs)
 }
 
 var ConvertICOTest = convert_ico
