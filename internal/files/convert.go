@@ -23,11 +23,18 @@ func errF(i... interface{}) error {
 } 
 
 var (
-	File = convert_file
+	Convert = convert_file
 )
 
+// interface
 type Converter interface {
 	Do(source, save types_.FilePath, size_px int, typ types_.FileType) error
+}
+
+// for testing
+var fn_source_check func( fpath types_.FilePath, source_typ types_.FileType, thumb_size int ) error
+func init(){
+	fn_source_check = source_check
 }
 
 //
@@ -56,7 +63,7 @@ func convert_file(
 		source_type = types_.SVG()
 	}
 
-	err = source_check(source, source_type, size_px)
+	err = fn_source_check(source, source_type, size_px)
 	if err != nil {
 		return false, errF(logF02, err)
 	}

@@ -29,10 +29,16 @@ func errS(i... interface{}) error {
 // список оригинальных файлов, ранее проверенных на корректность
 var source_check_list sync.Map // [filepath]error
 
+// for test 
+var (
+	osOpen = os.Open
+	osStat = os.Stat
+)
+
 // получние разрешения исходного изображения
 func source_resolution( fpath types_.FilePath ) ( w,h int, err error ) {
 
-	file, err := os.Open(fpath.String())
+	file, err := osOpen(fpath.String())
     if err != nil {
 		return 0,0, errS(logS01, err)
     }
@@ -58,7 +64,7 @@ func source_check( fpath types_.FilePath, source_typ types_.FileType, thumb_size
 		return e.(error)
 	}
 
-	if f, err := os.Stat(fpath.String()); err != nil {
+	if f, err := osStat(fpath.String()); err != nil {
 
 		source_check_list.Store(fpath, err)
 		return errS(logS03, err)
