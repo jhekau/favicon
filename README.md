@@ -1,4 +1,4 @@
-# Favicon — automatic creation of popular icons for browsers, mobile OS
+# Favicon — automatic creation of popular icons for popular platform
 
 doc 
 
