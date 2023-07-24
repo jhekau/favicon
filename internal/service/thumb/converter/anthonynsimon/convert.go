@@ -9,8 +9,8 @@ import (
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
 	ico_ "github.com/Kodeworks/golang-image-ico"
-	err_ "github.com/jhekau/favicon/err"
-	types_ "github.com/jhekau/favicon/types"
+	err_ "github.com/jhekau/favicon/internal/core/err"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (

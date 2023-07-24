@@ -14,9 +14,9 @@ import (
 	"strings"
 	"sync"
 
-	err_ "github.com/jhekau/favicon/err"
-	create_ "github.com/jhekau/favicon/thumb/create"
-	types_ "github.com/jhekau/favicon/types"
+	err_ "github.com/jhekau/favicon/internal/core/err"
+	create_ "github.com/jhekau/favicon/internal/files"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (
