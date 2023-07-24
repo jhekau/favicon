@@ -6,10 +6,12 @@ package create
  */
 import (
 	"errors"
+	"fmt"
 	"image"
 	"os"
 	"sync"
 
+	config_ "github.com/jhekau/favicon/internal/config"
 	err_ "github.com/jhekau/favicon/internal/core/err"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
@@ -21,6 +23,7 @@ const (
 	logS04 = `S04: save thumb image is a folder`
 	logS05 = `S05: get source resolution`
 	logS06 = `S06: source size < thumb size`
+	logS07 = `S07: invalid dimensions of the original image`
 )
 func errS(i... interface{}) error {
 	return err_.Err(err_.TypeError, `/thumb/create/source.go`, i...)
@@ -84,11 +87,33 @@ func source_check( fpath types_.FilePath, source_typ types_.FileType, thumb_size
 			return err
 		}
 
-		if  source_height < thumb_size || source_width < thumb_size {
+		if source_height < thumb_size || source_width < thumb_size {
 			err := errS(logS06, err)
 			source_check_list.Store(fpath, err)
 			return err
 		}
+
+		if 	source_height < config_.ImageSourceResolutionMin || 
+			source_height > config_.ImageSourceResolutionMax ||
+			source_width < config_.ImageSourceResolutionMin || 
+			source_width > config_.ImageSourceResolutionMax {
+
+				err := errS(
+						fmt.Sprintf(`Min Resolution: %v, Max Resolution: %v, Current Resolution: %vx%v`,
+						config_.ImageSourceResolutionMin,
+						config_.ImageSourceResolutionMax,
+						source_width,
+						source_height,
+					),
+					logS07, err)
+
+				source_check_list.Store(fpath, err)
+				return err
+		}
+		
+		config_.ImagePreviewResolutionMin
+		config_.ImagePreviewResolutionMax
+
 	}
 
 	source_check_list.Store(fpath, errOK)

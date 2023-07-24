@@ -8,7 +8,10 @@ package config
 import ()
 
 const (
-	ImageSizeMin = 16
-	ImageSizeMax = 40_000
+	// px
+	ImageSourceResolutionMin = 16
+	ImageSourceResolutionMax = 40_000
+	ImagePreviewResolutionMin = 16
+	ImagePreviewResolutionMax = 1280
 )
 
