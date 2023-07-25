@@ -10,7 +10,7 @@ import ()
 const (
 	// px
 	ImageSourceResolutionMin = 16
-	ImageSourceResolutionMax = 40_000
+	ImageSourceResolutionMax = 10_000
 	ImagePreviewResolutionMin = 16
 	ImagePreviewResolutionMax = 1280
 )
