@@ -1,12 +1,20 @@
 package converterstest
 
+import (
+	"testing"
+
+	config_ "github.com/jhekau/favicon/internal/config"
+	types_ "github.com/jhekau/favicon/internal/core/types"
+	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
+)
+
 /* *
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
  * 21 July 2023
  * testing converts
  */
 
-
+// images
 const (
 	// PNG 1x1 : https://shoonia.github.io/1x1/#00000000
 	png_1_1 = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NgAAIAAAUAAR4f7BQAAAAASUVORK5CYII=`
@@ -28,3 +36,32 @@ const (
 	svg = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiA8IS0tIENyZWF0ZWQgd2l0aCBTVkcgRWRpdG9yIC0gaHR0cDovL2dpdGh1Yi5jb20vbXphbGl2ZS9TVkcgRWRpdG9yLyAtLT4KIDxnPgogIDx0aXRsZT5iYWNrZ3JvdW5kPC90aXRsZT4KICA8cmVjdCBmaWxsPSIjZmZmIiBpZD0iY2FudmFzX2JhY2tncm91bmQiIGhlaWdodD0iMTgiIHdpZHRoPSIxOCIgeT0iLTEiIHg9Ii0xIi8+CiAgPGcgZGlzcGxheT0ibm9uZSIgb3ZlcmZsb3c9InZpc2libGUiIHk9IjAiIHg9IjAiIGhlaWdodD0iMTAwJSIgd2lkdGg9IjEwMCUiIGlkPSJjYW52YXNHcmlkIj4KICAgPHJlY3QgZmlsbD0idXJsKCNncmlkcGF0dGVybikiIHN0cm9rZS13aWR0aD0iMCIgeT0iMCIgeD0iMCIgaGVpZ2h0PSIxMDAlIiB3aWR0aD0iMTAwJSIvPgogIDwvZz4KIDwvZz4KIDxnPgogIDx0aXRsZT5MYXllciAxPC90aXRsZT4KIDwvZz4KPC9zdmc+`
 )
 
+//
+
+func TestCheckPreview( t *testing.T ) {
+
+	for _, ts := range []struct{
+		size int
+		typ types_.FileType
+		status bool
+	}{
+		{ 0, 		types_.PNG(), false },
+		{ 15, 		types_.ICO(), false },
+		{ 16, 		types_.ICO(), true },
+		{ 10001, 	types_.PNG(), false },
+		{ 10001,	types_.SVG(), true },
+		{ config_.ImagePreviewResolutionMin, 	types_.PNG(), true },
+		{ config_.ImagePreviewResolutionMin-1, 	types_.PNG(), false },
+		{ config_.ImagePreviewResolutionMax, 	types_.PNG(), true },
+		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), false },
+	}{
+		status, err := checks_.Preview{}.Check( ts.typ, ts.size)
+		if err != nil {
+			t.Fatalf(`CheckPreviewTest - error: data: %#v`, ts)
+		}
+		if status != ts.status {
+			t.Fatalf(`CheckPreviewTest - status: data: %#v`, ts)
+		}
+	}
+
+}
