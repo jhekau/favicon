@@ -1,11 +1,11 @@
 package converters_test
 
 import (
-	"testing"
+	// "testing"
 
-	config_ "github.com/jhekau/favicon/internal/config"
-	types_ "github.com/jhekau/favicon/internal/core/types"
-	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
+	// config_ "github.com/jhekau/favicon/internal/config"
+	// types_ "github.com/jhekau/favicon/internal/core/types"
+	// checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
 )
 
 /* *

@@ -114,14 +114,14 @@ func TestCheckSourceUnit( t *testing.T ) {
 		check_disable := struct{
 			Status func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error)
 			SetErr func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error
-		}{}
-	
-		// disable cache
-		check_disable.Status = func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error) {
-			return false, nil
-		}
-		check_disable.SetErr = func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error {
-			return err
+		}{
+			// disable cache
+			Status: func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error) {
+				return false, nil
+			},
+			SetErr: func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error {
+				return err
+			},
 		}
 
 		fn.disable = func() {

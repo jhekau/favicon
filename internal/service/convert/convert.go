@@ -28,21 +28,19 @@ var (
 
 
 
-// функция, которая непосредственно конвертирует изображение.
-// Можно использовать внешнюю библиотеку, или внешний бинарник
+// конвертер, который непосредственно занимается конвертацией
 type Converter interface {
 	Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
 }
 
-// функция, которая проверяет, подходит ли она для конвертации запрашиваемого типа
-// и запускает конвертер для конвертации непосредственно файла
+// проверяют тип, в который хотим конвертировать и запускают конвертер
 type ConvertType interface {
 
 	// функция, которая запускается для проверки типа и последующего запуска конвертора
 	Do(source, save types_.FilePath, size_px int, typ types_.FileType, conv Converter) (complete bool, err error)
 }
 
-// соб-но пара, интерфейс для конвертера и сам конвертер
+// связка, функция запускающая конвертер и сам конвертер
 type Converters struct {
 	Converter Converter
 	ConvertType ConvertType
@@ -59,7 +57,7 @@ type CheckPreview interface {
 	Check(typ types_.FileType, size_px int) error
 }
 
-// проверка валидности исходника
+// проверка валидности исходника для нарезания превьюхи
 type CheckSource interface {
 	Check(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) error
 }
