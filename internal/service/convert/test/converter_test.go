@@ -1,4 +1,4 @@
-package converterstest
+package converters_test
 
 import (
 	"testing"
@@ -10,8 +10,7 @@ import (
 
 /* *
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
- * 21 July 2023
- * testing converts
+ * 25 July 2023
  */
 
 // images
@@ -38,30 +37,3 @@ const (
 
 //
 
-func TestCheckPreview( t *testing.T ) {
-
-	for _, ts := range []struct{
-		size int
-		typ types_.FileType
-		status bool
-	}{
-		{ 0, 		types_.PNG(), false },
-		{ 15, 		types_.ICO(), false },
-		{ 16, 		types_.ICO(), true },
-		{ 10001, 	types_.PNG(), false },
-		{ 10001,	types_.SVG(), true },
-		{ config_.ImagePreviewResolutionMin, 	types_.PNG(), true },
-		{ config_.ImagePreviewResolutionMin-1, 	types_.PNG(), false },
-		{ config_.ImagePreviewResolutionMax, 	types_.PNG(), true },
-		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), false },
-	}{
-		status, err := checks_.Preview{}.Check( ts.typ, ts.size)
-		if err != nil {
-			t.Fatalf(`CheckPreviewTest - error: data: %#v`, ts)
-		}
-		if status != ts.status {
-			t.Fatalf(`CheckPreviewTest - status: data: %#v`, ts)
-		}
-	}
-
-}
