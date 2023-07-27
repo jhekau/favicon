@@ -19,23 +19,20 @@ func TestCheckPreviewUnit( t *testing.T ) {
 	for _, ts := range []struct{
 		size int
 		typ types_.FileType
-		status bool
+		err error
 	}{
-		{ 0, 		types_.PNG(), false },
-		{ 15, 		types_.ICO(), false },
-		{ 16, 		types_.ICO(), true },
-		{ 10001, 	types_.PNG(), false },
-		{ 10001,	types_.SVG(), true },
-		{ config_.ImagePreviewResolutionMin, 	types_.PNG(), true },
-		{ config_.ImagePreviewResolutionMin-1, 	types_.PNG(), false },
-		{ config_.ImagePreviewResolutionMax, 	types_.PNG(), true },
-		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), false },
+		{ 0, 		types_.PNG(), errors.New(`error`) },
+		{ 15, 		types_.ICO(), errors.New(`error`) },
+		{ 16, 		types_.ICO(), nil },
+		{ 10001, 	types_.PNG(), errors.New(`error`) },
+		{ 10001,	types_.SVG(), nil },
+		{ config_.ImagePreviewResolutionMin, 	types_.PNG(), nil },
+		{ config_.ImagePreviewResolutionMin-1, 	types_.PNG(), errors.New(`error`) },
+		{ config_.ImagePreviewResolutionMax, 	types_.PNG(), nil },
+		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), errors.New(`error`) },
 	}{
-		status, err := checks_.Preview{}.Check( ts.typ, ts.size)
-		if err != nil {
-			t.Fatalf(`TestCheckPreviewUnit - error: data: %#v`, ts)
-		}
-		if status != ts.status {
+		err := checks_.Preview{}.Check( ts.typ, ts.size)
+		if (err == nil && ts.err != nil) || (err != nil && ts.err == nil) {
 			t.Fatalf(`TestCheckPreviewUnit - status: data: %#v`, ts)
 		}
 	}

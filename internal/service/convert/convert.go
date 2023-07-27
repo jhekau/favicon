@@ -16,7 +16,8 @@ const (
 	logF02 = `F02: check preview image`
 	logF03 = `F03: convert thumb`
 	logF04 = `F04: check source image`
-	// logF05 = `F05: convert png`
+	logF05 = `F05: the resolution is 0`
+	logF06 = `F06: there is no suitable converter for image modification`
 )
 func errF(i... interface{}) error {
 	return err_.Err(err_.TypeError, `/internal/service/convert.go`, i...)
@@ -72,7 +73,6 @@ func convert_file(
 	check_preview CheckPreview,
 	check_source CheckSource,
 )(
-	complete bool,
 	err error,
 ){
 
@@ -80,12 +80,12 @@ func convert_file(
 	source_type := types_.PNG()
 
 	if size_px == 0 {
-		return false, nil
+		return errF(logF05, err)
 	}
 
 	if source == `` {
 		if source_svg == `` {
-			return false, errF(logF01, err)
+			return errF(logF01, err)
 		}
 		source = source_svg
 		source_type = types_.SVG()
@@ -93,12 +93,12 @@ func convert_file(
 
 	err = check_preview.Check(typ, size_px)
 	if err != nil {
-		return false, errF(logF02, err)
+		return errF(logF02, err)
 	}
 
 	err = check_source.Check(source, source_type, size_px)
 	if err != nil {
-		return false, errF(logF04, err)
+		return errF(logF04, err)
 	}
 
 	// for _, fn := range []func(s, sv types_.FilePath, sz int, tp types_.FileType, conv Converter) (bool, error) {
@@ -107,12 +107,12 @@ func convert_file(
 	// }
 	for _, fn := range converters {
 		if ok, err := fn.ConvertType.Do(source, save, size_px, typ, fn.Converter); err != nil {
-			return false, errF(logF03, err)
+			return errF(logF03, err)
 		} else if ok {
-			return true, nil
+			return nil
 		}
 	}
-	return false, nil
+	return errF(logF06, err)
 }
 
 

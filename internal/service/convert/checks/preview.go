@@ -6,34 +6,43 @@ package checks
  * проверка исходного изображения
  */
 import (
-	// err_ "github.com/jhekau/favicon/internal/core/err"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	"fmt"
+
 	config_ "github.com/jhekau/favicon/internal/config"
+	err_ "github.com/jhekau/favicon/internal/core/err"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 )
-/*
+
 const (
-	logP01 = `P01: `
-	logP02 = `P02: `
-	logP03 = `P03: `
-	logP04 = `P04: `
+	logP01 = `P01: incorrect resolution source file`
+	// logP02 = `P02: `
+	// logP03 = `P03: `
+	// logP04 = `P04: `
 )
 func errP(i... interface{}) error {
 	return err_.Err(err_.TypeError, `/internal/service/convert/checks/preview.go`, i...)
 }
-*/
+
 
 type Preview struct {}
 
-func (p Preview) Check(typ types_.FileType, size_px int) (bool, error) {
+func (p Preview) Check(typ types_.FileType, size_px int) error {
 
 	if typ == types_.SVG() {
-		return true, nil
+		return nil
 	}
 
 	if 	size_px < config_.ImagePreviewResolutionMin || 
 		size_px > config_.ImagePreviewResolutionMax {
-		return false, nil
+		return errP(
+			fmt.Sprintf(
+				`Minimum Resolution: %d, Maximum Resolution %d, Current Value: %d`,
+				config_.ImagePreviewResolutionMin,
+				config_.ImagePreviewResolutionMax,
+				size_px,
+			),
+			logP01,
+		)
 	}
-
-	return true, nil
+	return nil
 }
