@@ -30,39 +30,34 @@ func errC(i... interface{}) error {
 	return err_.Err(err_.TypeError, `/internal/service/convert/checks/source.go`, i...)
 } 
 
-// список оригинальных файлов, ранее проверенных на корректность
-var check_cache = struct{
-	Status func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error)
-	SetErr func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error
-}{}
+type CacheStatus struct {
+	m sync.Map
+}
+func (c *CacheStatus) cache_key(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) string {
+	return fmt.Sprintf(`%s, %s, %d`, fpath, source_typ, thumb_size)
+}
+func (c *CacheStatus) Status(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error) {
 
-func init() {
+	e, ok := c.m.Load(c.cache_key(fpath, source_typ, thumb_size))
 
-	var c sync.Map
-
-	cache_key := func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) string {
-		return fmt.Sprintf(`%s, %s, %d`, fpath, source_typ, thumb_size)
+	var err error
+	if e != nil {
+		err = e.(error)
 	}
 
-	check_cache.Status = func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error) {
-		e, ok := c.Load(cache_key(fpath, source_typ, thumb_size))
-
-		var err error
-		if e != nil {
-			err = e.(error)
-		}
-
-		return ok, err
-	}
-
-	check_cache.SetErr = func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error {
-		c.Store(cache_key(fpath, source_typ, thumb_size), err)
-		return err
-	}
+	return ok, err
+}
+func (c *CacheStatus) SetErr(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error {
+	c.m.Store(c.cache_key(fpath, source_typ, thumb_size), err)
+	return err
 }
 
 //
 type Source struct {
+	Cache interface {
+		Status(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error)
+		SetErr(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error
+	}
 	FileIsExist func(fpath types_.FilePath) (bool, error) 
 	FileResolution func(fpath types_.FilePath) (w int, h int, err error)
 }
@@ -70,7 +65,7 @@ type Source struct {
 // проверка исходного изображения на корректность
 func (c Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb_size int ) error {
 
-	ok, err := check_cache.Status(fpath, source_typ, thumb_size)
+	ok, err := c.Cache.Status(fpath, source_typ, thumb_size)
 	if ok {
 		if err == nil {
 			return nil
@@ -88,21 +83,21 @@ func (c Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb_
 
 	exist, err := c.FileIsExist(fpath)
 	if err != nil {
-		return check_cache.SetErr(fpath, source_typ, thumb_size, errC(logC02, err))
+		return c.Cache.SetErr(fpath, source_typ, thumb_size, errC(logC02, err))
 	}
 	if !exist {
-		return check_cache.SetErr(fpath, source_typ, thumb_size, errC(logC03, err))
+		return c.Cache.SetErr(fpath, source_typ, thumb_size, errC(logC03, err))
 	}
 
 	if source_typ != types_.SVG() {
 
 		source_width, source_height, err := c.FileResolution(fpath)
 		if err != nil {
-			return check_cache.SetErr(fpath, source_typ, thumb_size, errC(logC04, err))
+			return c.Cache.SetErr(fpath, source_typ, thumb_size, errC(logC04, err))
 		}
 
 		if source_height < thumb_size || source_width < thumb_size {
-			return check_cache.SetErr(
+			return c.Cache.SetErr(
 				fpath, source_typ, thumb_size, errC(
 					fmt.Sprintf(`Source: %vx%v, Preview: %v; %s`, source_width, source_height, thumb_size, logC05),
 					err),
@@ -114,7 +109,7 @@ func (c Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb_
 			source_width < config_.ImageSourceResolutionMin || 
 			source_width > config_.ImageSourceResolutionMax {
 
-				return check_cache.SetErr(
+				return c.Cache.SetErr(
 					fpath, source_typ, thumb_size, errC(
 						fmt.Sprintf(`Min Resolution: %v, Max Resolution: %v, Current Resolution: %vx%v`,
 						config_.ImageSourceResolutionMin,
@@ -125,6 +120,6 @@ func (c Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb_
 		}
 	}
 
-	check_cache.SetErr(fpath, source_typ, thumb_size, nil)
+	c.Cache.SetErr(fpath, source_typ, thumb_size, nil)
 	return nil
 }

@@ -33,10 +33,10 @@ func TestCheckPreviewUnit( t *testing.T ) {
 	}{
 		status, err := checks_.Preview{}.Check( ts.typ, ts.size)
 		if err != nil {
-			t.Fatalf(`CheckPreviewTest - error: data: %#v`, ts)
+			t.Fatalf(`TestCheckPreviewUnit - error: data: %#v`, ts)
 		}
 		if status != ts.status {
-			t.Fatalf(`CheckPreviewTest - status: data: %#v`, ts)
+			t.Fatalf(`TestCheckPreviewUnit - status: data: %#v`, ts)
 		}
 	}
 
@@ -44,7 +44,7 @@ func TestCheckPreviewUnit( t *testing.T ) {
 
 func TestCheckSourceCacheNotExistUnit( t *testing.T ) {
 
-	check := checks_.ExportCheckCache()
+	check := checks_.CacheStatus{}
 
 	data_not_exist := map[types_.FilePath]struct{
 		err error
@@ -59,10 +59,10 @@ func TestCheckSourceCacheNotExistUnit( t *testing.T ) {
 	for filepath, ts := range data_not_exist {
 		status, err := check.Status(filepath, types_.ICO(), 16)
 		if err != nil {
-			t.Fatalf(`TestCheckSourceCacheExist - error: data: %#v`, ts)
+			t.Fatalf(`TestCheckSourceCacheNotExistUnit - error: data: %#v`, ts)
 		}
 		if status {
-			t.Fatalf(`TestCheckSourceCacheExist - status: data: %#v`, ts)
+			t.Fatalf(`TestCheckSourceCacheNotExistUnit - status: data: %#v`, ts)
 		}
 	}
 
@@ -70,7 +70,7 @@ func TestCheckSourceCacheNotExistUnit( t *testing.T ) {
 
 func TestCheckSourceCacheExistUnit( t *testing.T ) {
 
-	check := checks_.ExportCheckCache()
+	check := checks_.CacheStatus{}
 
 	data_not_exist := []struct{
 		filepath 	types_.FilePath
@@ -95,46 +95,32 @@ func TestCheckSourceCacheExistUnit( t *testing.T ) {
 	for _, ts := range data_not_exist {
 		status, err := check.Status(ts.filepath, ts.typ, ts.thumb_size)
 		if err != ts.err {
-			t.Fatalf(`TestCheckSourceCacheExist - error: data: %#v`, ts)
+			t.Fatalf(`TestCheckSourceCacheExistUnit - error: data: %#v`, ts)
 		}
 		if !status {
-			t.Fatalf(`TestCheckSourceCacheExist - status: data: %#v`, ts)
+			t.Fatalf(`TestCheckSourceCacheExistUnit - status: data: %#v`, ts)
 		}
 	}
 }
 
+type CheckSourceUnitCacheDisable struct{}
+func (c CheckSourceUnitCacheDisable) Status(_ types_.FilePath, _ types_.FileType, _ int) (bool, error) {
+	return false, nil
+}
+func (c CheckSourceUnitCacheDisable) SetErr(_ types_.FilePath, _ types_.FileType, _ int, err error) error {
+	return err
+}
+
 func TestCheckSourceUnit( t *testing.T ) {
 
-	// backup check cache function and disable cache ******************
-	check_cache := func() (fn struct { defaulT func(); disable func() }) {
-
-		check := checks_.ExportCheckCache()
-		def := *check
-
-		check_disable := struct{
-			Status func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error)
-			SetErr func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error
-		}{
-			// disable cache
-			Status: func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error) {
-				return false, nil
-			},
-			SetErr: func(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error {
-				return err
-			},
-		}
-
-		fn.disable = func() {
-			*check = check_disable
-		}
-		fn.defaulT = func() {
-			*check = def
-		}
-		return
+	// enable and disable cache ******************
+	type cache interface {
+		Status(_ types_.FilePath, _ types_.FileType, _ int) (bool, error)
+		SetErr(_ types_.FilePath, _ types_.FileType, _ int, _ error) error
 	}
 
-	// restore check cache function and enable cache
-	defer check_cache().defaulT()	
+	cache_enable := checks_.CacheStatus{}
+	cache_disable := CheckSourceUnitCacheDisable{}
 
 	// test *************************************************************
 
@@ -147,8 +133,6 @@ func TestCheckSourceUnit( t *testing.T ) {
 		err: 		func(fpath types_.FilePath) (bool, error){ return false, errors.New(`error`) },
 	}
 
-	source_check := checks_.Source{}
-
 	// testing
 	for _, dt := range []struct{
 		filepath         types_.FilePath
@@ -156,80 +140,68 @@ func TestCheckSourceUnit( t *testing.T ) {
 		thumb_size 		 int
 		file_is_exist 	 func(fpath types_.FilePath) (bool, error)
 		file_resolution  func(fpath types_.FilePath) (w int, h int, err error)
-		check_cache_used func()
+		cache 			 cache
 		status_error 	 error
 	}{
-		{	`TestCheckSourceUnit/1.jpg`, // ------------------------------------------------------
+		{	`TestCheckSourceUnit/1.jpg`, // ошибка - нулевой размер ---------------------------------------
 			types_.PNG(), 0, file_is_exist.exist, 
 			func(fpath types_.FilePath) (w int, h int, err error){ return 1, 1, nil },
-			check_cache().disable,
+			cache_disable,
 			errors.New(`error`),
 		},
-		{	`TestCheckSourceUnit/2.jpg`, // ------------------------------------------------------
+		{	`TestCheckSourceUnit/2.jpg`, // ошибка - размер оригинала меньше, чем нарезаемая превьха ------
 			types_.PNG(), 16, file_is_exist.exist, 
 			func(fpath types_.FilePath) (w int, h int, err error){ return 1, 1, nil },
-			check_cache().defaulT,
+			&cache_enable,
 			errors.New(`error`),
 		},
-		{	`TestCheckSourceUnit/2.jpg`, // ------------------------------------------------------
+		{	`TestCheckSourceUnit/2.jpg`, // проверка работы кеша по предыдущему условию -------------------
 			types_.PNG(), 16, file_is_exist.exist, 
 			func(fpath types_.FilePath) (w int, h int, err error){ return 1, 1, nil },
-			check_cache().defaulT,
+			&cache_enable,
 			errors.New(`error`),
 		},
 		{	`TestCheckSourceUnit/3.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.exist, 
 			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
-			check_cache().defaulT,
+			&cache_enable,
 			nil,
 		},
 		{	`TestCheckSourceUnit/3.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.exist, 
 			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
-			check_cache().defaulT,
+			&cache_enable,
 			nil,
 		},
 		{	`TestCheckSourceUnit/4.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.not_exist, 
 			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
-			check_cache().disable,
+			cache_disable,
 			errors.New(`error`),
 		},
 		{	`TestCheckSourceUnit/5.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.err, 
 			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
-			check_cache().disable,
+			cache_disable,
 			errors.New(`error`),
 		},
 		{	`TestCheckSourceUnit/6.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.exist, 
 			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, errors.New(`error`) },
-			check_cache().disable,
+			cache_disable,
 			errors.New(`error`),
 		},
 	}{
-		// swith data cache check used
-		dt.check_cache_used()
 
-		source_check.FileIsExist = dt.file_is_exist
-		source_check.FileResolution = dt.file_resolution
+		err := checks_.Source{
+			Cache: dt.cache,
+			FileIsExist: dt.file_is_exist,
+			FileResolution: dt.file_resolution,
+		}.
+		Check(dt.filepath, dt.typ, dt.thumb_size)
 
-		err := source_check.Check(dt.filepath, dt.typ, dt.thumb_size)
 		if (err == nil && dt.status_error != nil) || (err != nil && dt.status_error == nil) {
 			t.Fatalf(`TestCheckSourceUnit - error: filepath: %v err: '%v' data: %#v`, dt.filepath, err, dt)
 		}
 	}
-
-	/*
-	{ 0, 		types_.PNG(), false },
-	{ 15, 		types_.ICO(), false },
-	{ 16, 		types_.ICO(), true },
-	{ 10001, 	types_.PNG(), false },
-	{ 10001,	types_.SVG(), true },
-	{ config_.ImagePreviewResolutionMin, 	types_.PNG(), true },
-	{ config_.ImagePreviewResolutionMin-1, 	types_.PNG(), false },
-	{ config_.ImagePreviewResolutionMax, 	types_.PNG(), true },
-	{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), false },
-	*/
-
 }
