@@ -5,4 +5,4 @@ package nginx_static
  * 26 July 2023
  * создание конфига для nginx на основе имеющегося набора изображений
  */
- import ()
+import ()
