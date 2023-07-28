@@ -1,17 +1,11 @@
-package converters_test
-
-import (
-	// "testing"
-
-	// config_ "github.com/jhekau/favicon/internal/config"
-	// types_ "github.com/jhekau/favicon/internal/core/types"
-	// checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
-)
+package test_data_image
 
 /* *
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
  * 25 July 2023
  */
+import (
+)
 
 // images
 const (
