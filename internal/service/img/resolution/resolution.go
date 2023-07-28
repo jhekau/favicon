@@ -2,7 +2,7 @@ package resolution
 
 /* *
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
- * 26 July 2023
+ * 28 July 2023
  * получение разрешение изображения
  */
 import (

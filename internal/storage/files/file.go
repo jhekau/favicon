@@ -20,7 +20,7 @@ const (
 	logS04 = `S04: save thumb image is a folder`
 )
 func errS(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/internal/data/files/stat.go`, i...)
+	return err_.Err(err_.TypeError, `/internal/storage/files/stat.go`, i...)
 } 
 
 var (
@@ -52,7 +52,7 @@ func resolution( fpath types_.FilePath ) ( w,h int, err error ) {
 }
 */
 
-func read(fpath types_.FilePath) (io.ReadCloser, error) {
+func read( fpath types_.FilePath ) (io.ReadCloser, error) {
 	return osOpen(fpath.String())
 }
 
