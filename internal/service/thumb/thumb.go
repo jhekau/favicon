@@ -15,7 +15,7 @@ import (
 	"sync"
 
 	err_ "github.com/jhekau/favicon/internal/core/err"
-	create_ "github.com/jhekau/favicon/internal/files"
+	// create_ "github.com/jhekau/favicon/internal/files"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
