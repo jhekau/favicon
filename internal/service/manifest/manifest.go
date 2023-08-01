@@ -6,7 +6,7 @@ package manifest
  */
 import (
 	"encoding/json"
-	"io/ioutil"
+	// "io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -240,7 +240,7 @@ func (m *Manifest) file_create(
 	)
 	os.Remove(fpath.String())
 
-	if err = ioutil.WriteFile(fpath.String(), filebody, 0775); err != nil {
+	if err = os.WriteFile(fpath.String(), filebody, 0775); err != nil {
 		return ``, false, errM(logM04, err)
 	}
 	return fpath, true, nil
