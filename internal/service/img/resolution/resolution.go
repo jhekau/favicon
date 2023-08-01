@@ -9,20 +9,19 @@ import (
 	"image"
 	"io"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 )
 
 const (
+	logRP = `/favicon/internal/service/img/resolution/resolution.go`
 	logR01 = `R01: image decode config error`
 	// logR02 = `R02: `
 	// logR03 = `R03: `
 	// logR04 = `R04: `
 )
-func errR(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/favicon/internal/service/img/resolution/resolution.go`, i...)
-}
 
 type Resolution struct {
+	L *logger_.Logger
 	Reader interface{
 		Read() io.Reader
 	}
@@ -32,7 +31,7 @@ type Resolution struct {
 func (r *Resolution) Get() ( w,h int, err error ) {
 	image, _, err := image.DecodeConfig(r.Reader.Read())
     if err != nil {
-		return 0,0, errR(logR01, err)
+		return 0,0, r.L.Typ.Error(logRP, logR01, err)
     }
     return image.Width, image.Height, nil
 }

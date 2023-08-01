@@ -8,4 +8,6 @@ import ()
 
 // var OsOpen = &osOpen
 var OsStat = &osStat
-
+var LogS03 = logS03
+var LogS04 = logS04
+var LogP   = logP

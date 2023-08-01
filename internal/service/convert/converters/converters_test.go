@@ -8,6 +8,8 @@ import (
 	"errors"
 	"testing"
 
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
 )
@@ -36,6 +38,9 @@ func TestConverterICOUnit( t *testing.T) {
 		{ `3.jpg`, `1_preview.png`, 16, types_.ICO(), converter{ errors.New(`error`) }, false, errors.New(`error`) },
 	}{
 		res, err := (&converters_.ConverterICO{
+			L: &logger_.Logger{
+				Typ: &logger_mock_.LoggerErrorf{},
+			},
 			ConverterExec: d.conv,
 		}).Do(d.source, d.save, d.size_px, d.typ)
 
@@ -65,6 +70,9 @@ func TestConverterPNGUnit( t *testing.T) {
 		{ `3.jpg`, `1_preview.png`, 16, types_.PNG(), converter{ errors.New(`error`) }, false, errors.New(`error`) },
 	}{
 		res, err := (&converters_.ConverterPNG{
+			L: &logger_.Logger{
+				Typ: &logger_mock_.LoggerErrorf{},
+			},
 			ConverterExec: d.conv,
 		}).Do(d.source, d.save, d.size_px, d.typ)
 		

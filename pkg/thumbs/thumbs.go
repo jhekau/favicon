@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
@@ -27,6 +27,7 @@ import (
 )
 
 const (
+	logTP  = `pkg/thumbs.go`
 	logT01 = `T01: get serve file`
 	logT02 = `T02: get file manifest`
 	logT03 = `T03: get file thumb`
@@ -34,9 +35,6 @@ const (
 	logT05 = `T05: get file manifest`
 	logT06 = `T06: error read original`
 )
-func errT(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/thumbs.go`, i...)
-} 
 
 var (
 
@@ -68,6 +66,7 @@ type Converter interface{
 
 type Thumbs struct {
 	s sync.RWMutex
+	l *logger_.Logger
 	source_svg types_.FilePath
 	source_img types_.FilePath
 	folder_work types_.Folder
@@ -130,7 +129,7 @@ func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err err
 	}
 	f, err := files_.Read( tb.GetFilepath(t.get_folder_work(), types_.FileName(source_file)) )
 	if err != nil {
-		return ``, false, errT(logT06, err)
+		return ``, false, t.l.Typ.Error(logTP, logT06, err)
 	}
 
 	storage := defStorageRead{ f: f }
@@ -214,7 +213,7 @@ func (t *Thumbs) handle() {
 
 		fpath, exists, err := t.ServeFile(r.URL)
 		if err != nil {
-			log.Println(errT(logT01, err))
+			log.Println(t.l.Typ.Error(logT01, err))
 			w.WriteHeader(http.StatusInternalServerError)
 		} else if !exists {
 			w.WriteHeader(http.StatusNotFound)
@@ -227,13 +226,13 @@ func (t *Thumbs) handle() {
 func (t *Thumbs) serve_file( url_ *url.URL, conv Converter ) ( fpath string, exists bool, err error ) {
 
 	if manifest, exists, err := t.server_file_manifest(url_); err != nil {
-		return ``, false, errT(logT02, err)
+		return ``, false, t.l.Typ.Error(logTP, logT02, err)
 	} else if exists {
 		return manifest.String(), true, nil
 	}
 
 	if thumb, exists, err := t.server_file_thumb(url_, conv); err != nil {
-		return ``, false, errT(logT03, err)
+		return ``, false, t.l.Typ.Error(logTP, logT03, err)
 	} else if exists {
 		return thumb.String(), true, nil
 	}
@@ -257,7 +256,7 @@ func (t *Thumbs) server_file_thumb( url_ *url.URL, conv Converter ) (fpath types
 		conv,
 	)
 	if err != nil {
-		return ``, false, errT(logT04, err)
+		return ``, false, t.l.Typ.Error(logTP, logT04, err)
 	}
 
 	return fpath, true, nil
@@ -271,7 +270,7 @@ func (t *Thumbs) server_file_manifest( url_ *url.URL ) (manifest types_.FilePath
 
 	manifest, exists, err = t.manifest.GetFile(t.get_folder_work(), t.thumbs)
 	if err != nil {
-		return ``, false, errT(logT05, err)
+		return ``, false, t.l.Typ.Error(logTP, logT05, err)
 	}
 	return manifest, exists, nil
 }

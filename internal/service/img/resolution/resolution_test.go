@@ -9,6 +9,8 @@ import (
 	"io"
 	"testing"
 
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 )
@@ -22,8 +24,12 @@ func (s storageReader) Read() io.Reader {
 
 func TestGetResolution(t *testing.T){
 	
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
 	for _, d := range []struct{
-		img interface{ Base64Reader() (io.Reader, string, error) }
+		img interface{ Base64Reader(l *logger_.Logger) (io.Reader, string, error) }
 		w, h int
 		err error
 	}{
@@ -34,12 +40,13 @@ func TestGetResolution(t *testing.T){
 		{image_test_data_.JPG_10001_10001, 10001, 10001, nil},
 		{image_test_data_.SVG, 0, 0, errors.New(`image: unknown format`)},
 	}{
-		reader, err := image_test_data_.GetFileReader(d.img)
+		reader, err := image_test_data_.GetFileReader(d.img, logger)
 		if err != nil {
 			t.Fatalf(`TestGetResolution:image_test_data_.GetFileReader - error: '%v' data: %#v`, err, d)
 		}
 
 		w, h, err := (&resolution_.Resolution{
+			logger,
 			storageReader{reader},
 		}).Get()
 		if (err == nil && d.err != nil) || (err != nil && d.err == nil) {

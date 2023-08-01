@@ -15,24 +15,22 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 )
 
 const (
+	logIP  = `/favicon/internal/core/test_data/image/image_test_data.go.go`
 	logI01 = `I01: incorrect base64 `
 	logI02 = `I02: read base64 string `
 	logI03 = `I03: get image conf `
 	logI04 = `I04: get reader base64 `
 )
-func errI(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/favicon/internal/core/test_data/image/image_test_data.go.go`, i...)
-}
 
 type Imgb64 string
-func (img Imgb64) Base64Reader() (io.Reader, string /*type image*/, error) {
+func (img Imgb64) Base64Reader(l *logger_.Logger) (io.Reader, string /*type image*/, error) {
 	idx := strings.Index(string(img), ";base64,")
     if idx < 0 {
-        return nil, ``, errI(logI01)
+        return nil, ``, l.Typ.Error( logIP, logI01 )
     }
     return base64.NewDecoder(base64.StdEncoding, strings.NewReader(string(img)[idx+8:])), string(img)[len(`data:`):idx], nil
 }
@@ -60,11 +58,11 @@ const (
 )
 
 //
-func GetFileReader(img interface{ Base64Reader()(io.Reader, string, error) }) (io.Reader, error) {
+func GetFileReader(img interface{ Base64Reader(l *logger_.Logger)(io.Reader, string, error) }, l *logger_.Logger) (io.Reader, error) {
 	
-	r, typ, err := img.Base64Reader()
+	r, typ, err := img.Base64Reader(l)
 	if err != nil {
-		return nil, errI(logI04)
+		return nil, l.Typ.Error( logIP, logI04 )
 	}
 
 	// обязательно вычитываем полностью base64
@@ -73,7 +71,7 @@ func GetFileReader(img interface{ Base64Reader()(io.Reader, string, error) }) (i
     buff := bytes.Buffer{}
     _, err = buff.ReadFrom(r)
     if err != nil {
-        return nil, errI(logI02)
+        return nil, l.Typ.Error( logIP, logI02 )
     }
 
 	b := buff.Bytes()
@@ -84,7 +82,7 @@ func GetFileReader(img interface{ Base64Reader()(io.Reader, string, error) }) (i
 	case `image/png`, `image/jpg`:
 		_, _, err = image.DecodeConfig(bytes.NewReader(b))
 		if err != nil {
-			return nil, errI(logI03, typ, err)
+			return nil, l.Typ.Error( logIP, typ, err)
 		}
 	case `image/svg+xml`:
 	}

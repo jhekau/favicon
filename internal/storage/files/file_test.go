@@ -6,11 +6,16 @@ package files_test
  */
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 )
 
@@ -32,6 +37,10 @@ func TestIsExists(t *testing.T) {
 		*files_.OsStat = backup
 	}()
 
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
 	for _, d := range []struct{
 		osStat func(_ string) (fs.FileInfo, error)
 		resultIsExist bool
@@ -43,7 +52,7 @@ func TestIsExists(t *testing.T) {
 		},
 		{	// true, nil, IsDir -> false, error				!если директория
 			func(_ string) (fs.FileInfo, error) { return &file_info{ true }, nil }, // exist, not error
-			false, errors.New(`error`),
+			false, logger.Typ.Error(files_.LogP, files_.LogS04),
 		},
 		{	// false, error(os.ErrNotExist) -> false, nil	!если файла нет
 			func(_ string) (fs.FileInfo, error) { return &file_info{}, os.ErrNotExist }, // exist, not error
@@ -51,18 +60,19 @@ func TestIsExists(t *testing.T) {
 		},
 		{	// false, error(error) -> false, error
 			func(_ string) (fs.FileInfo, error) { return &file_info{}, errors.New(`error`) }, // exist, error
-			false, errors.New(`error`),
+			false, logger.Typ.Error(files_.LogP, files_.LogS03, errors.New(`error`)),
 		},
 	}{
 		*files_.OsStat = d.osStat
 
-		isExist, err := files_.IsExists(``)
-		if (err == nil && d.resultError != nil) || (err != nil && d.resultError == nil) {
-			t.Fatalf(`TestIsExists - error: '%v' data: %#v`, err, d)
-		}
-		if isExist != d.resultIsExist {
-			t.Fatalf(`TestIsExists - isExists: '%v' data: %#v`, err, d)
-		}
+		isExist, err := files_.IsExists(``, logger)
+
+		require.Equal(t, err, d.resultError, fmt.Sprintf(
+			`error: isExists: '%v', resultIsExist: '%v', err: '%v', data: %#v`, isExist, d.resultIsExist, err, d))
+
+		require.Equal(t, isExist, d.resultIsExist, fmt.Sprintf(
+			`status: isExists: '%v', resultIsExist: '%v', err: '%v', data: %#v`, isExist, d.resultIsExist, err, d)) 
+
 	}
 
 

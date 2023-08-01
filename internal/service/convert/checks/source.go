@@ -9,12 +9,13 @@ import (
 	"fmt"
 	"sync"
 
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	config_ "github.com/jhekau/favicon/internal/config"
-	err_ "github.com/jhekau/favicon/internal/core/err"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (
+	logCP  = `/internal/service/convert/checks/source.go`
 	logC01 = `C01: check source`
 	logC02 = `C02: check is exists source file`
 	logC03 = `C03: file is not exist`
@@ -25,9 +26,6 @@ const (
 	// logC08 = `C08: `
 	// logC09 = `C09: `
 )
-func errC(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/internal/service/convert/checks/source.go`, i...)
-} 
 
 type CacheStatus struct {
 	m sync.Map
@@ -53,11 +51,12 @@ func (c *CacheStatus) SetErr(fpath types_.FilePath, source_typ types_.FileType, 
 
 //
 type Source struct {
+	L *logger_.Logger
 	Cache interface{
 		Status(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error)
 		SetErr(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error
 	}
-	FileIsExist func(fpath types_.FilePath) (bool, error) 
+	FileIsExist func(fpath types_.FilePath, l *logger_.Logger ) (bool, error) 
 	Resolution interface{
 		Get() (w int, h int, err error)
 	}
@@ -71,7 +70,7 @@ func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb
 		if err == nil {
 			return nil
 		}
-		return errC(logC01, err)
+		return c.L.Typ.Error(logCP, logC01, err)
 	}
 
 	// default func
@@ -82,12 +81,12 @@ func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb
 	// 	c.FileIsExist = files_.IsExists
 	// }
 
-	exist, err := c.FileIsExist(fpath)
+	exist, err := c.FileIsExist(fpath, c.L)
 	if err != nil {
-		return c.Cache.SetErr(fpath, source_typ, thumb_size, errC(logC02, err))
+		return c.Cache.SetErr(fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, logC02, err))
 	}
 	if !exist {
-		return c.Cache.SetErr(fpath, source_typ, thumb_size, errC(logC03, err))
+		return c.Cache.SetErr(fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, logC03, err))
 	}
 
 	if source_typ != types_.SVG() {
@@ -96,12 +95,12 @@ func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb
 
 		source_width, source_height, err := c.Resolution.Get()
 		if err != nil {
-			return c.Cache.SetErr(fpath, source_typ, thumb_size, errC(logC04, err))
+			return c.Cache.SetErr(fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, logC04, err))
 		}
 
 		if source_height < thumb_size || source_width < thumb_size {
 			return c.Cache.SetErr(
-				fpath, source_typ, thumb_size, errC(
+				fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, 
 					fmt.Sprintf(`Source: %vx%v, Preview: %v; %s`, source_width, source_height, thumb_size, logC05),
 					err),
 				)
@@ -113,7 +112,7 @@ func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb
 			source_width > config_.ImageSourceResolutionMax {
 
 				return c.Cache.SetErr(
-					fpath, source_typ, thumb_size, errC(
+					fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, 
 						fmt.Sprintf(`Min Resolution: %v, Max Resolution: %v, Current Resolution: %vx%v`,
 						config_.ImageSourceResolutionMin,
 						config_.ImageSourceResolutionMax,

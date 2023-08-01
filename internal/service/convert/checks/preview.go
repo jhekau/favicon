@@ -8,23 +8,23 @@ package checks
 import (
 	"fmt"
 
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	config_ "github.com/jhekau/favicon/internal/config"
-	err_ "github.com/jhekau/favicon/internal/core/err"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (
+	logPP  = `/internal/service/convert/checks/preview.go`
 	logP01 = `P01: incorrect resolution source file`
 	// logP02 = `P02: `
 	// logP03 = `P03: `
 	// logP04 = `P04: `
 )
-func errP(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/internal/service/convert/checks/preview.go`, i...)
+
+
+type Preview struct{
+	L *logger_.Logger
 }
-
-
-type Preview struct {}
 
 func (p Preview) Check(typ types_.FileType, size_px int) error {
 
@@ -34,7 +34,8 @@ func (p Preview) Check(typ types_.FileType, size_px int) error {
 
 	if 	size_px < config_.ImagePreviewResolutionMin || 
 		size_px > config_.ImagePreviewResolutionMax {
-		return errP(
+		return p.L.Typ.Error(
+			logPP,
 			fmt.Sprintf(
 				`Minimum Resolution: %d, Maximum Resolution %d, Current Value: %d`,
 				config_.ImagePreviewResolutionMin,

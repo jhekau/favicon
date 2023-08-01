@@ -6,18 +6,16 @@ package converters
  * конвертеры для различных типов файлов
  */
 import (
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 // 
 const (
+	logF   = `/internal/service/convert.go`
 	logF01 = `F01: convert ico`
 	logF02 = `F02: convert png`
 )
-func errF(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/internal/service/convert.go`, i...)
-} 
 
 
 // функция, которая непосредственно конвертирует изображение.
@@ -27,6 +25,7 @@ func errF(i... interface{}) error {
 // }
 
 type ConverterICO struct{
+	L *logger_.Logger
 	// пакет/утилита, который выполняет непосредственную конвертацию изображения
 	ConverterExec interface {
 		Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
@@ -39,7 +38,7 @@ func (t *ConverterICO) Do(source, save types_.FilePath, size_px int, typ types_.
 		return false, nil
 	}
     if err := t.ConverterExec.Proc(source, save, size_px, typ); err != nil {
-		return false, errF(logF01, err)
+		return false, t.L.Typ.Error( logF, logF01, err )
 	}
 	return true, nil
 }
@@ -47,6 +46,8 @@ func (t *ConverterICO) Do(source, save types_.FilePath, size_px int, typ types_.
 
 
 type ConverterPNG struct{
+	L *logger_.Logger
+	// пакет/утилита, который выполняет непосредственную конвертацию изображения
 	ConverterExec interface {
 		Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
 	}
@@ -58,7 +59,7 @@ func (t *ConverterPNG) Do(source, save types_.FilePath, size_px int, typ types_.
 		return false, nil
 	}
     if err := t.ConverterExec.Proc(source, save, size_px, typ); err != nil {
-		return false, errF(logF02, err)
+		return false, t.L.Typ.Error( logF, logF02, err )
 	}
 	return true, nil
 }

@@ -14,12 +14,12 @@ import (
 	"strings"
 	"sync"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
-	// create_ "github.com/jhekau/favicon/internal/files"
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (
+	logTP  = `/thumb/thumb.go`
 	logT01 = `T01: create file`
 	logT02 = `T02: thumb file not exists`
 	logT03 = `T03: create thumb file`
@@ -30,9 +30,6 @@ const (
 	logT08 = `T08: url parse standart template domain.com`
 	logT09 = `T09: `
 )
-func errT(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/thumb/thumb.go`, i...)
-} 
 
 var (
 	URLExists = url_Exists
@@ -58,6 +55,7 @@ type attr_size struct {
 ///
 type Thumb struct {
 	s sync.RWMutex
+	l *logger_.Logger
 	size_px uint16
 	size_attr_value attr_size
 	comment string // <!-- comment -->
@@ -171,7 +169,7 @@ func (t *Thumb) file_create(save_img, source_img, source_svg types_.FilePath, co
 
 	err := conv.Do(source_img, source_svg, save_img, t.typ, int(t.size_px))
 	if err != nil {
-		return errT(logT01, err)
+		return t.l.Typ.Error(logTP, logT01, err)
 	}
 	return nil
 }
@@ -239,7 +237,7 @@ func (t *Thumb) get_file(
 	}
 	
 	if check_exists == types_.FileExistsNOT {
-		return ``, errT(logT02)
+		return ``, t.l.Typ.Error(logTP, logT02)
 	}
 
 	t.s.Lock()
@@ -247,7 +245,7 @@ func (t *Thumb) get_file(
 
 	err := t.file_create(save_img, source_img, source_svg, conv)
 	if err != nil {
-		return ``, errT(logT03, err)
+		return ``, t.l.Typ.Error(logTP, logT03, err)
 	// } else if !complite {
 	// 	t.cache.set_file_exists_state(types_.FileExistsNOT)
 	// 	return ``, errT(logT04)
@@ -256,12 +254,12 @@ func (t *Thumb) get_file(
 	if f, err := os.Stat(save_img.String()); err != nil {
 		t.cache.set_file_exists_state(types_.FileExistsNOT)
 		if os.IsNotExist(err) {
-			return ``, errT(logT05)
+			return ``, t.l.Typ.Error(logTP, logT05)
 		}
-		return ``, errT(logT06, err)
+		return ``, t.l.Typ.Error(logTP, logT06, err)
 	} else if f.IsDir() {
 		t.cache.set_file_exists_state(types_.FileExistsNOT)
-		return ``, errT(logT07, err) 
+		return ``, t.l.Typ.Error(logTP, logT07, err) 
 	}
 
 	t.cache.set_file_exists_state(types_.FileExistsOK)
@@ -367,7 +365,7 @@ func (t *Thumb) set_href(src string) *Thumb {
 	{
 		u, err := url.Parse(`http://domain.com`)
 		if err != nil {
-			log.Println( errT(logT08, err) )
+			log.Println( t.l.Typ.Error(logTP, logT08, err) )
 		} else {
 			t.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
 		}

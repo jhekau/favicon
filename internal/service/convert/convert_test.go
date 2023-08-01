@@ -8,6 +8,8 @@ import (
 	"errors"
 	"testing"
 
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
@@ -69,15 +71,9 @@ func TestConvertUnit( t *testing.T ) {
 		{ 	// -----------------------------------------------------------
 			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 16,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
-			// []convert_.ConverterT{
-			// 	&converters_.ConverterPNG{converterExec: &convertType{types_.ICO(), nil}},
-			// 	&converters_.ConverterICO{converterExec: &convertType{types_.SVG(), nil}},
-			// },
 			checkPreview{nil},
 			checkSource{nil},
 			nil,
@@ -85,8 +81,6 @@ func TestConvertUnit( t *testing.T ) {
 		{ 	// нулевой размер для готовой превьюхи -----------------------
 			`TestConvertUnit/2.jpg`, ``, `2.ico`, types_.ICO(), 0,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
@@ -97,8 +91,6 @@ func TestConvertUnit( t *testing.T ) {
 		{ 	// -----------------------------------------------------------
 			``, `TestConvertUnit/2.svg`, `2.svg`, types_.SVG(), 16,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
@@ -109,8 +101,6 @@ func TestConvertUnit( t *testing.T ) {
 		{ 	// исходных файлов нет, для нарезания превьюхи ---------------
 			``, ``, `2.svg`, types_.SVG(), 16,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
@@ -121,8 +111,6 @@ func TestConvertUnit( t *testing.T ) {
 		{ 	// ошибка из проверки параметров нарезаемой превьюхи ---------
 			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
@@ -133,8 +121,6 @@ func TestConvertUnit( t *testing.T ) {
 		{ 	// ошибка при проверке оригинального файла, с которого нарезается превьюха 
 			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
@@ -145,8 +131,6 @@ func TestConvertUnit( t *testing.T ) {
 		{ 	// ошибка декоратора, который проверяет тип нарезаемой превьюхи и запускает свой конвертер
 			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), errors.New(`error`)}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), errors.New(`error`), converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
@@ -163,6 +147,9 @@ func TestConvertUnit( t *testing.T ) {
 		},
 	}{
 		err := (&convert_.Converter{
+			&logger_.Logger{
+				Typ: &logger_mock_.LoggerErrorf{},
+			},
 			d.converters,
 			d.check_preview,
 			d.check_source,
@@ -201,11 +188,11 @@ func TestConvertIntegration( t *testing.T ) {
 
 	// init
 	file_is_exist := struct{
-		exist, not_exist, err func(fpath types_.FilePath) (bool, error)
+		exist, not_exist, err func(fpath types_.FilePath, l *logger_.Logger) (bool, error)
 	}{
-		exist: 		func(fpath types_.FilePath) (bool, error){ return true, nil },
-		not_exist: 	func(fpath types_.FilePath) (bool, error){ return false, nil },
-		err: 		func(fpath types_.FilePath) (bool, error){ return false, errors.New(`error`) },
+		exist: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return true, nil },
+		not_exist: 	func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, nil },
+		err: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, errors.New(`error`) },
 	}
 
 	for _, d := range []struct{
@@ -224,37 +211,42 @@ func TestConvertIntegration( t *testing.T ) {
 		{ 	// + checkPreview ---------------------------------------------
 			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 16,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
-			checks_.Preview{},
+			checks_.Preview{
+				L: &logger_.Logger{
+					Typ: &logger_mock_.LoggerErrorf{},
+				},
+			},
 			checkSource{nil},
 			nil,
 		},
 		{ 	// + checkPreview, ошибка, превьюха размером меньше, чем нужно -
 			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 1,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
-			checks_.Preview{},
+			checks_.Preview{
+				L: &logger_.Logger{
+					Typ: &logger_mock_.LoggerErrorf{},
+				},
+			},
 			checkSource{nil},
 			errors.New(`error`),
 		},
 		{ 	// + checkSource -----------------------------------------------
 			`TestConvertUnit/2.jpg`, ``, `2.ico`, types_.ICO(), 16,
 			[]convert_.ConverterT{
-				// {converter{nil}, convertType{types_.ICO(), nil}},
-				// {converter{nil}, convertType{types_.SVG(), nil}},
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checkPreview{nil},
 			&checks_.Source{ 
+				L: &logger_.Logger{
+					Typ: &logger_mock_.LoggerErrorf{},
+				},
 				Cache: CheckSourceCacheDisable{},
 				FileIsExist: file_is_exist.exist,
 				Resolution: resolution{f: func() (w int, h int, err error){ return 16, 16, nil } },
@@ -263,6 +255,9 @@ func TestConvertIntegration( t *testing.T ) {
 		},
 	}{
 		err := (&convert_.Converter{
+			&logger_.Logger{
+				Typ: &logger_mock_.LoggerErrorf{},
+			},
 			d.converters,
 			d.check_preview,
 			d.check_source,

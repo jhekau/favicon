@@ -15,21 +15,19 @@ import (
 	"sync"
 	"time"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (
+	logM   = `/manifest/manifest.go`
 	logM01 = `M01: url: error parsing standart template domain.com`
 	logM02 = `M02: json: marshal manifest`
 	logM03 = `M03: generate manifest body`
 	logM04 = `M04: write file manifest`
 	logM05 = `M05: manifest file create`
 )
-func errM(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/manifest/manifest.go`, i...)
-} 
 
 var (
 	// ~~ interface ~~
@@ -44,6 +42,7 @@ const (
 
 type Manifest struct {
 	s sync.RWMutex
+	l *logger_.Logger
 	cache cache
 
 	url_href types_.URLHref
@@ -105,7 +104,7 @@ func (m *Manifest) set_name_url(src string) *Manifest {
 	{
 		u, err := url.Parse(`http://domain.com`)
 		if err != nil {
-			log.Println(errM(logM01, err))
+			log.Println(m.l.Typ.Error(logM, logM01, err))
 		} else {
 			m.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
 		}
@@ -201,7 +200,7 @@ func (m *Manifest) generate(
 
 	body, err := json.Marshal(list)
 	if err != nil {
-		return nil, false, errM(logM02, err)
+		return nil, false, m.l.Typ.Error(logM, logM02, err)
 	}
 	return body, true, nil
 }
@@ -218,7 +217,7 @@ func (m *Manifest) file_create(
 ){
 	filebody, status, err := m.generate(thumbs)
 	if err != nil {
-		return ``, false, errM(logM03, err)
+		return ``, false, m.l.Typ.Error(logM, logM03, err)
 	}
 	if !status {
 		return ``, false, nil
@@ -241,7 +240,7 @@ func (m *Manifest) file_create(
 	os.Remove(fpath.String())
 
 	if err = os.WriteFile(fpath.String(), filebody, 0775); err != nil {
-		return ``, false, errM(logM04, err)
+		return ``, false, m.l.Typ.Error(logM, logM04, err)
 	}
 	return fpath, true, nil
 }
@@ -268,7 +267,7 @@ func (m *Manifest) get_file(
 
 	fpath, state_create, err := m.file_create(folder_work, thumbs)
 	if err != nil {
-		return ``, false, errM(logM05, err)
+		return ``, false, m.l.Typ.Error(logM, logM05, err)
 	}
 	if !state_create {
 		m.cache.set_file_exists(types_.FileExistsNOT)

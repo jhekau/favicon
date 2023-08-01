@@ -7,68 +7,38 @@ package files
 import (
 	"os"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	// err_ "github.com/jhekau/favicon/internal/core/err"
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
 
 const (
-	// logS01 = `S01: open source image`
-	// logS02 = `S02: decode image config`
-	logS03 = `S03: os stat suorce image`
+	logP = `/internal/storage/files/stat.go`
+	// logS01 = `S01: `
+	// logS02 = `S02: `
+	logS03 = `S03: os stat source image`
 	logS04 = `S04: save thumb image is a folder`
-)
-func errS(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/internal/storage/files/stat.go`, i...)
-} 
-
-var (
-	// Resolution = resolution
-	// Read = read
-	IsExists = exists
 )
 
 // for test 
 var (
-	// osOpen = os.Open
 	osStat = os.Stat
 )
-/*
-// получние разрешения исходного изображения
-func resolution( fpath types_.FilePath ) ( w,h int, err error ) {
 
-	file, err := osOpen(fpath.String())
-    if err != nil {
-		return 0,0, errS(logS01, err)
-    }
-	defer file.Close()
-
-    image, _, err := image.DecodeConfig(file)
-    if err != nil {
-		return 0,0, errS(logS02, err)
-    }
-    return image.Width, image.Height, nil
-}
-*/
-
-// type Reader struct {
-// 	FPath interface{
-// 		Get() types_.FilePath
-// 	}
-// }
-func /*r *Reader)*/ Read(fpath types_.FilePath) (*os.File, error) {
+func Read(fpath types_.FilePath) (*os.File, error) {
 	return os.Open(fpath.String())
 }
 
-func exists( fpath types_.FilePath ) ( bool, error ) {
+func IsExists( fpath types_.FilePath, l *logger_.Logger ) ( bool, error ) {
 
 	if f, err := osStat(fpath.String()); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		return false, errS(logS03, err)
+		return false, l.Typ.Error(logP, logS03, err)
 
 	} else if f.IsDir() {
-		return false, errS(logS04, err)
+		return false, l.Typ.Error(logP, logS04)
 	}
 
 	return true, nil

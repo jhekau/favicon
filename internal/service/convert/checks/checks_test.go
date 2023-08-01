@@ -8,6 +8,8 @@ import (
 	"errors"
 	"testing"
 
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	config_ "github.com/jhekau/favicon/internal/config"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
@@ -31,7 +33,11 @@ func TestCheckPreviewUnit( t *testing.T ) {
 		{ config_.ImagePreviewResolutionMax, 	types_.PNG(), nil },
 		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), errors.New(`error`) },
 	}{
-		err := checks_.Preview{}.Check( ts.typ, ts.size)
+		err := checks_.Preview{
+			&logger_.Logger{
+				Typ: &logger_mock_.LoggerErrorf{},
+			},
+		}.Check( ts.typ, ts.size)
 		if (err == nil && ts.err != nil) || (err != nil && ts.err == nil) {
 			t.Fatalf(`TestCheckPreviewUnit - status: data: %#v`, ts)
 		}
@@ -130,11 +136,11 @@ func TestCheckSourceUnit( t *testing.T ) {
 
 	// init
 	file_is_exist := struct{
-		exist, not_exist, err func(fpath types_.FilePath) (bool, error)
+		exist, not_exist, err func(fpath types_.FilePath, l *logger_.Logger) (bool, error)
 	}{
-		exist: 		func(fpath types_.FilePath) (bool, error){ return true, nil },
-		not_exist: 	func(fpath types_.FilePath) (bool, error){ return false, nil },
-		err: 		func(fpath types_.FilePath) (bool, error){ return false, errors.New(`error`) },
+		exist: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return true, nil },
+		not_exist: 	func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, nil },
+		err: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, errors.New(`error`) },
 	}
 
 	// testing
@@ -142,7 +148,7 @@ func TestCheckSourceUnit( t *testing.T ) {
 		filepath         types_.FilePath
 		typ 			 types_.FileType
 		thumb_size 		 int
-		file_is_exist 	 func(fpath types_.FilePath) (bool, error)
+		file_is_exist 	 func(fpath types_.FilePath, l *logger_.Logger) (bool, error)
 		file_resolution  func() (w int, h int, err error)
 		cache 			 cache
 		status_error 	 error
@@ -198,6 +204,9 @@ func TestCheckSourceUnit( t *testing.T ) {
 	}{
 
 		err := (&checks_.Source{
+			L: &logger_.Logger{
+				Typ: &logger_mock_.LoggerErrorf{},
+			},
 			Cache: dt.cache,
 			FileIsExist: dt.file_is_exist,
 			Resolution: resolution{dt.file_resolution},
