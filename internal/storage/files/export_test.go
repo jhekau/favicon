@@ -6,6 +6,6 @@ package files
  */
 import ()
 
-var OsOpen = &osOpen
+// var OsOpen = &osOpen
 var OsStat = &osStat
 

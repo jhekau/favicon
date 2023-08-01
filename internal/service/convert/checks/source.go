@@ -12,7 +12,6 @@ import (
 	config_ "github.com/jhekau/favicon/internal/config"
 	err_ "github.com/jhekau/favicon/internal/core/err"
 	types_ "github.com/jhekau/favicon/internal/core/types"
-	// files_ "github.com/jhekau/favicon/internal/data/files"
 )
 
 const (
@@ -54,16 +53,18 @@ func (c *CacheStatus) SetErr(fpath types_.FilePath, source_typ types_.FileType, 
 
 //
 type Source struct {
-	Cache interface {
+	Cache interface{
 		Status(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error)
 		SetErr(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error
 	}
 	FileIsExist func(fpath types_.FilePath) (bool, error) 
-	FileResolution func(fpath types_.FilePath) (w int, h int, err error)
+	Resolution interface{
+		Get() (w int, h int, err error)
+	}
 }
 
 // проверка исходного изображения на корректность
-func (c Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb_size int ) error {
+func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb_size int ) error {
 
 	ok, err := c.Cache.Status(fpath, source_typ, thumb_size)
 	if ok {
@@ -91,7 +92,9 @@ func (c Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb_
 
 	if source_typ != types_.SVG() {
 
-		source_width, source_height, err := c.FileResolution(fpath)
+		// files_.Read(fpath)	
+
+		source_width, source_height, err := c.Resolution.Get()
 		if err != nil {
 			return c.Cache.SetErr(fpath, source_typ, thumb_size, errC(logC04, err))
 		}

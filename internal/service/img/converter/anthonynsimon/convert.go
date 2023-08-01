@@ -1,4 +1,4 @@
-package convert
+package converter_exec_anthonynsimon
 
 /* *
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
@@ -19,15 +19,12 @@ const (
 	logC03 = `C03: save thumb image`
 )
 func errC(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/thumb/convert/convert.go`, i)
+	return err_.Err(err_.TypeError, `/thumb/convert/convert.go`, i...)
 } 
 
-var (
-	// ~~ interface ~~
-	Do = do
-)
+type Exec struct{}
 
-func do(source, save types_.FilePath, size_px int, typ types_.FileType) error {
+func (e *Exec) Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error {
 
     img, err := imgio.Open(source.String())
     if err != nil {

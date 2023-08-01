@@ -22,9 +22,15 @@ func errR(i... interface{}) error {
 	return err_.Err(err_.TypeError, `/favicon/internal/service/img/resolution/resolution.go`, i...)
 }
 
+type Resolution struct {
+	Reader interface{
+		Read() io.Reader
+	}
+}
+
 // Get : получние разрешения изображения 
-func Get(r io.Reader) ( w,h int, err error ) {
-	image, _, err := image.DecodeConfig(r)
+func (r *Resolution) Get() ( w,h int, err error ) {
+	image, _, err := image.DecodeConfig(r.Reader.Read())
     if err != nil {
 		return 0,0, errR(logR01, err)
     }

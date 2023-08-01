@@ -31,12 +31,10 @@ const (
 	logT09 = `T09: `
 )
 func errT(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/thumb/thumb.go`, i)
+	return err_.Err(err_.TypeError, `/thumb/thumb.go`, i...)
 } 
 
 var (
-	// ~~ interface ~~
-
 	URLExists = url_Exists
 )
 
@@ -144,30 +142,38 @@ func (t *Thumb) SetSizeAttrCustom(val string) *Thumb {
 func (t *Thumb) GetFile(
 	folder_work types_.Folder,
 	source_img, source_svg types_.FilePath,
+	conv Converter,
 )(
 	types_.FilePath,
 	error,
 ){
-	return t.get_file(folder_work, source_img, source_svg)
+	return t.get_file(folder_work, source_img, source_svg, conv)
 }
 
-
+func (t *Thumb) GetFilepath(folder_work types_.Folder, original_filename types_.FileName) types_.FilePath {
+	return t.get_filepath(folder_work, original_filename)
+}
 
 
 
 //
 // ...
-func (t *Thumb) file_create(save_img, source_img, source_svg types_.FilePath) (complite bool, err error) {
+type Converter interface{
+	Do(source, source_svg, save types_.FilePath, typ types_.FileType, size_px int) error
+}
+
+func (t *Thumb) file_create(save_img, source_img, source_svg types_.FilePath, conv Converter) error {
 
 	t.s.Lock()
 	defer t.s.Unlock()
 
 	os.Remove(save_img.String())
-	complite, err = create_.File(source_img, source_svg, save_img, t.typ, int(t.size_px))
+
+	err := conv.Do(source_img, source_svg, save_img, t.typ, int(t.size_px))
 	if err != nil {
-		return false, errT(logT01, err)
+		return errT(logT01, err)
 	}
-	return complite, nil
+	return nil
 }
 
 // ...
@@ -206,6 +212,7 @@ func (t *Thumb) get_filepath(folder_work types_.Folder, original_name types_.Fil
 func (t *Thumb) get_file(
 	folder_work types_.Folder,
 	source_img, source_svg types_.FilePath,
+	conv Converter,
 )(
 	types_.FilePath,
 	error,
@@ -238,12 +245,12 @@ func (t *Thumb) get_file(
 	t.s.Lock()
 	defer t.s.Unlock()
 
-
-	if complite, err := t.file_create(save_img, source_img, source_svg); err != nil {
+	err := t.file_create(save_img, source_img, source_svg, conv)
+	if err != nil {
 		return ``, errT(logT03, err)
-	} else if !complite {
-		t.cache.set_file_exists_state(types_.FileExistsNOT)
-		return ``, errT(logT04)
+	// } else if !complite {
+	// 	t.cache.set_file_exists_state(types_.FileExistsNOT)
+	// 	return ``, errT(logT04)
 	}
 
 	if f, err := os.Stat(save_img.String()); err != nil {

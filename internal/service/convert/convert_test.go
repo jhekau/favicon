@@ -25,9 +25,10 @@ func (c converter) Proc(_, _ types_.FilePath, _ int, _ types_.FileType) error {
 // проверяют тип, в который хотим конвертировать и запускают конвертер
 type convertType struct{
 	typ types_.FileType
-	err error
+	err error 
+	converterExec converter
 }
-func (c convertType) Do(_, _ types_.FilePath, _ int, typ types_.FileType, _ convert_.Converter) (complete bool, err error) {
+func (c convertType) Do(_, _ types_.FilePath, _ int, typ types_.FileType) (complete bool, err error) {
 	return c.typ == typ, c.err
 }
 
@@ -59,7 +60,7 @@ func TestConvertUnit( t *testing.T ) {
 		save 			types_.FilePath
 		typ 			types_.FileType
 		size_px 		int
-		converters 		[]convert_.Converters
+		converters 		[]convert_.ConverterT
 		check_preview 	checkPreview
 		check_source 	checkSource
 		// result
@@ -67,19 +68,27 @@ func TestConvertUnit( t *testing.T ) {
 	}{
 		{ 	// -----------------------------------------------------------
 			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 16,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
+			// []convert_.ConverterT{
+			// 	&converters_.ConverterPNG{converterExec: &convertType{types_.ICO(), nil}},
+			// 	&converters_.ConverterICO{converterExec: &convertType{types_.SVG(), nil}},
+			// },
 			checkPreview{nil},
 			checkSource{nil},
 			nil,
 		},
 		{ 	// нулевой размер для готовой превьюхи -----------------------
 			`TestConvertUnit/2.jpg`, ``, `2.ico`, types_.ICO(), 0,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checkPreview{nil},
 			checkSource{nil},
@@ -87,9 +96,11 @@ func TestConvertUnit( t *testing.T ) {
 		},
 		{ 	// -----------------------------------------------------------
 			``, `TestConvertUnit/2.svg`, `2.svg`, types_.SVG(), 16,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checkPreview{nil},
 			checkSource{nil},
@@ -97,9 +108,11 @@ func TestConvertUnit( t *testing.T ) {
 		},
 		{ 	// исходных файлов нет, для нарезания превьюхи ---------------
 			``, ``, `2.svg`, types_.SVG(), 16,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checkPreview{nil},
 			checkSource{nil},
@@ -107,9 +120,11 @@ func TestConvertUnit( t *testing.T ) {
 		},
 		{ 	// ошибка из проверки параметров нарезаемой превьюхи ---------
 			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checkPreview{errors.New(`error`)},
 			checkSource{nil},
@@ -117,9 +132,11 @@ func TestConvertUnit( t *testing.T ) {
 		},
 		{ 	// ошибка при проверке оригинального файла, с которого нарезается превьюха 
 			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checkPreview{nil},
 			checkSource{errors.New(`error`)},
@@ -127,9 +144,11 @@ func TestConvertUnit( t *testing.T ) {
 		},
 		{ 	// ошибка декоратора, который проверяет тип нарезаемой превьюхи и запускает свой конвертер
 			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), errors.New(`error`)}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), errors.New(`error`)}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), errors.New(`error`), converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checkPreview{nil},
 			checkSource{nil},
@@ -143,22 +162,19 @@ func TestConvertUnit( t *testing.T ) {
 			errors.New(`error`),
 		},
 	}{
-		err := convert_.Convert( 
-			d.source, d.source_svg, d.save,
-			d.typ,
-			d.size_px,
+		err := (&convert_.Converter{
 			d.converters,
 			d.check_preview,
 			d.check_source,
+		}).Do( 
+			d.source, d.source_svg, d.save,
+			d.typ,
+			d.size_px,
 		)
 
 		if (err == nil && d.complite_err != nil) || (err != nil && d.complite_err == nil) {
 			t.Fatalf(`TestConvertUnit - error: '%v' data: %#v`, err, d)
 		}
-		
-		// if complite != d.complite {
-		// 	t.Fatalf(`TestConvertUnit - complite: complite: %v err: '%v' data: %#v`, d.complite, err, d)
-		// }
 	}
 }
 
@@ -172,6 +188,13 @@ func (c CheckSourceCacheDisable) Status(_ types_.FilePath, _ types_.FileType, _ 
 }
 func (c CheckSourceCacheDisable) SetErr(_ types_.FilePath, _ types_.FileType, _ int, err error) error {
 	return err
+}
+
+type resolution struct{
+	f func() (w int, h int, err error)
+}
+func (r resolution) Get() (w int, h int, err error){
+	return r.f()
 }
 
 func TestConvertIntegration( t *testing.T ) {
@@ -192,7 +215,7 @@ func TestConvertIntegration( t *testing.T ) {
 		save 			types_.FilePath
 		typ 			types_.FileType
 		size_px 		int
-		converters 		[]convert_.Converters
+		converters 		[]convert_.ConverterT
 		check_preview 	interface { Check(typ types_.FileType, size_px int) error }
 		check_source 	interface { Check(_ types_.FilePath, _ types_.FileType, _ int) error }
 		// result
@@ -200,9 +223,11 @@ func TestConvertIntegration( t *testing.T ) {
 	}{
 		{ 	// + checkPreview ---------------------------------------------
 			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 16,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checks_.Preview{},
 			checkSource{nil},
@@ -210,9 +235,11 @@ func TestConvertIntegration( t *testing.T ) {
 		},
 		{ 	// + checkPreview, ошибка, превьюха размером меньше, чем нужно -
 			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 1,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checks_.Preview{},
 			checkSource{nil},
@@ -220,34 +247,33 @@ func TestConvertIntegration( t *testing.T ) {
 		},
 		{ 	// + checkSource -----------------------------------------------
 			`TestConvertUnit/2.jpg`, ``, `2.ico`, types_.ICO(), 16,
-			[]convert_.Converters{
-				{converter{nil}, convertType{types_.ICO(), nil}},
-				{converter{nil}, convertType{types_.SVG(), nil}},
+			[]convert_.ConverterT{
+				// {converter{nil}, convertType{types_.ICO(), nil}},
+				// {converter{nil}, convertType{types_.SVG(), nil}},
+				&convertType{types_.ICO(), nil, converter{nil}},
+				&convertType{types_.SVG(), nil, converter{nil}},
 			},
 			checkPreview{nil},
-			checks_.Source{ 
+			&checks_.Source{ 
 				Cache: CheckSourceCacheDisable{},
 				FileIsExist: file_is_exist.exist,
-				FileResolution: func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
+				Resolution: resolution{f: func() (w int, h int, err error){ return 16, 16, nil } },
 			},
 			nil,
 		},
 	}{
-		err := convert_.Convert( 
-			d.source, d.source_svg, d.save,
-			d.typ,
-			d.size_px,
+		err := (&convert_.Converter{
 			d.converters,
 			d.check_preview,
 			d.check_source,
+		}).Do( 
+			d.source, d.source_svg, d.save,
+			d.typ,
+			d.size_px,
 		)
 
 		if (err == nil && d.complite_err != nil) || (err != nil && d.complite_err == nil) {
 			t.Fatalf(`TestConvertIntegration - error: '%v' data: %#v`, err, d)
 		}
-		
-		// if complite != d.complite {
-		// 	t.Fatalf(`TestConvertIntegration - complite: complite: %v err: '%v' data: %#v`, d.complite, err, d)
-		// }
 	}
 }

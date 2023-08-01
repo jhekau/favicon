@@ -28,7 +28,7 @@ const (
 	logM05 = `M05: manifest file create`
 )
 func errM(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/manifest/manifest.go`, i)
+	return err_.Err(err_.TypeError, `/manifest/manifest.go`, i...)
 } 
 
 var (

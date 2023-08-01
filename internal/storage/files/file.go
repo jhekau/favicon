@@ -5,8 +5,6 @@ package files
  * 10 March 2023
  */
 import (
-	// "image"
-	"io"
 	"os"
 
 	err_ "github.com/jhekau/favicon/internal/core/err"
@@ -25,13 +23,13 @@ func errS(i... interface{}) error {
 
 var (
 	// Resolution = resolution
-	Read = read
+	// Read = read
 	IsExists = exists
 )
 
 // for test 
 var (
-	osOpen = os.Open
+	// osOpen = os.Open
 	osStat = os.Stat
 )
 /*
@@ -52,8 +50,13 @@ func resolution( fpath types_.FilePath ) ( w,h int, err error ) {
 }
 */
 
-func read( fpath types_.FilePath ) (io.ReadCloser, error) {
-	return osOpen(fpath.String())
+// type Reader struct {
+// 	FPath interface{
+// 		Get() types_.FilePath
+// 	}
+// }
+func /*r *Reader)*/ Read(fpath types_.FilePath) (*os.File, error) {
+	return os.Open(fpath.String())
 }
 
 func exists( fpath types_.FilePath ) ( bool, error ) {

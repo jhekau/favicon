@@ -108,6 +108,13 @@ func (c CheckSourceUnitCacheDisable) SetErr(_ types_.FilePath, _ types_.FileType
 	return err
 }
 
+type resolution struct{
+	f func() (w int, h int, err error)
+}
+func (r resolution) Get() (w int, h int, err error){
+	return r.f()
+}
+
 func TestCheckSourceUnit( t *testing.T ) {
 
 	// enable and disable cache ******************
@@ -136,65 +143,65 @@ func TestCheckSourceUnit( t *testing.T ) {
 		typ 			 types_.FileType
 		thumb_size 		 int
 		file_is_exist 	 func(fpath types_.FilePath) (bool, error)
-		file_resolution  func(fpath types_.FilePath) (w int, h int, err error)
+		file_resolution  func() (w int, h int, err error)
 		cache 			 cache
 		status_error 	 error
 	}{
 		{	`TestCheckSourceUnit/1.jpg`, // ошибка - нулевой размер ---------------------------------------
 			types_.PNG(), 0, file_is_exist.exist, 
-			func(fpath types_.FilePath) (w int, h int, err error){ return 1, 1, nil },
+			func() (w int, h int, err error){ return 1, 1, nil },
 			cache_disable,
 			errors.New(`error`),
 		},
 		{	`TestCheckSourceUnit/2.jpg`, // ошибка - размер оригинала меньше, чем нарезаемая превьха ------
 			types_.PNG(), 16, file_is_exist.exist, 
-			func(fpath types_.FilePath) (w int, h int, err error){ return 1, 1, nil },
+			func() (w int, h int, err error){ return 1, 1, nil },
 			&cache_enable,
 			errors.New(`error`),
 		},
 		{	`TestCheckSourceUnit/2.jpg`, // проверка работы кеша по предыдущему условию -------------------
 			types_.PNG(), 16, file_is_exist.exist, 
-			func(fpath types_.FilePath) (w int, h int, err error){ return 1, 1, nil },
+			func() (w int, h int, err error){ return 1, 1, nil },
 			&cache_enable,
 			errors.New(`error`),
 		},
 		{	`TestCheckSourceUnit/3.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.exist, 
-			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
+			func() (w int, h int, err error){ return 16, 16, nil },
 			&cache_enable,
 			nil,
 		},
 		{	`TestCheckSourceUnit/3.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.exist, 
-			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
+			func() (w int, h int, err error){ return 16, 16, nil },
 			&cache_enable,
 			nil,
 		},
 		{	`TestCheckSourceUnit/4.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.not_exist, 
-			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
+			func() (w int, h int, err error){ return 16, 16, nil },
 			cache_disable,
 			errors.New(`error`),
 		},
 		{	`TestCheckSourceUnit/5.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.err, 
-			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, nil },
+			func() (w int, h int, err error){ return 16, 16, nil },
 			cache_disable,
 			errors.New(`error`),
 		},
 		{	`TestCheckSourceUnit/6.jpg`, // ------------------------------------------------------
 			types_.PNG(), 16, file_is_exist.exist, 
-			func(fpath types_.FilePath) (w int, h int, err error){ return 16, 16, errors.New(`error`) },
+			func() (w int, h int, err error){ return 16, 16, errors.New(`error`) },
 			cache_disable,
 			errors.New(`error`),
 		},
 	}{
 
-		err := checks_.Source{
+		err := (&checks_.Source{
 			Cache: dt.cache,
 			FileIsExist: dt.file_is_exist,
-			FileResolution: dt.file_resolution,
-		}.
+			Resolution: resolution{dt.file_resolution},
+		}).
 		Check(dt.filepath, dt.typ, dt.thumb_size)
 
 		if (err == nil && dt.status_error != nil) || (err != nil && dt.status_error == nil) {

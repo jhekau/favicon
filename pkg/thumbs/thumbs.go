@@ -5,17 +5,25 @@ package favicon
  * 09 March 2023
  */
 import (
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 
-	defaults_ "github.com/jhekau/favicon/internal/service/defaults"
 	err_ "github.com/jhekau/favicon/internal/core/err"
+	types_ "github.com/jhekau/favicon/internal/core/types"
+	convert_ "github.com/jhekau/favicon/internal/service/convert"
+	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
+	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
+	defaults_ "github.com/jhekau/favicon/internal/service/defaults"
+	converter_exec_anthonynsimon_ "github.com/jhekau/favicon/internal/service/img/converter/anthonynsimon"
+	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 	manifest_ "github.com/jhekau/favicon/internal/service/manifest"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	files_ "github.com/jhekau/favicon/internal/storage/files"
 )
 
 const (
@@ -24,9 +32,10 @@ const (
 	logT03 = `T03: get file thumb`
 	logT04 = `T04: get file thumb`
 	logT05 = `T05: get file manifest`
+	logT06 = `T06: error read original`
 )
 func errT(i... interface{}) error {
-	return err_.Err(err_.TypeError, `/thumbs.go`, i)
+	return err_.Err(err_.TypeError, `/thumbs.go`, i...)
 } 
 
 var (
@@ -53,6 +62,10 @@ var (
 	}
 )
 
+type Converter interface{
+	Do(source, source_svg, save types_.FilePath, typ types_.FileType, size_px int) error
+}
+
 type Thumbs struct {
 	s sync.RWMutex
 	source_svg types_.FilePath
@@ -77,8 +90,65 @@ func (t *Thumbs) SetFilepathSourceIMG( fpath string ) *Thumbs {
 func (t *Thumbs) Handle() {
 	t.handle()
 }
+
+// костыль, чуть позже удалим TODO
+// type defStorageFPath struct{
+// 	t *thumb_.Thumb
+// 	ts Thumbs
+// }
+
+// func (d *defStorageFPath) Get() types_.FilePath {
+// 	// костыль, чуть позже удалим TODO
+// 	source_file := d.ts.get_filepath_source_img()
+// 	if source_file == `` {
+// 		source_file = d.ts.get_filepath_source_svg()
+// 	}
+// 	return d.t.GetFilepath(d.ts.get_folder_work(), types_.FileName(source_file))
+// }
+
+// костыль, чуть позже удалим TODO
+type defStorageRead struct{
+	f *os.File
+}
+func (d *defStorageRead) Read() io.Reader {
+	return d.f
+}
+
+// использует конвертер и систему хранения изображений по умолчанию
 func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err error ) {
-	return t.serve_file(url_)
+
+	converter := converter_exec_anthonynsimon_.Exec{}
+	tb, exist := t.getThumb(types_.URLHref(url_.Path))
+	if !exist {
+		return ``, false, nil
+	}
+
+	// костыль, чуть позже удалим TODO
+	source_file := t.get_filepath_source_img()
+	if source_file == `` {
+		source_file = t.get_filepath_source_svg()
+	}
+	f, err := files_.Read( tb.GetFilepath(t.get_folder_work(), types_.FileName(source_file)) )
+	if err != nil {
+		return ``, false, errT(logT06, err)
+	}
+
+	storage := defStorageRead{ f: f }
+
+	return t.serve_file(url_, &convert_.Converter{
+		Converters: []convert_.ConverterT{
+			&converters_.ConverterPNG{ConverterExec: &converter},
+			&converters_.ConverterICO{ConverterExec: &converter},
+		},
+		CheckPreview: checks_.Preview{},
+		CheckSource: &checks_.Source{
+			Cache: &checks_.CacheStatus{},
+			FileIsExist: files_.IsExists,
+			Resolution: &resolution_.Resolution{
+				Reader: &storage,
+			} ,
+		},
+	})
 }
 func (t *Thumbs) TagsHTML() string {
 	return t.tags_html()
@@ -154,7 +224,7 @@ func (t *Thumbs) handle() {
 	}))
 }
 
-func (t *Thumbs) serve_file( url_ *url.URL ) ( fpath string, exists bool, err error ) {
+func (t *Thumbs) serve_file( url_ *url.URL, conv Converter ) ( fpath string, exists bool, err error ) {
 
 	if manifest, exists, err := t.server_file_manifest(url_); err != nil {
 		return ``, false, errT(logT02, err)
@@ -162,16 +232,15 @@ func (t *Thumbs) serve_file( url_ *url.URL ) ( fpath string, exists bool, err er
 		return manifest.String(), true, nil
 	}
 
-	if thumb, exists, err := t.server_file_thumb(url_); err != nil {
+	if thumb, exists, err := t.server_file_thumb(url_, conv); err != nil {
 		return ``, false, errT(logT03, err)
 	} else if exists {
 		return thumb.String(), true, nil
 	}
-
 	return ``, false, nil
 }
 
-func (t *Thumbs) server_file_thumb( url_ *url.URL ) (fpath types_.FilePath, exists bool, err error) {
+func (t *Thumbs) server_file_thumb( url_ *url.URL, conv Converter ) (fpath types_.FilePath, exists bool, err error) {
 
 	t.s.RLock()
 	thumb, exists := thumb_.URLExists(url_, t.thumbs)
@@ -181,7 +250,12 @@ func (t *Thumbs) server_file_thumb( url_ *url.URL ) (fpath types_.FilePath, exis
 		return ``, false, nil
 	}
 
-	fpath, err = thumb.GetFile(t.get_folder_work(), t.get_filepath_source_img(), t.get_filepath_source_svg())
+	fpath, err = thumb.GetFile(
+		t.get_folder_work(),
+		t.get_filepath_source_img(),
+		t.get_filepath_source_svg(),
+		conv,
+	)
 	if err != nil {
 		return ``, false, errT(logT04, err)
 	}
@@ -219,6 +293,10 @@ func (t *Thumbs) tags_html() string {
 	return tags.String()
 }
 
+func (t *Thumbs) getThumb(u types_.URLHref) (*thumb_.Thumb, bool) {
+	tb, ok := t.thumbs[u]
+	return tb, ok
+}
 
 func default_list() *Thumbs {
 	return &Thumbs{

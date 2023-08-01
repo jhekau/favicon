@@ -13,6 +13,13 @@ import (
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 )
 
+type storageReader struct{
+	r io.Reader
+}
+func (s storageReader) Read() io.Reader {
+	return s.r
+}
+
 func TestGetResolution(t *testing.T){
 	
 	for _, d := range []struct{
@@ -32,7 +39,9 @@ func TestGetResolution(t *testing.T){
 			t.Fatalf(`TestGetResolution:image_test_data_.GetFileReader - error: '%v' data: %#v`, err, d)
 		}
 
-		w, h, err := resolution_.Get(reader)
+		w, h, err := (&resolution_.Resolution{
+			storageReader{reader},
+		}).Get()
 		if (err == nil && d.err != nil) || (err != nil && d.err == nil) {
 			t.Fatalf(`TestGetResolution - error: '%v' data: %#v`, err, d)
 		}

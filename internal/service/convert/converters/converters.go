@@ -19,35 +19,45 @@ func errF(i... interface{}) error {
 	return err_.Err(err_.TypeError, `/internal/service/convert.go`, i...)
 } 
 
-//
-var (
-	ConverterICO = convert_ico
-	ConverterPNG = convert_png
-)
 
 // функция, которая непосредственно конвертирует изображение.
 // Можно использовать внешнюю библиотеку, или внешний бинарник
-type Converter interface {
-	Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
+// type Converter interface {
+// 	Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
+// }
+
+type ConverterICO struct{
+	// пакет/утилита, который выполняет непосредственную конвертацию изображения
+	ConverterExec interface {
+		Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
+	}
 }
 
 // интерфейс для конвертора ICO
-func convert_ico(source, save types_.FilePath, size_px int, typ types_.FileType, conv Converter) (complete bool, err error) {
+func (t *ConverterICO) Do(source, save types_.FilePath, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
 	if typ != types_.ICO() {
 		return false, nil
 	}
-    if err := conv.Proc(source, save, size_px, typ); err != nil {
+    if err := t.ConverterExec.Proc(source, save, size_px, typ); err != nil {
 		return false, errF(logF01, err)
 	}
 	return true, nil
 }
 
+
+
+type ConverterPNG struct{
+	ConverterExec interface {
+		Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
+	}
+}
+
 // интерфейс для конвертора PNG
-func convert_png(source, save types_.FilePath, size_px int, typ types_.FileType, conv Converter) (complete bool, err error) {
+func (t *ConverterPNG) Do(source, save types_.FilePath, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
 	if typ != types_.PNG() {
 		return false, nil
 	}
-    if err := conv.Proc(source, save, size_px, typ); err != nil {
+    if err := t.ConverterExec.Proc(source, save, size_px, typ); err != nil {
 		return false, errF(logF02, err)
 	}
 	return true, nil

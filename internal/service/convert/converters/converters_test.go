@@ -35,7 +35,9 @@ func TestConverterICOUnit( t *testing.T) {
 		{ `3.jpg`, `1_preview.png`, 16, types_.SVG(), converter{ nil }, false, nil },
 		{ `3.jpg`, `1_preview.png`, 16, types_.ICO(), converter{ errors.New(`error`) }, false, errors.New(`error`) },
 	}{
-		res, err := converters_.ConverterICO(d.source, d.save, d.size_px, d.typ, d.conv)
+		res, err := (&converters_.ConverterICO{
+			ConverterExec: d.conv,
+		}).Do(d.source, d.save, d.size_px, d.typ)
 
 		if ( err != nil && d.result_error == nil ) || ( err == nil && d.result_error != nil ) {
 			t.Fatalf(`TestConverterICOUnit:error - result: '%v', err: '%v', testdata: '%#v'`, res, err, d)
@@ -45,6 +47,7 @@ func TestConverterICOUnit( t *testing.T) {
 		}
 	}
 }
+
 
 func TestConverterPNGUnit( t *testing.T) {
 
@@ -61,7 +64,9 @@ func TestConverterPNGUnit( t *testing.T) {
 		{ `3.jpg`, `1_preview.png`, 16, types_.SVG(), converter{ nil }, false, nil },
 		{ `3.jpg`, `1_preview.png`, 16, types_.PNG(), converter{ errors.New(`error`) }, false, errors.New(`error`) },
 	}{
-		res, err := converters_.ConverterPNG(d.source, d.save, d.size_px, d.typ, d.conv)
+		res, err := (&converters_.ConverterPNG{
+			ConverterExec: d.conv,
+		}).Do(d.source, d.save, d.size_px, d.typ)
 		
 		if ( err != nil && d.result_error == nil ) || ( err == nil && d.result_error != nil ) {
 			t.Fatalf(`TestConverterICOUnit:error - result: '%v', err: '%v', testdata: '%#v'`, res, err, d)
