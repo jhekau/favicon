@@ -27,6 +27,14 @@ cover:
 
 .PHONY: mockgen
 mockgen: internal/service/convert/convert.go internal/service/convert/checks/source.go
-	@echo "Generating mocks..."$(GOPATH)
+	@echo "Generating mocks..."
 	@rm -rf $(MOCKS_DESTINATION)
-	@for file in $^; do $(MOCKGEN) -source=$$file -destination=$(MOCKS_DESTINATION)/$$file; done
+	@for file in $^; 															\
+		do			 															\
+			IFS=', '; read -r -a array <<< "$string"; \
+			for element in $$array; 		\
+			do 							\
+				echo $$element'*'; 			\
+			done; 						\
+			$(MOCKGEN) -source=$$file -destination=$(MOCKS_DESTINATION)/$$file; \
+		done;
