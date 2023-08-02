@@ -37,6 +37,7 @@ type Converters struct {
 	ConvertType ConverterType
 }
 */
+
 // конвертер для конкретного типа
 type ConverterT interface{
 	Do(source, save types_.FilePath, size_px int, typ types_.FileType) (complete bool, err error)

@@ -15,21 +15,28 @@ import (
 const (
 	logRP = `/favicon/internal/service/img/resolution/resolution.go`
 	logR01 = `R01: image decode config error`
-	// logR02 = `R02: `
+	logR02 = `R02: read object`
 	// logR03 = `R03: `
 	// logR04 = `R04: `
 )
 
+type StorageOBJ interface{
+	Read() (io.ReadCloser , error)
+}
+
 type Resolution struct {
 	L *logger_.Logger
-	Reader interface{
-		Read() io.Reader
-	}
 }
 
 // Get : получние разрешения изображения 
-func (r *Resolution) Get() ( w,h int, err error ) {
-	image, _, err := image.DecodeConfig(r.Reader.Read())
+func (r *Resolution) Get(obj StorageOBJ) ( w,h int, err error ) {
+
+	read, err := obj.Read()
+	if err != nil {
+		return 0,0, r.L.Typ.Error(logRP, logR02, err)
+	}
+
+	image, _, err := image.DecodeConfig(read)
     if err != nil {
 		return 0,0, r.L.Typ.Error(logRP, logR01, err)
     }

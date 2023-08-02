@@ -143,6 +143,10 @@ func (t *Thumb) SetSizeAttrCustom(val string) *Thumb {
 	return t.set_size_attr_custom(val)
 }
 
+func (t *Thumb) GetOriginalKey() string{
+	return t.get_original_key()
+}
+
 func (t *Thumb) GetFile(
 	folder_work types_.Folder,
 	source_img, source_svg types_.FilePath,
@@ -229,15 +233,14 @@ func (t *Thumb) get_filepath(folder_work types_.Folder, original_name types_.Fil
 	return fpath
 }
 
-// ...
-func (t *Thumb) get_file(
-	folder_work types_.Folder,
-	source_img, source_svg types_.FilePath,
-	conv Converter,
-)(
-	types_.FilePath,
-	error,
-){
+func (t *Thumb) get_original_key() string {
+	if t.original == nil {
+		return ``
+	}
+	return t.original.filepath.String()
+}
+
+func (t *Thumb) set_original( source_img, source_svg types_.FilePath ) {
 
 	t.original = &original{}
 	if t.typ == types_.SVG() && source_svg != `` {
@@ -250,6 +253,19 @@ func (t *Thumb) get_file(
 		t.original.filepath = source_svg
 		t.original.typSVG = true
 	}
+}
+
+// ...
+func (t *Thumb) get_file(
+	folder_work types_.Folder,
+	source_img, source_svg types_.FilePath,
+	conv Converter,
+)(
+	types_.FilePath,
+	error,
+){
+
+	t.set_original(source_img, source_svg)
 
 	original_filename := types_.FileName(
 		filepath.Base(t.original.filepath.String()),

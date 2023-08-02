@@ -9,7 +9,8 @@ import (
 
 	// err_ "github.com/jhekau/favicon/internal/core/err"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	// types_ "github.com/jhekau/favicon/internal/core/types"
+	domain_ "github.com/jhekau/favicon/pkg/domain"
 )
 
 const (
@@ -26,54 +27,64 @@ var (
 	osStat = os.Stat
 )
 
-type File struct{
-	L *logger_.Logger
-	fpath types_.FilePath
+// storage object
+type file struct{
+	l *logger_.Logger
+	filepath func() string
 	f *os.File
 }
 
-func (s *File) Read() (*os.File, error) {
-	f, err := osOpen(s.fpath.String())
+// storage
+type Files struct{
+	L *logger_.Logger
+}
+
+func (s *file) Read() (*os.File, error) {
+	f, err := osOpen(s.filepath())
 	if err != nil {
-		return nil, s.L.Typ.Error(logP, logS02, err)
+		return nil, s.l.Typ.Error(logP, logS02, err)
 	}
 	return f, nil
 }
-func (s *File) Close() error {
+func (s *file) Close() error {
 	if s.f == nil {
 		return nil
 	}
 	err := s.f.Close()
 	if err != nil {
-		return s.L.Typ.Error(logP, logS01, err)
+		return s.l.Typ.Error(logP, logS01, err)
 	}
 	return nil
 }
 
-func (s *File) IsExists() ( bool, error ) {
+func (s *file) IsExists() ( bool, error ) {
 
-	if f, err := osStat(s.fpath.String()); err != nil {
+	if f, err := osStat(s.filepath()); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		return false, s.L.Typ.Error(logP, logS03, err)
+		return false, s.l.Typ.Error(logP, logS03, err)
 
 	} else if f.IsDir() {
-		return false, s.L.Typ.Error(logP, logS04)
+		return false, s.l.Typ.Error(logP, logS04)
 	}
 
 	return true, nil
+}
+
+func (s *file) Key() domain_.StorageKey {
+	return domain_.StorageKey(s.filepath())
 }
 
 // TODO ?
 // func (s *File) Write()....
 // func (s *File) Delete()....
 
-
-func New( l *logger_.Logger, f types_.FilePath ) *File {
-	return &File{
-		L: l,
-		fpath: f,
+// получаем интерфейсы на объект в storage
+func (fl *Files) Object( key func() string ) *file {
+	return &file{
+		l: fl.L,
+		filepath: key,
 	}
 }
 

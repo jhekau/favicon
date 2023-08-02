@@ -64,9 +64,22 @@ type Converter interface{
 	Do(source, save types_.FilePath, originalSVG bool, typ types_.FileType, size_px int) error
 }
 
+type StorageObject interface{
+	Read() (*os.File, error)
+	Close() error
+	IsExists() ( bool, error )
+}
+
 type Thumbs struct {
 	s sync.RWMutex
-	l *logger_.Logger
+	l interface { // logger
+        Info(path string, messages ...interface{}) error
+        Alert(path string, messages ...interface{}) error
+        Error(path string, messages ...interface{}) error
+    }
+	storage interface {
+		Object( key func() string ) StorageObject
+	}
 	source_svg types_.FilePath
 	source_img types_.FilePath
 	folder_work types_.Folder
@@ -91,16 +104,6 @@ func (t *Thumbs) Handle() {
 }
 
 
-// костыль, чуть позже удалим TODO
-// проблема в том, что необходимо закрыть системный ресурс на 
-// каком то участке, сохранив универсальность
-// type defStorageRead struct{
-// 	f *os.File
-// }
-// func (d *defStorageRead) Read() io.Reader {
-// 	return d.f
-// }
-
 // использует конвертер и систему хранения изображений по умолчанию
 func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err error ) {
 
@@ -110,17 +113,9 @@ func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err err
 		return ``, false, nil
 	}
 
-	// костыль, чуть позже удалим TODO
-	source_file := t.get_filepath_source_img()
-	if source_file == `` {
-		source_file = t.get_filepath_source_svg()
-	}
-	f, err := files_.Read( tb.GetFilepath(t.get_folder_work(), types_.FileName(source_file)) )
-	if err != nil {
-		return ``, false, t.l.Typ.Error(logTP, logT06, err)
-	}
+	// storage := files_.Files{ t.l }
 
-	// storage := defStorageRead{ f: f }
+	storageObj := t.storage.Object( tb.GetOriginalKey )
 
 	return t.serve_file(url_, &convert_.Converter{
 		Converters: []convert_.ConverterT{
@@ -130,9 +125,9 @@ func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err err
 		CheckPreview: checks_.Preview{},
 		CheckSource: &checks_.Source{
 			Cache: &checks_.CacheStatus{},
-			FileIsExist: files_.IsExists,
+			StorageObj: storageObj,
 			Resolution: &resolution_.Resolution{
-				Reader: &storage,
+				L: t.l,
 			} ,
 		},
 	})
