@@ -30,12 +30,12 @@ const (
 type CacheStatus struct {
 	m sync.Map
 }
-func (c *CacheStatus) cache_key(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) string {
-	return fmt.Sprintf(`%s, %s, %d`, fpath, source_typ, thumb_size)
+func (c *CacheStatus) cache_key(fpath types_.FilePath, originalSVG bool, thumb_size int) string {
+	return fmt.Sprintf(`%s, %v, %d`, fpath, originalSVG, thumb_size)
 }
-func (c *CacheStatus) Status(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error) {
+func (c *CacheStatus) Status(fpath types_.FilePath, originalSVG bool, thumb_size int) (bool, error) {
 
-	e, ok := c.m.Load(c.cache_key(fpath, source_typ, thumb_size))
+	e, ok := c.m.Load(c.cache_key(fpath, originalSVG, thumb_size))
 
 	var err error
 	if e != nil {
@@ -44,8 +44,8 @@ func (c *CacheStatus) Status(fpath types_.FilePath, source_typ types_.FileType, 
 
 	return ok, err
 }
-func (c *CacheStatus) SetErr(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error {
-	c.m.Store(c.cache_key(fpath, source_typ, thumb_size), err)
+func (c *CacheStatus) SetErr(fpath types_.FilePath, originalSVG bool, thumb_size int, err error) error {
+	c.m.Store(c.cache_key(fpath, originalSVG, thumb_size), err)
 	return err
 }
 
@@ -53,8 +53,8 @@ func (c *CacheStatus) SetErr(fpath types_.FilePath, source_typ types_.FileType, 
 type Source struct {
 	L *logger_.Logger
 	Cache interface{
-		Status(fpath types_.FilePath, source_typ types_.FileType, thumb_size int) (bool, error)
-		SetErr(fpath types_.FilePath, source_typ types_.FileType, thumb_size int, err error) error
+		Status(fpath types_.FilePath, originalSVG bool, thumb_size int) (bool, error)
+		SetErr(fpath types_.FilePath, originalSVG bool, thumb_size int, err error) error
 	}
 	FileIsExist func(fpath types_.FilePath, l *logger_.Logger ) (bool, error) 
 	Resolution interface{
@@ -63,9 +63,9 @@ type Source struct {
 }
 
 // проверка исходного изображения на корректность
-func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb_size int ) error {
+func (c *Source) Check( fpath types_.FilePath, originalSVG bool, thumb_size int ) error {
 
-	ok, err := c.Cache.Status(fpath, source_typ, thumb_size)
+	ok, err := c.Cache.Status(fpath, originalSVG, thumb_size)
 	if ok {
 		if err == nil {
 			return nil
@@ -73,34 +73,24 @@ func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb
 		return c.L.Typ.Error(logCP, logC01, err)
 	}
 
-	// default func
-	// if c.FileResolution == nil {
-	// 	c.FileResolution = files_.Resolution
-	// }
-	// if c.FileIsExist == nil {
-	// 	c.FileIsExist = files_.IsExists
-	// }
-
 	exist, err := c.FileIsExist(fpath, c.L)
 	if err != nil {
-		return c.Cache.SetErr(fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, logC02, err))
+		return c.Cache.SetErr(fpath, originalSVG, thumb_size, c.L.Typ.Error(logCP, logC02, err))
 	}
 	if !exist {
-		return c.Cache.SetErr(fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, logC03, err))
+		return c.Cache.SetErr(fpath, originalSVG, thumb_size, c.L.Typ.Error(logCP, logC03, err))
 	}
 
-	if source_typ != types_.SVG() {
-
-		// files_.Read(fpath)	
+	if !originalSVG {
 
 		source_width, source_height, err := c.Resolution.Get()
 		if err != nil {
-			return c.Cache.SetErr(fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, logC04, err))
+			return c.Cache.SetErr(fpath, originalSVG, thumb_size, c.L.Typ.Error(logCP, logC04, err))
 		}
 
 		if source_height < thumb_size || source_width < thumb_size {
 			return c.Cache.SetErr(
-				fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, 
+				fpath, originalSVG, thumb_size, c.L.Typ.Error(logCP, 
 					fmt.Sprintf(`Source: %vx%v, Preview: %v; %s`, source_width, source_height, thumb_size, logC05),
 					err),
 				)
@@ -112,7 +102,7 @@ func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb
 			source_width > config_.ImageSourceResolutionMax {
 
 				return c.Cache.SetErr(
-					fpath, source_typ, thumb_size, c.L.Typ.Error(logCP, 
+					fpath, originalSVG, thumb_size, c.L.Typ.Error(logCP, 
 						fmt.Sprintf(`Min Resolution: %v, Max Resolution: %v, Current Resolution: %vx%v`,
 						config_.ImageSourceResolutionMin,
 						config_.ImageSourceResolutionMax,
@@ -122,6 +112,6 @@ func (c *Source) Check( fpath types_.FilePath, source_typ types_.FileType, thumb
 		}
 	}
 
-	c.Cache.SetErr(fpath, source_typ, thumb_size, nil)
+	c.Cache.SetErr(fpath, originalSVG, thumb_size, nil)
 	return nil
 }

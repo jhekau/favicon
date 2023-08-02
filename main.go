@@ -8,8 +8,5 @@ import ()
 
 func main(){
 
-	// nginx
-
-	// www-worker
 
 }

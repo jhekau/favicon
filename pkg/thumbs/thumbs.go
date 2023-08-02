@@ -61,7 +61,7 @@ var (
 )
 
 type Converter interface{
-	Do(source, source_svg, save types_.FilePath, typ types_.FileType, size_px int) error
+	Do(source, save types_.FilePath, originalSVG bool, typ types_.FileType, size_px int) error
 }
 
 type Thumbs struct {
@@ -90,20 +90,6 @@ func (t *Thumbs) Handle() {
 	t.handle()
 }
 
-// костыль, чуть позже удалим TODO
-// type defStorageFPath struct{
-// 	t *thumb_.Thumb
-// 	ts Thumbs
-// }
-
-// func (d *defStorageFPath) Get() types_.FilePath {
-// 	// костыль, чуть позже удалим TODO
-// 	source_file := d.ts.get_filepath_source_img()
-// 	if source_file == `` {
-// 		source_file = d.ts.get_filepath_source_svg()
-// 	}
-// 	return d.t.GetFilepath(d.ts.get_folder_work(), types_.FileName(source_file))
-// }
 
 // костыль, чуть позже удалим TODO
 type defStorageRead struct{

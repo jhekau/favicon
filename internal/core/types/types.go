@@ -35,10 +35,12 @@ var (
 	ico = FileType(mime.TypeByExtension(".ico"))
 	svg = FileType(mime.TypeByExtension(".svg"))
 	png = FileType(mime.TypeByExtension(".png"))
+	jpg = FileType(mime.TypeByExtension(".png"))
 
 	ICO = func() FileType { return ico }
 	SVG = func() FileType { return svg }
 	PNG = func() FileType { return png }
+	JPG = func() FileType { return jpg }
 ) 
 
 //

@@ -50,12 +50,18 @@ type attr_size struct {
 	value string
 }
 
+// Оригинальное изображение, с которого нарезается превьюха
+type original struct {
+	typSVG bool
+	filepath types_.FilePath
+}
 
 ///
 ///
 type Thumb struct {
 	s sync.RWMutex
 	l *logger_.Logger
+	original *original
 	size_px uint16
 	size_attr_value attr_size
 	comment string // <!-- comment -->
@@ -152,22 +158,39 @@ func (t *Thumb) GetFilepath(folder_work types_.Folder, original_filename types_.
 	return t.get_filepath(folder_work, original_filename)
 }
 
+// source image
+func (t *Thumb) OriginalSet( filepath string ) {
+	t.original = &original{
+		filepath: types_.FilePath(filepath),
+	}
+}
+func (t *Thumb) OriginalSetSVG( filepath string ) {
+	t.original = &original{
+		typSVG: true,
+		filepath: types_.FilePath(filepath),
+	}
+}
+func (t *Thumb) original_get( filepath string ) *original {
+	return t.original
+}
+
+
 
 
 //
 // ...
 type Converter interface{
-	Do(source, source_svg, save types_.FilePath, typ types_.FileType, size_px int) error
+	Do(source, save types_.FilePath, originalSVG bool, typThumb types_.FileType, size_px int) error
 }
 
-func (t *Thumb) file_create(save_img, source_img, source_svg types_.FilePath, conv Converter) error {
+func (t *Thumb) file_create(save_img types_.FilePath, conv Converter) error {
 
 	t.s.Lock()
 	defer t.s.Unlock()
 
 	os.Remove(save_img.String())
 
-	err := conv.Do(source_img, source_svg, save_img, t.typ, int(t.size_px))
+	err := conv.Do(t.original.filepath, save_img, t.original.typSVG, t.typ, int(t.size_px))
 	if err != nil {
 		return t.l.Typ.Error(logTP, logT01, err)
 	}
@@ -216,13 +239,20 @@ func (t *Thumb) get_file(
 	error,
 ){
 
-	source_file := source_img
-	if source_file == `` {
-		source_file = source_svg
+	t.original = &original{}
+	if t.typ == types_.SVG() && source_svg != `` {
+		t.original.filepath = source_svg
+		t.original.typSVG = true
+	} else if source_img != `` {
+		t.original.filepath = source_img
+	} else {
+		// SVG -> PNG&&ICO ?? real? TODO
+		t.original.filepath = source_svg
+		t.original.typSVG = true
 	}
 
 	original_filename := types_.FileName(
-		filepath.Base(source_file.String()),
+		filepath.Base(t.original.filepath.String()),
 	)
 
 	save_img := t.get_filepath(folder_work, original_filename)
@@ -243,7 +273,7 @@ func (t *Thumb) get_file(
 	t.s.Lock()
 	defer t.s.Unlock()
 
-	err := t.file_create(save_img, source_img, source_svg, conv)
+	err := t.file_create(save_img, /*source_img, source_svg,*/ conv)
 	if err != nil {
 		return ``, t.l.Typ.Error(logTP, logT03, err)
 	// } else if !complite {

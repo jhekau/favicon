@@ -46,7 +46,7 @@ func (c checkPreview) Check(_ types_.FileType, _ int) error {
 type checkSource struct {
 	err error
 }
-func (c checkSource) Check(_ types_.FilePath, _ types_.FileType, _ int) error {
+func (c checkSource) Check(_ types_.FilePath, _ bool, _ int) error {
 	return c.err
 }
 
@@ -58,9 +58,9 @@ func TestConvertUnit( t *testing.T ) {
 	for _, d := range []struct{
 		// test data
 		source 			types_.FilePath
-		source_svg 		types_.FilePath
 		save 			types_.FilePath
-		typ 			types_.FileType
+		originalSVG    	bool
+		typThumb		types_.FileType
 		size_px 		int
 		converters 		[]convert_.ConverterT
 		check_preview 	checkPreview
@@ -69,7 +69,7 @@ func TestConvertUnit( t *testing.T ) {
 		complite_err 	error
 	}{
 		{ 	// -----------------------------------------------------------
-			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 16,
+			`TestConvertUnit/1.jpg`, `1.ico`, false, types_.ICO(), 16,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -79,7 +79,7 @@ func TestConvertUnit( t *testing.T ) {
 			nil,
 		},
 		{ 	// нулевой размер для готовой превьюхи -----------------------
-			`TestConvertUnit/2.jpg`, ``, `2.ico`, types_.ICO(), 0,
+			`TestConvertUnit/2.jpg`, `2.ico`, false, types_.ICO(), 0,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -89,7 +89,7 @@ func TestConvertUnit( t *testing.T ) {
 			errors.New(`error`),
 		},
 		{ 	// -----------------------------------------------------------
-			``, `TestConvertUnit/2.svg`, `2.svg`, types_.SVG(), 16,
+			`TestConvertUnit/2.svg`, `2.svg`, false, types_.SVG(), 16,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -99,7 +99,7 @@ func TestConvertUnit( t *testing.T ) {
 			nil,
 		},
 		{ 	// исходных файлов нет, для нарезания превьюхи ---------------
-			``, ``, `2.svg`, types_.SVG(), 16,
+			``, `2.svg`, false, types_.SVG(), 16,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -109,7 +109,7 @@ func TestConvertUnit( t *testing.T ) {
 			errors.New(`error`),
 		},
 		{ 	// ошибка из проверки параметров нарезаемой превьюхи ---------
-			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
+			`TestConvertUnit/3.jpg`, `3.ico`, false, types_.ICO(), 16,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -119,7 +119,7 @@ func TestConvertUnit( t *testing.T ) {
 			errors.New(`error`),
 		},
 		{ 	// ошибка при проверке оригинального файла, с которого нарезается превьюха 
-			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
+			`TestConvertUnit/3.jpg`, `3.ico`, false, types_.ICO(), 16,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -129,7 +129,7 @@ func TestConvertUnit( t *testing.T ) {
 			errors.New(`error`),
 		},
 		{ 	// ошибка декоратора, который проверяет тип нарезаемой превьюхи и запускает свой конвертер
-			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
+			`TestConvertUnit/3.jpg`, `3.ico`, false, types_.ICO(), 16,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), errors.New(`error`), converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -139,7 +139,7 @@ func TestConvertUnit( t *testing.T ) {
 			errors.New(`error`),
 		},
 		{ 	// отсутствуют конвертеры ------------------------------------
-			`TestConvertUnit/3.jpg`, ``, `3.ico`, types_.ICO(), 16,
+			`TestConvertUnit/3.jpg`, `3.ico`, false, types_.ICO(), 16,
 			nil,
 			checkPreview{nil},
 			checkSource{nil},
@@ -154,8 +154,9 @@ func TestConvertUnit( t *testing.T ) {
 			d.check_preview,
 			d.check_source,
 		}).Do( 
-			d.source, d.source_svg, d.save,
-			d.typ,
+			d.source, d.save,
+			d.originalSVG,
+			d.typThumb,
 			d.size_px,
 		)
 
@@ -170,10 +171,10 @@ func TestConvertUnit( t *testing.T ) {
 // Integration
 
 type CheckSourceCacheDisable struct{}
-func (c CheckSourceCacheDisable) Status(_ types_.FilePath, _ types_.FileType, _ int) (bool, error) {
+func (c CheckSourceCacheDisable) Status(_ types_.FilePath, _ bool, _ int) (bool, error) {
 	return false, nil
 }
-func (c CheckSourceCacheDisable) SetErr(_ types_.FilePath, _ types_.FileType, _ int, err error) error {
+func (c CheckSourceCacheDisable) SetErr(_ types_.FilePath, _ bool, _ int, err error) error {
 	return err
 }
 
@@ -198,18 +199,18 @@ func TestConvertIntegration( t *testing.T ) {
 	for _, d := range []struct{
 		// test data
 		source 			types_.FilePath
-		source_svg 		types_.FilePath
 		save 			types_.FilePath
-		typ 			types_.FileType
+		originalSVG    	bool
+		typThumb		types_.FileType
 		size_px 		int
 		converters 		[]convert_.ConverterT
 		check_preview 	interface { Check(typ types_.FileType, size_px int) error }
-		check_source 	interface { Check(_ types_.FilePath, _ types_.FileType, _ int) error }
+		check_source 	interface { Check(_ types_.FilePath, _ bool, _ int) error }
 		// result
 		complite_err 	error
 	}{
 		{ 	// + checkPreview ---------------------------------------------
-			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 16,
+			`TestConvertUnit/1.jpg`, `1.ico`, false, types_.ICO(), 16,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -223,7 +224,7 @@ func TestConvertIntegration( t *testing.T ) {
 			nil,
 		},
 		{ 	// + checkPreview, ошибка, превьюха размером меньше, чем нужно -
-			`TestConvertUnit/1.jpg`, ``, `1.ico`, types_.ICO(), 1,
+			`TestConvertUnit/1.jpg`, `1.ico`, false, types_.ICO(), 1,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -237,7 +238,7 @@ func TestConvertIntegration( t *testing.T ) {
 			errors.New(`error`),
 		},
 		{ 	// + checkSource -----------------------------------------------
-			`TestConvertUnit/2.jpg`, ``, `2.ico`, types_.ICO(), 16,
+			`TestConvertUnit/2.jpg`, `2.ico`, false, types_.ICO(), 16,
 			[]convert_.ConverterT{
 				&convertType{types_.ICO(), nil, converter{nil}},
 				&convertType{types_.SVG(), nil, converter{nil}},
@@ -262,8 +263,9 @@ func TestConvertIntegration( t *testing.T ) {
 			d.check_preview,
 			d.check_source,
 		}).Do( 
-			d.source, d.source_svg, d.save,
-			d.typ,
+			d.source, d.save,
+			d.originalSVG,
+			d.typThumb,
 			d.size_px,
 		)
 
