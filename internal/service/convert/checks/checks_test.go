@@ -7,6 +7,7 @@ package checks_test
 import (
 	"errors"
 	"fmt"
+	"io"
 	"testing"
 
 	config_ "github.com/jhekau/favicon/internal/config"
@@ -14,6 +15,7 @@ import (
 	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
+	domain_ "github.com/jhekau/favicon/pkg/domain"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,7 +42,7 @@ func TestCheckPreviewUnit( t *testing.T ) {
 				Typ: &logger_mock_.LoggerErrorf{},
 			},
 		}.Check( ts.typ, ts.size)
-		
+
 		if (err == nil && ts.err != nil) || (err != nil && ts.err == nil) {
 			t.Fatalf(`TestCheckPreviewUnit - status: data: %#v`, ts)
 		}
@@ -52,7 +54,7 @@ func TestCheckSourceCacheNotExistUnit( t *testing.T ) {
 
 	check := checks_.CacheStatus{}
 
-	data_not_exist := map[types_.FilePath]struct{
+	data_not_exist := map[domain_.StorageKey]struct{
 		err error
 		exist bool
 	}{
@@ -79,7 +81,7 @@ func TestCheckSourceCacheExistUnit( t *testing.T ) {
 	check := checks_.CacheStatus{}
 
 	d := []struct{
-		filepath 	types_.FilePath
+		originalKey domain_.StorageKey
 		originalSVG	bool
 		thumb_size 	int
 		err 		error
@@ -94,12 +96,12 @@ func TestCheckSourceCacheExistUnit( t *testing.T ) {
 	
 	// store
 	for _, ts := range d {
-		check.SetErr(ts.filepath, ts.originalSVG, ts.thumb_size, ts.err)
+		check.SetErr(ts.originalKey, ts.originalSVG, ts.thumb_size, ts.err)
 	}
 
 	// read
 	for _, ts := range d {
-		status, err := check.Status(ts.filepath, ts.originalSVG, ts.thumb_size)
+		status, err := check.Status(ts.originalKey, ts.originalSVG, ts.thumb_size)
 
 		require.Equal(t, err, ts.err, 
 			fmt.Sprintf(`TestCheckSourceCacheExistUnit - error: %v, data: %#v`, err, ts))
@@ -110,17 +112,33 @@ func TestCheckSourceCacheExistUnit( t *testing.T ) {
 }
 
 type CheckSourceUnitCacheDisable struct{}
-func (c CheckSourceUnitCacheDisable) Status(_ types_.FilePath, _ bool, _ int) (bool, error) {
+func (c CheckSourceUnitCacheDisable) Status(_ domain_.StorageKey, _ bool, _ int) (bool, error) {
 	return false, nil
 }
-func (c CheckSourceUnitCacheDisable) SetErr(_ types_.FilePath, _ bool, _ int, err error) error {
+func (c CheckSourceUnitCacheDisable) SetErr(_ domain_.StorageKey, _ bool, _ int, err error) error {
 	return err
+}
+
+
+type storageOBJ struct {
+	key domain_.StorageKey
+	isExists bool
+	isExists_err error
+}
+func (s *storageOBJ) Key() domain_.StorageKey {
+	return domain_.StorageKey(s.key)
+}
+func (s *storageOBJ) Read() (io.ReadCloser, error) {
+	return nil, nil
+}
+func (s *storageOBJ) IsExists() ( bool, error ) {
+	return s.isExists, s.isExists_err
 }
 
 type resolution struct{
 	f func() (w int, h int, err error)
 }
-func (r resolution) Get() (w int, h int, err error){
+func (r resolution) Get(_ checks_.StorageOBJ) (w int, h int, err error){
 	return r.f()
 }
 
@@ -128,8 +146,8 @@ func TestCheckSourceUnit( t *testing.T ) {
 
 	// enable and disable cache ******************
 	type cache interface {
-		Status(_ types_.FilePath, _ bool, _ int) (bool, error)
-		SetErr(_ types_.FilePath, _ bool, _ int, _ error) error
+		Status(_ domain_.StorageKey, _ bool, _ int) (bool, error)
+		SetErr(_ domain_.StorageKey, _ bool, _ int, _ error) error
 	}
 
 	cache_enable := checks_.CacheStatus{}
@@ -137,69 +155,98 @@ func TestCheckSourceUnit( t *testing.T ) {
 
 	// test *************************************************************
 
-	// init
-	file_is_exist := struct{
-		exist, not_exist, err func(fpath types_.FilePath, l *logger_.Logger) (bool, error)
-	}{
-		exist: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return true, nil },
-		not_exist: 	func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, nil },
-		err: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, errors.New(`error`) },
-	}
-
-	// testing
 	for _, dt := range []struct{
-		filepath         types_.FilePath
+		storageOBJ       *storageOBJ
 		originalSVG  	 bool
 		thumb_size 		 int
-		file_is_exist 	 func(fpath types_.FilePath, l *logger_.Logger) (bool, error)
 		file_resolution  func() (w int, h int, err error)
 		cache 			 cache
 		status_error 	 error
 	}{
-		{	`TestCheckSourceUnit/1.jpg`, // ошибка - нулевой размер ---------------------------------------
-			false, 0, file_is_exist.exist, 
+		{	// ошибка - нулевой размер ---------------------------------------
+			&storageOBJ{
+				key:`TestCheckSourceUnit/1.jpg`,
+				isExists: true,
+				isExists_err: nil,
+			},
+			false, 0,
 			func() (w int, h int, err error){ return 1, 1, nil },
 			cache_disable,
 			errors.New(`error`),
 		},
-		{	`TestCheckSourceUnit/2.jpg`, // ошибка - размер оригинала меньше, чем нарезаемая превьха ------
-			false, 16, file_is_exist.exist, 
+		{	// ошибка - размер оригинала меньше, чем нарезаемая превьха ------
+			&storageOBJ{
+				key:`TestCheckSourceUnit/2.jpg`,
+				isExists: true,
+				isExists_err: nil,
+			}, 
+			false, 16, 
 			func() (w int, h int, err error){ return 1, 1, nil },
 			&cache_enable,
 			errors.New(`error`),
 		},
-		{	`TestCheckSourceUnit/2.jpg`, // проверка работы кеша по предыдущему условию -------------------
-			false, 16, file_is_exist.exist, 
+		{	// проверка работы кеша по предыдущему условию -------------------
+			&storageOBJ{
+				key:`TestCheckSourceUnit/2.jpg`,
+				isExists: true,
+				isExists_err: nil,
+			}, 
+			false, 16,
 			func() (w int, h int, err error){ return 1, 1, nil },
 			&cache_enable,
 			errors.New(`error`),
 		},
-		{	`TestCheckSourceUnit/3.jpg`, // ------------------------------------------------------
-			false, 16, file_is_exist.exist, 
+		{	// ------------------------------------------------------
+			&storageOBJ{
+				key:`TestCheckSourceUnit/3.jpg`,
+				isExists: true,
+				isExists_err: nil,
+			},
+			false, 16,
 			func() (w int, h int, err error){ return 16, 16, nil },
 			&cache_enable,
 			nil,
 		},
-		{	`TestCheckSourceUnit/3.jpg`, // ------------------------------------------------------
-			false, 16, file_is_exist.exist, 
+		{	// ------------------------------------------------------
+			&storageOBJ{
+				key:`TestCheckSourceUnit/3.jpg`,
+				isExists: true,
+				isExists_err: nil,
+			}, 
+			false, 16, 
 			func() (w int, h int, err error){ return 16, 16, nil },
 			&cache_enable,
 			nil,
 		},
-		{	`TestCheckSourceUnit/4.jpg`, // ------------------------------------------------------
-			false, 16, file_is_exist.not_exist, 
+		{	// ------------------------------------------------------
+			&storageOBJ{
+				key:`TestCheckSourceUnit/4.jpg`,
+				isExists: false,
+				isExists_err: nil,
+			}, 
+			false, 16, 
 			func() (w int, h int, err error){ return 16, 16, nil },
 			cache_disable,
 			errors.New(`error`),
 		},
-		{	`TestCheckSourceUnit/5.jpg`, // ------------------------------------------------------
-			false, 16, file_is_exist.err, 
+		{	// ------------------------------------------------------
+			&storageOBJ{
+				key:`TestCheckSourceUnit/5.jpg`,
+				isExists: false,
+				isExists_err: errors.New(`error`),
+			}, 
+			false, 16, 
 			func() (w int, h int, err error){ return 16, 16, nil },
 			cache_disable,
 			errors.New(`error`),
 		},
-		{	`TestCheckSourceUnit/6.jpg`, // ------------------------------------------------------
-			false, 16, file_is_exist.exist, 
+		{	// ------------------------------------------------------
+			&storageOBJ{
+				key:`TestCheckSourceUnit/6.jpg`,
+				isExists: true,
+				isExists_err: nil,
+			}, 
+			false, 16, 
 			func() (w int, h int, err error){ return 16, 16, errors.New(`error`) },
 			cache_disable,
 			errors.New(`error`),
@@ -211,13 +258,12 @@ func TestCheckSourceUnit( t *testing.T ) {
 				Typ: &logger_mock_.LoggerErrorf{},
 			},
 			Cache: dt.cache,
-			FileIsExist: dt.file_is_exist,
-			Resolution: resolution{dt.file_resolution},
+			Resolution: resolution{ dt.file_resolution },
 		}).
-		Check(dt.filepath, dt.originalSVG, dt.thumb_size)
+		Check(dt.storageOBJ, dt.originalSVG, dt.thumb_size)
 
 		if (err == nil && dt.status_error != nil) || (err != nil && dt.status_error == nil) {
-			t.Fatalf(`TestCheckSourceUnit - error: filepath: %v err: '%v' data: %#v`, dt.filepath, err, dt)
+			t.Fatalf(`TestCheckSourceUnit - error: filepath: %v err: '%v' data: %#v`, dt.storageOBJ.Key(), err, dt)
 		}
 	}
 }
