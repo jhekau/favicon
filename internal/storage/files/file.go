@@ -7,9 +7,7 @@ package files
 import (
 	"os"
 
-	// err_ "github.com/jhekau/favicon/internal/core/err"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	// types_ "github.com/jhekau/favicon/internal/core/types"
 	domain_ "github.com/jhekau/favicon/pkg/domain"
 )
 

@@ -13,6 +13,7 @@ import (
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
+	domain_ "github.com/jhekau/favicon/pkg/domain"
 )
 
 // конвертер, который непосредственно занимается конвертацией
@@ -171,10 +172,10 @@ func TestConvertUnit( t *testing.T ) {
 // Integration
 
 type CheckSourceCacheDisable struct{}
-func (c CheckSourceCacheDisable) Status(_ types_.FilePath, _ bool, _ int) (bool, error) {
+func (c CheckSourceCacheDisable) Status(_ domain_.StorageKey, _ bool, _ int) (bool, error) {
 	return false, nil
 }
-func (c CheckSourceCacheDisable) SetErr(_ types_.FilePath, _ bool, _ int, err error) error {
+func (c CheckSourceCacheDisable) SetErr(_ domain_.StorageKey, _ bool, _ int, err error) error {
 	return err
 }
 
@@ -188,13 +189,13 @@ func (r resolution) Get() (w int, h int, err error){
 func TestConvertIntegration( t *testing.T ) {
 
 	// init
-	file_is_exist := struct{
-		exist, not_exist, err func(fpath types_.FilePath, l *logger_.Logger) (bool, error)
-	}{
-		exist: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return true, nil },
-		not_exist: 	func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, nil },
-		err: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, errors.New(`error`) },
-	}
+	// file_is_exist := struct{
+	// 	exist, not_exist, err func(fpath types_.FilePath, l *logger_.Logger) (bool, error)
+	// }{
+	// 	exist: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return true, nil },
+	// 	not_exist: 	func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, nil },
+	// 	err: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, errors.New(`error`) },
+	// }
 
 	for _, d := range []struct{
 		// test data
@@ -249,7 +250,6 @@ func TestConvertIntegration( t *testing.T ) {
 					Typ: &logger_mock_.LoggerErrorf{},
 				},
 				Cache: CheckSourceCacheDisable{},
-				FileIsExist: file_is_exist.exist,
 				Resolution: resolution{f: func() (w int, h int, err error){ return 16, 16, nil } },
 			},
 			nil,
