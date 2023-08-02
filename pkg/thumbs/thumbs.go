@@ -92,12 +92,14 @@ func (t *Thumbs) Handle() {
 
 
 // костыль, чуть позже удалим TODO
-type defStorageRead struct{
-	f *os.File
-}
-func (d *defStorageRead) Read() io.Reader {
-	return d.f
-}
+// проблема в том, что необходимо закрыть системный ресурс на 
+// каком то участке, сохранив универсальность
+// type defStorageRead struct{
+// 	f *os.File
+// }
+// func (d *defStorageRead) Read() io.Reader {
+// 	return d.f
+// }
 
 // использует конвертер и систему хранения изображений по умолчанию
 func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err error ) {
@@ -118,7 +120,7 @@ func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err err
 		return ``, false, t.l.Typ.Error(logTP, logT06, err)
 	}
 
-	storage := defStorageRead{ f: f }
+	// storage := defStorageRead{ f: f }
 
 	return t.serve_file(url_, &convert_.Converter{
 		Converters: []convert_.ConverterT{
