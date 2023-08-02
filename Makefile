@@ -26,7 +26,7 @@ cover:
 	rm coverage.out
 
 .PHONY: mockgen
-mockgen: internal/service/convert/convert.go
+mockgen: internal/service/convert/convert.go internal/service/convert/checks/source.go
 	@echo "Generating mocks..."$(GOPATH)
 	@rm -rf $(MOCKS_DESTINATION)
 	@for file in $^; do $(MOCKGEN) -source=$$file -destination=$(MOCKS_DESTINATION)/$$file; done

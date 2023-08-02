@@ -11,9 +11,11 @@ import (
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	types_ "github.com/jhekau/favicon/internal/core/types"
+	mock_convert_ "github.com/jhekau/favicon/internal/mocks/internal/service/convert"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
 	domain_ "github.com/jhekau/favicon/pkg/domain"
+	"go.uber.org/mock/gomock"
 )
 
 // конвертер, который непосредственно занимается конвертацией
@@ -188,14 +190,10 @@ func (r resolution) Get() (w int, h int, err error){
 
 func TestConvertIntegration( t *testing.T ) {
 
-	// init
-	// file_is_exist := struct{
-	// 	exist, not_exist, err func(fpath types_.FilePath, l *logger_.Logger) (bool, error)
-	// }{
-	// 	exist: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return true, nil },
-	// 	not_exist: 	func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, nil },
-	// 	err: 		func(fpath types_.FilePath, l *logger_.Logger) (bool, error){ return false, errors.New(`error`) },
-	// }
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
+
+	mock_check_source := mock_convert_.NewMockCheckSource(ctl)
 
 	for _, d := range []struct{
 		// test data
@@ -206,7 +204,7 @@ func TestConvertIntegration( t *testing.T ) {
 		size_px 		int
 		converters 		[]convert_.ConverterT
 		check_preview 	interface { Check(typ types_.FileType, size_px int) error }
-		check_source 	interface { Check(_ types_.FilePath, _ bool, _ int) error }
+		check_source 	interface { Check(_ string, _ bool, _ int) error }
 		// result
 		complite_err 	error
 	}{
@@ -221,7 +219,7 @@ func TestConvertIntegration( t *testing.T ) {
 					Typ: &logger_mock_.LoggerErrorf{},
 				},
 			},
-			checkSource{nil},
+			mock_convert,
 			nil,
 		},
 		{ 	// + checkPreview, ошибка, превьюха размером меньше, чем нужно -
@@ -235,7 +233,7 @@ func TestConvertIntegration( t *testing.T ) {
 					Typ: &logger_mock_.LoggerErrorf{},
 				},
 			},
-			checkSource{nil},
+			mock_convert,
 			errors.New(`error`),
 		},
 		{ 	// + checkSource -----------------------------------------------
