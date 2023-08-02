@@ -11,7 +11,8 @@ import (
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	types_ "github.com/jhekau/favicon/internal/core/types"
-	mock_convert_ "github.com/jhekau/favicon/internal/mocks/internal/service/convert"
+	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
+	mock_checks_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert/checks"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
 	domain_ "github.com/jhekau/favicon/pkg/domain"
@@ -194,6 +195,7 @@ func TestConvertIntegration( t *testing.T ) {
 	defer ctl.Finish()
 
 	mock_check_source := mock_convert_.NewMockCheckSource(ctl)
+	// mock_checks_.MockStorageOBJ
 
 	for _, d := range []struct{
 		// test data
@@ -204,7 +206,7 @@ func TestConvertIntegration( t *testing.T ) {
 		size_px 		int
 		converters 		[]convert_.ConverterT
 		check_preview 	interface { Check(typ types_.FileType, size_px int) error }
-		check_source 	interface { Check(_ string, _ bool, _ int) error }
+		check_source 	interface { Check(_ mock_checks_.MockStorageOBJ, _ bool, _ int) error }
 		// result
 		complite_err 	error
 	}{
@@ -219,7 +221,7 @@ func TestConvertIntegration( t *testing.T ) {
 					Typ: &logger_mock_.LoggerErrorf{},
 				},
 			},
-			mock_convert,
+			mock_check_source,
 			nil,
 		},
 		{ 	// + checkPreview, ошибка, превьюха размером меньше, чем нужно -
@@ -233,7 +235,7 @@ func TestConvertIntegration( t *testing.T ) {
 					Typ: &logger_mock_.LoggerErrorf{},
 				},
 			},
-			mock_convert,
+			mock_check_source,
 			errors.New(`error`),
 		},
 		{ 	// + checkSource -----------------------------------------------
@@ -248,7 +250,7 @@ func TestConvertIntegration( t *testing.T ) {
 					Typ: &logger_mock_.LoggerErrorf{},
 				},
 				Cache: CheckSourceCacheDisable{},
-				Resolution: resolution{f: func() (w int, h int, err error){ return 16, 16, nil } },
+				// Resolution: resolution{f: func() (w int, h int, err error){ return 16, 16, nil } },
 			},
 			nil,
 		},
