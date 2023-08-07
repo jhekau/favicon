@@ -1,15 +1,16 @@
-# solves the problem on the windows platform:
-# process_begin: CreateProcess(NULL, Write-Output asdf/asdf, ...) failed.
-# make (e=2): ═х єфрхЄё  эрщЄш єърчрээ√щ Їрщы.
-
 ifndef $(GOPATH)
     GOPATH=$(shell go env GOPATH)
     export GOPATH
 endif
 
 MOCKGEN ?= $(GOPATH)/bin/mockgen
-
 MOCKS_DESTINATION ?= internal/mocks
+
+# solves the problem on the windows platform
+# решает проблему на винде
+# ------------------------------------------
+# process_begin: CreateProcess(NULL, Write-Output asdf/asdf, ...) failed.
+# make (e=2): ═х єфрхЄё  эрщЄш єърчрээ√щ Їрщы.
 ifeq ($(OS),Windows_NT)
 
 SHELL := powershell.exe
@@ -25,6 +26,8 @@ cover:
 	go tool cover -html="coverage.out"
 	rm coverage.out
 
+# rename the destination for subfolders - "internal", otherwise it will be impossible to import packages
+# переименовываем для вложенных папок назначения - "internal", иначе импортировать моки будет нереал
 .PHONY: mockgen
 mockgen: internal/service/convert/convert.go internal/service/convert/checks/source.go
 	@echo "Generating mocks..."
