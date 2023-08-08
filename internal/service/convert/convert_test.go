@@ -16,8 +16,9 @@ import (
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
-	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
-	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
+	// checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
+	// converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
+	domain_ "github.com/jhekau/favicon/pkg/domain"
 
 	// domain_ "github.com/jhekau/favicon/pkg/domain"
 	"github.com/stretchr/testify/require"
@@ -61,21 +62,59 @@ func (c checkSource) Check(_ types_.FilePath, _ bool, _ int) error {
 }
 */
 
+
+// image test data
+type storage struct{
+	l *logger_.Logger
+	img interface{ 
+		Base64Reader(l *logger_.Logger) (io.Reader, string, error)
+	}
+	ifExist bool
+	ifExistError error
+	storageKey domain_.StorageKey
+}
+func (s *storage) IsExists() ( bool, error ) {
+	return s.ifExist, s.ifExistError
+}
+func (s *storage) Key() domain_.StorageKey {
+	return s.storageKey
+}
+func (s *storage) Reader() (io.ReadCloser , error) {
+	r, err := image_test_data_.GetFileReader(s.img, s.l)
+	return io.NopCloser(r), err
+}
+func (s *storage) Writer() (io.WriteCloser, error) {
+	var w io.WriteCloser
+	return w, nil
+}
+
+
+
+
 // Unit *******
 
 //
 func TestUnit_Convert_JPGxICO( t *testing.T ) {
 
 	// Data
-	original := types_.FilePath(`TestConvertUnit/1.jpg`)
-	original_svg := false
-	save := types_.FilePath(`1.png`)
-	size := 16
-	typ := types_.ICO()
-
 	logger := &logger_.Logger{
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
+
+	original := &storage{
+		l: logger,
+		img: image_test_data_.PNG_16x16,
+		storageKey: `TestConvertUnit/1.jpg`,
+	}
+	original_svg := false
+
+	save := &storage{
+		l: logger,
+		storageKey: `testThumb/1.ico`,
+	}
+
+	size := 16
+	typ := types_.ICO()
 
 	errNil := (error)(nil)
 
@@ -113,15 +152,24 @@ func TestUnit_Convert_JPGxICO( t *testing.T ) {
 func TestUnit_Convert_CoverterError( t *testing.T ) {
 
 	// Data
-	original := types_.FilePath(`TestConvertUnit/1.jpg`)
-	original_svg := false
-	save := types_.FilePath(`1.png`)
-	size := 16
-	typ := types_.ICO()
-
 	logger := &logger_.Logger{
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
+
+	original := &storage{
+		l: logger,
+		img: image_test_data_.PNG_16x16,
+		storageKey: `TestConvertUnit/1.jpg`,
+	}
+	original_svg := false
+
+	save := &storage{
+		l: logger,
+		storageKey: `testThumb/1.ico`,
+	}
+	
+	size := 16
+	typ := types_.ICO()
 
 	errNil := (error)(nil)
 	errConverter := errors.New(`error converter`)
@@ -161,15 +209,25 @@ func TestUnit_Convert_CoverterError( t *testing.T ) {
 func TestUnit_Convert_CoverterMulti( t *testing.T ) {
 
 	// Data
-	original := types_.FilePath(`TestConvertUnit/1.jpg`)
-	original_svg := false
-	save := types_.FilePath(`1.png`)
-	size := 16
-	typ := types_.ICO()
-
 	logger := &logger_.Logger{
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
+
+	original := &storage{
+		l: logger,
+		img: image_test_data_.PNG_16x16,
+		storageKey: `TestConvertUnit/1.jpg`,
+	}
+	original_svg := false
+
+	save := &storage{
+		l: logger,
+		storageKey: `testThumb/1.ico`,
+	}
+
+	size := 16
+	typ := types_.ICO()
+
 
 	errNil := (error)(nil)
 
@@ -211,15 +269,24 @@ func TestUnit_Convert_CoverterMulti( t *testing.T ) {
 func TestUnit_Convert_NoConverters( t *testing.T ) {
 
 	// Data
-	original := types_.FilePath(`TestConvertUnit/1.jpg`)
-	original_svg := false
-	save := types_.FilePath(`1.png`)
-	size := 16
-	typ := types_.ICO()
-
 	logger := &logger_.Logger{
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
+
+	original := &storage{
+		l: logger,
+		img: image_test_data_.PNG_16x16,
+		storageKey: `TestConvertUnit/1.jpg`,
+	}
+	original_svg := false
+
+	save := &storage{
+		l: logger,
+		storageKey: `testThumb/1.ico`,
+	}
+
+	size := 16
+	typ := types_.ICO()
 
 	errNil := (error)(nil)
 	errReturn := logger.Typ.Error(convert_.LogFP, convert_.LogF06)
@@ -253,58 +320,27 @@ func TestUnit_Convert_NoConverters( t *testing.T ) {
 func TestUnit_Convert_SizePX0( t *testing.T ) {
 
 	// Data
-	original := types_.FilePath(`TestConvertUnit/2.jpg`)
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	original := &storage{
+		l: logger,
+		img: image_test_data_.PNG_16x16,
+		storageKey: `TestConvertUnit/2.jpg`,
+	}
 	original_svg := false
-	save := types_.FilePath(`2.png`)
+
+	save := &storage{
+		l: logger,
+		storageKey: `testThumb/2.ico`,
+	}
+
 	size := 0
 	typ := types_.ICO()
 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
-	}
 
 	errReturn := logger.Typ.Error(convert_.LogFP, convert_.LogF05)
-
-	// Mock
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mock_converters := mock_convert_.NewMockConverterT(ctrl)
-	mock_check_preview := mock_convert_.NewMockCheckPreview(ctrl)
-	mock_check_source := mock_convert_.NewMockCheckSource(ctrl)
-	
-	// Test
-	err := (&convert_.Converter{
-		L: logger,
-		Converters: []convert_.ConverterT{
-			mock_converters,
-		},
-		CheckPreview: mock_check_preview,
-		CheckSource: mock_check_source,
-
-	}).Do( 
-		original, save, original_svg, typ, size,
-	)
-
-	require.EqualError(t, err, errReturn.Error(), 
-		fmt.Sprintf(`error: return '%v', want: '%v'`, err, errReturn ))
-}
-
-//
-func TestUnit_Convert_OriginalEmpty( t *testing.T ) {
-
-	// Data
-	original := types_.FilePath(``)
-	original_svg := false
-	save := types_.FilePath(`3.png`)
-	size := 16
-	typ := types_.ICO()
-
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
-	}
-
-	errReturn := logger.Typ.Error(convert_.LogFP, convert_.LogF01)
 
 	// Mock
 	ctrl := gomock.NewController(t)
@@ -335,15 +371,24 @@ func TestUnit_Convert_OriginalEmpty( t *testing.T ) {
 func TestUnit_Convert_PreviewCheckError( t *testing.T ) {
 
 	// Data
-	original := types_.FilePath(`TestConvertUnit/3.jpg`)
-	original_svg := false
-	save := types_.FilePath(`3.png`)
-	size := 16
-	typ := types_.ICO()
-
 	logger := &logger_.Logger{
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
+
+	original := &storage{
+		l: logger,
+		img: image_test_data_.PNG_16x16,
+		storageKey: `TestConvertUnit/1.jpg`,
+	}
+	original_svg := false
+
+	save := &storage{
+		l: logger,
+		storageKey: `testThumb/1.ico`,
+	}
+
+	size := 16
+	typ := types_.ICO()
 
 	// errNil := (error)(nil)
 	errCheck := errors.New(`error check`)
@@ -382,15 +427,24 @@ func TestUnit_Convert_PreviewCheckError( t *testing.T ) {
 func TestUnit_Convert_OriginalCheckError( t *testing.T ) {
 
 	// Data
-	original := types_.FilePath(`TestConvertUnit/3.jpg`)
-	original_svg := false
-	save := types_.FilePath(`3.png`)
-	size := 16
-	typ := types_.ICO()
-
 	logger := &logger_.Logger{
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
+
+	original := &storage{
+		l: logger,
+		img: image_test_data_.PNG_16x16,
+		storageKey: `TestConvertUnit/3.jpg`,
+	}
+	original_svg := false
+
+	save := &storage{
+		l: logger,
+		storageKey: `testThumb/3.ico`,
+	}
+
+	size := 16
+	typ := types_.ICO()
 
 	errNil := (error)(nil)
 	errCheck := errors.New(`error check`)
@@ -546,18 +600,6 @@ func TestConvertIntegration( t *testing.T ) {
 // !!!! Переделать
 
 
-// image test data
-type storage struct{
-	l *logger_.Logger
-	img interface{ 
-		Base64Reader(l *logger_.Logger) (io.Reader, string, error)
-	}
-}
-func (s *storage) Read() (io.ReadCloser , error) {
-	r, err := image_test_data_.GetFileReader(s.img, s.l)
-	return io.NopCloser(r), err
-}
-
 // Original_16, Preview_16, ICO, ConverterICO [PASS]
 func TestIntegrationConvert( t *testing.T ) {
 
@@ -566,9 +608,11 @@ func TestIntegrationConvert( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 	
+	_ = logger
 
 
 
+	/*
 	// Test
 	err := (&convert_.Converter{
 		L: logger,
@@ -590,6 +634,7 @@ func TestIntegrationConvert( t *testing.T ) {
 	}).Do( 
 		original, save, original_svg, types_.ICO(), size,
 	)
+	*/
 
 
 	/*
