@@ -6,6 +6,7 @@ package converters
  * конвертеры для различных типов файлов
  */
 import (
+	"io"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
@@ -18,22 +19,20 @@ const (
 )
 
 
-// функция, которая непосредственно конвертирует изображение.
-// Можно использовать внешнюю библиотеку, или внешний бинарник
-// type Converter interface {
-// 	Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
-// }
+type StorageOBJ interface{
+	Read() (io.ReadCloser, error)
+}
 
 type ConverterICO struct{
 	L *logger_.Logger
 	// пакет/утилита, который выполняет непосредственную конвертацию изображения
 	ConverterExec interface {
-		Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
+		Proc(source, save StorageOBJ, size_px int, typ types_.FileType) error
 	}
 }
 
 // интерфейс для конвертора ICO
-func (t *ConverterICO) Do(source, save types_.FilePath, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
+func (t *ConverterICO) Do(source, save StorageOBJ, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
 	if typ != types_.ICO() {
 		return false, nil
 	}
@@ -49,12 +48,12 @@ type ConverterPNG struct{
 	L *logger_.Logger
 	// пакет/утилита, который выполняет непосредственную конвертацию изображения
 	ConverterExec interface {
-		Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
+		Proc(source, save StorageOBJ, size_px int, typ types_.FileType) error
 	}
 }
 
 // интерфейс для конвертора PNG
-func (t *ConverterPNG) Do(source, save types_.FilePath, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
+func (t *ConverterPNG) Do(source, save StorageOBJ, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
 	if typ != types_.PNG() {
 		return false, nil
 	}

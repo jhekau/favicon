@@ -22,6 +22,18 @@ func (s storageReader) Read() io.Reader {
 	return s.r
 }
 
+type storage struct{
+	l *logger_.Logger
+	img interface{ 
+		Base64Reader(l *logger_.Logger) (io.Reader, string, error)
+	}
+}
+func (s *storage) Read() (io.ReadCloser , error) {
+	r, err := image_test_data_.GetFileReader(s.img, s.l)
+	return io.NopCloser(r), err
+}
+
+
 func TestGetResolution(t *testing.T){
 	
 	logger := &logger_.Logger{
@@ -40,15 +52,12 @@ func TestGetResolution(t *testing.T){
 		{image_test_data_.JPG_10001_10001, 10001, 10001, nil},
 		{image_test_data_.SVG, 0, 0, errors.New(`image: unknown format`)},
 	}{
-		reader, err := image_test_data_.GetFileReader(d.img, logger)
-		if err != nil {
-			t.Fatalf(`TestGetResolution:image_test_data_.GetFileReader - error: '%v' data: %#v`, err, d)
-		}
-
-		w, h, err := (&resolution_.Resolution{
-			logger,
-			storageReader{reader},
-		}).Get()
+		w, h, err := (&resolution_.Resolution{logger}).Get(
+			&storage{
+				logger,
+				d.img,
+			},
+		)
 		if (err == nil && d.err != nil) || (err != nil && d.err == nil) {
 			t.Fatalf(`TestGetResolution - error: '%v' data: %#v`, err, d)
 		}

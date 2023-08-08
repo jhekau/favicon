@@ -4,11 +4,13 @@ ifndef $(GOPATH)
 endif
 
 
+# *****
 # solves the problem on the windows platform
 # решает проблему на винде
 # ------------------------------------------
 # process_begin: CreateProcess(NULL, Write-Output asdf/asdf, ...) failed.
 # make (e=2): ═х єфрхЄё  эрщЄш єърчрээ√щ Їрщы.
+
 ifeq ($(OS),Windows_NT)
 SHELL := powershell.exe
 .SHELLFLAGS := -NoProfile -Command
@@ -26,9 +28,11 @@ cover:
 
 
 
-
+# *****
 # rename the destination for subfolders - "internal", otherwise it will be impossible to import packages
 # ренейм для вложенных папок назначения - "internal", иначе импортировать моки будет нереал
+# <!> go install go.uber.org/mock/mockgen@latest
+
 MOCKS_FILEPATH = internal/service/convert/convert.go $\
 internal/service/convert/checks/source.go
 

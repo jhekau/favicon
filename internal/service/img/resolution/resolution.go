@@ -35,6 +35,7 @@ func (r *Resolution) Get(obj StorageOBJ) ( w,h int, err error ) {
 	if err != nil {
 		return 0,0, r.L.Typ.Error(logRP, logR02, err)
 	}
+	defer read.Close()
 
 	image, _, err := image.DecodeConfig(read)
     if err != nil {

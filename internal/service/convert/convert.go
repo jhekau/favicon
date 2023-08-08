@@ -4,14 +4,17 @@ package convert
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
  * 1 August 2023
  */
-import(
+import (
+	"io"
+
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
+	domain_ "github.com/jhekau/favicon/pkg/domain"
 )
 
 const (
 	logFP  = `/internal/service/convert.go`
-	logF01 = `F01: empty original image`
+	// logF01 = `F01: empty original image`
 	logF02 = `F02: check preview image`
 	logF03 = `F03: convert thumb`
 	logF04 = `F04: check source image`
@@ -19,28 +22,17 @@ const (
 	logF06 = `F06: there is no suitable converter for image modification`
 )
 
-// конвертер, который непосредственно занимается конвертацией
-/*
-type ConverterExec interface{
-	Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error
+// хранимые объекты
+type StorageOBJ interface{
+	IsExists() ( bool, error )
+	Read() (io.ReadCloser, error)
+	Key() domain_.StorageKey
 }
 
-// проверяют тип, в который хотим конвертировать и запускают конвертер
-// метод, которая запускается для проверки типа и последующего запуска конвертора
-type ConverterType interface{
-	Do(source, save types_.FilePath, size_px int, typ types_.FileType, conv ConverterExec) (complete bool, err error)
-}
-
-// связка, функция запускающая конвертер и сам конвертер
-type Converters struct {
-	Converter ConverterExec
-	ConvertType ConverterType
-}
-*/
 
 // конвертер для конкретного типа
 type ConverterT interface{
-	Do(source, save types_.FilePath, size_px int, typ types_.FileType) (complete bool, err error)
+	Do(source, save StorageOBJ, size_px int, typ types_.FileType) (complete bool, err error)
 }
 
 // проверка валидности запрашиваемой превьюхи
@@ -50,8 +42,9 @@ type CheckPreview interface {
 
 // проверка валидности исходника для нарезания превьюхи
 type CheckSource interface {
-	Check(fpath types_.FilePath, originalSVG bool, thumb_size int) error
+	Check(original StorageOBJ, originalSVG bool, thumb_size int) error
 }
+
 
 
 
@@ -65,7 +58,7 @@ type Converter struct{
 }
 
 func (c *Converter) Do( 
-	source, /*source_svg,*/ save types_.FilePath,
+	source, /*source_svg,*/ save StorageOBJ, // types_.FilePath,
 	originalSVG bool,
 	typThumb types_.FileType,
 	size_px int,
@@ -74,11 +67,11 @@ func (c *Converter) Do(
 ){
 
 	if size_px == 0 {
-		return c.L.Typ.Error(logFP, logF05, err)
+		return c.L.Typ.Error(logFP, logF05)
 	}
-	if source == `` {
-		return c.L.Typ.Error(logFP, logF01, err)
-	}
+	// if source == `` {
+	// 	return c.L.Typ.Error(logFP, logF01)
+	// }
 
 	err = c.CheckPreview.Check(typThumb, size_px)
 	if err != nil {
@@ -91,14 +84,13 @@ func (c *Converter) Do(
 	}
 
 	for _, fn := range c.Converters {
-		// if ok, err := fn.ConvertType.Do(source, save, size_px, typ, fn.Converter); err != nil {
 		if ok, err := fn.Do(source, save, size_px, typThumb); err != nil {
 			return c.L.Typ.Error(logFP, logF03, err)
 		} else if ok {
 			return nil
 		}
 	}
-	return c.L.Typ.Error(logFP, logF06, err)
+	return c.L.Typ.Error(logFP, logF06)
 }
 
 
