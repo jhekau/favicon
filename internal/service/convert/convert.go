@@ -25,8 +25,9 @@ const (
 // хранимые объекты
 type StorageOBJ interface{
 	IsExists() ( bool, error )
-	Read() (io.ReadCloser, error)
 	Key() domain_.StorageKey
+	Reader() (io.ReadCloser, error)
+	Writer() (io.WriteCloser, error)
 }
 
 

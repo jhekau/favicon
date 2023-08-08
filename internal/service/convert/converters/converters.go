@@ -20,7 +20,8 @@ const (
 
 
 type StorageOBJ interface{
-	Read() (io.ReadCloser, error)
+	Reader() (io.ReadCloser, error)
+	Writer() (io.WriteCloser, error)
 }
 
 type ConverterICO struct{
