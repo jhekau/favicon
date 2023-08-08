@@ -66,19 +66,34 @@ func (mr *MockStorageOBJMockRecorder) Key() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Key", reflect.TypeOf((*MockStorageOBJ)(nil).Key))
 }
 
-// Read mocks base method.
-func (m *MockStorageOBJ) Read() (io.ReadCloser, error) {
+// Reader mocks base method.
+func (m *MockStorageOBJ) Reader() (io.ReadCloser, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Read")
+	ret := m.ctrl.Call(m, "Reader")
 	ret0, _ := ret[0].(io.ReadCloser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Read indicates an expected call of Read.
-func (mr *MockStorageOBJMockRecorder) Read() *gomock.Call {
+// Reader indicates an expected call of Reader.
+func (mr *MockStorageOBJMockRecorder) Reader() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Read", reflect.TypeOf((*MockStorageOBJ)(nil).Read))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reader", reflect.TypeOf((*MockStorageOBJ)(nil).Reader))
+}
+
+// Writer mocks base method.
+func (m *MockStorageOBJ) Writer() (io.WriteCloser, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Writer")
+	ret0, _ := ret[0].(io.WriteCloser)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Writer indicates an expected call of Writer.
+func (mr *MockStorageOBJMockRecorder) Writer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Writer", reflect.TypeOf((*MockStorageOBJ)(nil).Writer))
 }
 
 // MockConverterT is a mock of ConverterT interface.
