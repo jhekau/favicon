@@ -8,6 +8,8 @@ import (
 	io "io"
 	reflect "reflect"
 
+	types "github.com/jhekau/favicon/internal/core/types"
+	converters "github.com/jhekau/favicon/internal/service/convert/converters"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -62,4 +64,41 @@ func (m *MockStorageOBJ) Writer() (io.WriteCloser, error) {
 func (mr *MockStorageOBJMockRecorder) Writer() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Writer", reflect.TypeOf((*MockStorageOBJ)(nil).Writer))
+}
+
+// MockConverterExec is a mock of ConverterExec interface.
+type MockConverterExec struct {
+	ctrl     *gomock.Controller
+	recorder *MockConverterExecMockRecorder
+}
+
+// MockConverterExecMockRecorder is the mock recorder for MockConverterExec.
+type MockConverterExecMockRecorder struct {
+	mock *MockConverterExec
+}
+
+// NewMockConverterExec creates a new mock instance.
+func NewMockConverterExec(ctrl *gomock.Controller) *MockConverterExec {
+	mock := &MockConverterExec{ctrl: ctrl}
+	mock.recorder = &MockConverterExecMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockConverterExec) EXPECT() *MockConverterExecMockRecorder {
+	return m.recorder
+}
+
+// Proc mocks base method.
+func (m *MockConverterExec) Proc(source, save converters.StorageOBJ, size_px int, typ types.FileType) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Proc", source, save, size_px, typ)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Proc indicates an expected call of Proc.
+func (mr *MockConverterExecMockRecorder) Proc(source, save, size_px, typ interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Proc", reflect.TypeOf((*MockConverterExec)(nil).Proc), source, save, size_px, typ)
 }
