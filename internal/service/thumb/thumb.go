@@ -6,34 +6,66 @@ package thumb
  */
 import (
 	"html"
+	"io"
 	"log"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
+	files_ "github.com/jhekau/favicon/internal/storage/files"
+	domain_ "github.com/jhekau/favicon/pkg/domain"
 )
 
 const (
 	logTP  = `/thumb/thumb.go`
 	logT01 = `T01: create file`
-	logT02 = `T02: thumb file not exists`
-	logT03 = `T03: create thumb file`
-	logT04 = `T04: not complite - file create`
-	logT05 = `T05: thumb not exists`
-	logT06 = `T06: os stat save thumb`
-	logT07 = `T07: save thumb is a folder`
+	// logT02 = `T02: thumb file not exists`
+	// logT03 = `T03: create thumb file`
+	// logT04 = `T04: not complite - file create`
+	// logT05 = `T05: thumb not exists`
+	// logT06 = `T06: os stat save thumb`
+	// logT07 = `T07: save thumb is a folder`
 	logT08 = `T08: url parse standart template domain.com`
-	logT09 = `T09: `
+	logT09 = `T09: create new storage object`
+
+	logT10 = `T10: thumb check is exists`
+	logT11 = `T11: create new thumb image`
+	// logT12 = `T12: `
+	// logT13 = `T13: `
+	// logT14 = `T14: `
+	// logT15 = `T15: `
+	// logT16 = `T16: `
+	// logT17 = `T17: `
+	// logT18 = `T18: `
+	// logT19 = `T19: `
 )
 
 var (
 	URLExists = url_Exists
 )
+
+
+type StorageOBJ interface{
+	Reader() (io.ReadCloser , error)
+	Writer() (io.WriteCloser, error)
+	Key() domain_.StorageKey
+	IsExists() ( bool, error )
+}
+
+type Storage interface {
+	NewObject() (StorageOBJ, error)
+}
+
+type Converter interface{
+	Do(source, save StorageOBJ, originalSVG bool, typThumb types_.FileType, size_px int) error
+}
+
+// type Converter interface{
+// 	Do(source, save StorageOBJ, originalSVG bool, typ types_.FileType, size_px int) error
+// }
+
 
 ///
 ///
@@ -53,26 +85,35 @@ type attr_size struct {
 // Оригинальное изображение, с которого нарезается превьюха
 type original struct {
 	typSVG bool
-	filepath types_.FilePath
+	// filepath types_.FilePath
+	obj StorageOBJ
 }
 
 ///
 ///
 type Thumb struct {
+
 	s sync.RWMutex
 	l *logger_.Logger
+
 	original *original
+	thumb StorageOBJ
+
+	storage Storage
+	conv Converter
+
 	size_px uint16
 	size_attr_value attr_size
 	comment string // <!-- comment -->
 	url_href types_.URLHref // domain{/name_url}, first -> `/`
 	url_href_clear types_.URLHref 
-	filename string // [folder/file] [file] [.file]
+	// filename string 
 	tag_rel string
 	manifest bool
 	mimetype types_.FileType
 	typ types_.FileType
 	cache cache
+
 }
 
 func (t *Thumb) SetSize(px uint16) *Thumb {
@@ -83,9 +124,9 @@ func (t *Thumb) GetSize() uint16 {
 	return t.get_size()
 }
 
-func (t *Thumb) SetNameFile( nameFile string ) *Thumb {
-	return t.set_name_file(nameFile)
-}
+// func (t *Thumb) SetNameFile( nameFile string ) *Thumb {
+// 	return t.set_name_file(nameFile)
+// }
 
 func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
 	return t.set_tag_rel(tagRel)
@@ -127,9 +168,9 @@ func (t *Thumb) GetTAG() string {
 	return t.get_tag()
 }
 
-func (t *Thumb) SetTypeImage( typ types_.FileType ) *Thumb {
-	return t.set_type_image(typ)
-}
+// func (t *Thumb) SetTypeImage( typ types_.FileType ) *Thumb {
+// 	return t.set_type_image(typ)
+// }
 
 func (t *Thumb) SetSizeAttrEmpty() *Thumb {
 	return t.set_size_attr_empty()
@@ -147,33 +188,41 @@ func (t *Thumb) GetOriginalKey() string{
 	return t.get_original_key()
 }
 
-func (t *Thumb) GetFile(
-	folder_work types_.Folder,
-	source_img, source_svg types_.FilePath,
-	conv Converter,
-)(
-	types_.FilePath,
-	error,
-){
-	return t.get_file(folder_work, source_img, source_svg, conv)
+func (t *Thumb) Read() (io.ReadCloser, error) {
+	return t.read()
 }
 
-func (t *Thumb) GetFilepath(folder_work types_.Folder, original_filename types_.FileName) types_.FilePath {
-	return t.get_filepath(folder_work, original_filename)
-}
+
+
 
 // source image
-func (t *Thumb) OriginalSet( filepath string ) {
+func (t *Thumb) OriginalFileSet( filepath string ) {
+	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
 	t.original = &original{
-		filepath: types_.FilePath(filepath),
+		obj: file,
 	}
 }
-func (t *Thumb) OriginalSetSVG( filepath string ) {
+func (t *Thumb) OriginalFileSetSVG( filepath string ) {
+	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
 	t.original = &original{
 		typSVG: true,
-		filepath: types_.FilePath(filepath),
+		obj: file,
 	}
 }
+func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) {
+	t.original = &original{
+		obj: obj,
+	}
+}
+func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
+	t.original = &original{
+		typSVG: true,
+		obj: obj,
+	}
+}
+
+
+
 func (t *Thumb) original_get( filepath string ) *original {
 	return t.original
 }
@@ -181,135 +230,49 @@ func (t *Thumb) original_get( filepath string ) *original {
 
 
 
-//
-// ...
-type Converter interface{
-	Do(source, save types_.FilePath, originalSVG bool, typThumb types_.FileType, size_px int) error
-}
 
-func (t *Thumb) file_create(save_img types_.FilePath, conv Converter) error {
+func (t *Thumb) thumb_create() error {
 
 	t.s.Lock()
 	defer t.s.Unlock()
 
-	os.Remove(save_img.String())
-
-	err := conv.Do(t.original.filepath, save_img, t.original.typSVG, t.typ, int(t.size_px))
+	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.typ, int(t.size_px))
 	if err != nil {
 		return t.l.Typ.Error(logTP, logT01, err)
 	}
 	return nil
 }
 
-// ...
-func (t *Thumb) get_filepath(folder_work types_.Folder, original_name types_.FileName) types_.FilePath {
-
-	var fpath types_.FilePath
-	t.s.RLock()
-	fpath = t.cache.get_filepath()
-	t.s.RUnlock()
-
-	if fpath != `` {
-		return fpath
-	}
-
-	//
-	if t.filename == `` {
-		t.filename = strings.Join(
-			[]string{
-				filepath.Base( original_name.String() ),
-				strconv.Itoa(int(t.size_px)),
-			},
-			`_`,
-		) + `.` + t.mimetype.String()
-	}
-	
-	fpath = types_.FilePath(
-		filepath.Join(folder_work.String(), t.filename),
-	)
-
-	//
-	t.cache.set_filepath(fpath)
-	return fpath
-}
 
 func (t *Thumb) get_original_key() string {
 	if t.original == nil {
 		return ``
 	}
-	return t.original.filepath.String()
+	return string(t.original.obj.Key())
 }
 
-func (t *Thumb) set_original( source_img, source_svg types_.FilePath ) {
-
-	t.original = &original{}
-	if t.typ == types_.SVG() && source_svg != `` {
-		t.original.filepath = source_svg
-		t.original.typSVG = true
-	} else if source_img != `` {
-		t.original.filepath = source_img
-	} else {
-		// SVG -> PNG&&ICO ?? real? TODO
-		t.original.filepath = source_svg
-		t.original.typSVG = true
-	}
-}
-
-// ...
-func (t *Thumb) get_file(
-	folder_work types_.Folder,
-	source_img, source_svg types_.FilePath,
-	conv Converter,
-)(
-	types_.FilePath,
-	error,
-){
-
-	t.set_original(source_img, source_svg)
-
-	original_filename := types_.FileName(
-		filepath.Base(t.original.filepath.String()),
-	)
-
-	save_img := t.get_filepath(folder_work, original_filename)
-	var check_exists types_.FileExists
-
-	t.s.RLock()
-	check_exists = t.cache.get_file_exists_state()
-	t.s.RUnlock()
-
-	if check_exists == types_.FileExistsOK {
-		return save_img, nil
-	}
+func (t *Thumb) read() (io.ReadCloser, error) {
 	
-	if check_exists == types_.FileExistsNOT {
-		return ``, t.l.Typ.Error(logTP, logT02)
-	}
-
-	t.s.Lock()
-	defer t.s.Unlock()
-
-	err := t.file_create(save_img, /*source_img, source_svg,*/ conv)
-	if err != nil {
-		return ``, t.l.Typ.Error(logTP, logT03, err)
-	// } else if !complite {
-	// 	t.cache.set_file_exists_state(types_.FileExistsNOT)
-	// 	return ``, errT(logT04)
-	}
-
-	if f, err := os.Stat(save_img.String()); err != nil {
-		t.cache.set_file_exists_state(types_.FileExistsNOT)
-		if os.IsNotExist(err) {
-			return ``, t.l.Typ.Error(logTP, logT05)
+	if t.thumb == nil {
+		tb, err := t.storage.NewObject()
+		if err != nil {
+			return nil, t.l.Typ.Error(logTP, logT09, err)
 		}
-		return ``, t.l.Typ.Error(logTP, logT06, err)
-	} else if f.IsDir() {
-		t.cache.set_file_exists_state(types_.FileExistsNOT)
-		return ``, t.l.Typ.Error(logTP, logT07, err) 
+		t.thumb = tb
+	}
+	exist, err := t.thumb.IsExists()
+	if err != nil {
+		return nil, t.l.Typ.Error(logTP, logT10, err)
+	}
+	if exist {
+		return t.thumb.Reader()
 	}
 
-	t.cache.set_file_exists_state(types_.FileExistsOK)
-	return save_img, nil
+	err = t.thumb_create()
+	if err != nil {
+		return nil, t.l.Typ.Error(logTP, logT11, err)
+	}
+	return t.thumb.Reader()
 }
 
 // ...
@@ -337,17 +300,6 @@ func (t *Thumb) get_size() uint16 {
 // 	t.url_path = nameURL
 // 	return t
 // }
-
-// ...
-func (t *Thumb) set_name_file( nameFile string ) *Thumb {
-
-	t.s.Lock()
-	defer t.s.Unlock()
-
-	t.cache.clean()
-	t.filename = nameFile
-	return t
-}
 
 // ...
 func (t *Thumb) set_tag_rel( tagRel string ) *Thumb {
@@ -509,17 +461,6 @@ func (t *Thumb) get_tag() string {
 }
 
 // ...
-func (t *Thumb) set_type_image( typ types_.FileType ) *Thumb {
-	
-	t.s.Lock()
-	defer t.s.Unlock()
-
-	t.cache.clean()
-	t.typ = typ
-	return t
-}
-
-// ...
 func (t *Thumb) set_size_attr_empty() *Thumb {
 
 	t.s.Lock()
@@ -572,23 +513,7 @@ func (t *Thumb) set_size_attr_custom(val string) *Thumb {
 
 type cache struct {
 	sync.RWMutex
-	filepath types_.FilePath
 	tag string
-	file_exists_state types_.FileExists
-}
-
-//
-func (c *cache) get_filepath() types_.FilePath {
-
-	c.RLock()
-	defer c.RUnlock()
-
-	return c.filepath
-}
-func (c *cache) set_filepath( filepath types_.FilePath ) {
-	c.Lock()
-	c.filepath = filepath
-	c.Unlock()
 }
 
 //
@@ -602,21 +527,6 @@ func (c *cache) get_tag() string {
 func (c *cache) set_tag( tag string ) {
 	c.Lock()
 	c.tag = tag
-	c.Unlock()
-}
-
-//
-func (c *cache) get_file_exists_state() types_.FileExists {
-
-	c.RLock()
-	defer c.RUnlock()
-
-	return c.file_exists_state
-}
-
-func (c *cache) set_file_exists_state( exists types_.FileExists ) {
-	c.Lock()
-	c.file_exists_state = exists
 	c.Unlock()
 }
 

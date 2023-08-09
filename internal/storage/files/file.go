@@ -5,9 +5,11 @@ package files
  * 10 March 2023
  */
 import (
+	"io"
 	"os"
 
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 	domain_ "github.com/jhekau/favicon/pkg/domain"
 )
 
@@ -17,6 +19,7 @@ const (
 	logS02 = `S02: error open file`
 	logS03 = `S03: os stat source image`
 	logS04 = `S04: save thumb image is a folder`
+	logS05 = `S05: failed open file`
 )
 
 // for test 
@@ -25,10 +28,12 @@ var (
 	osStat = os.Stat
 )
 
+
+
 // storage object
 type file struct{
 	l *logger_.Logger
-	filepath func() string
+	filepath types_.FilePath
 	f *os.File
 }
 
@@ -37,13 +42,21 @@ type Files struct{
 	L *logger_.Logger
 }
 
-func (s *file) Read() (*os.File, error) {
-	f, err := osOpen(s.filepath())
+func (s *file) Reader() (io.ReadCloser, error) {
+	f, err := osOpen(s.filepath.String())
 	if err != nil {
 		return nil, s.l.Typ.Error(logP, logS02, err)
 	}
 	return f, nil
 }
+func (s *file) Writer() (io.WriteCloser, error){
+	f, err := os.OpenFile(s.filepath.String(), os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		return nil, s.l.Typ.Error(logP, logS05, err)
+	}
+	return f, nil
+}
+
 func (s *file) Close() error {
 	if s.f == nil {
 		return nil
@@ -57,7 +70,11 @@ func (s *file) Close() error {
 
 func (s *file) IsExists() ( bool, error ) {
 
-	if f, err := osStat(s.filepath()); err != nil {
+	if s == nil {
+		return false, nil
+	}
+	
+	if f, err := osStat(s.filepath.String()); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
@@ -71,18 +88,17 @@ func (s *file) IsExists() ( bool, error ) {
 }
 
 func (s *file) Key() domain_.StorageKey {
-	return domain_.StorageKey(s.filepath())
+	return domain_.StorageKey(s.filepath.String())
 }
 
 // TODO ?
-// func (s *File) Write()....
 // func (s *File) Delete()....
 
 // получаем интерфейсы на объект в storage
-func (fl *Files) Object( key func() string ) *file {
+func (fl *Files) NewObject( filepath types_.FilePath ) *file {
 	return &file{
 		l: fl.L,
-		filepath: key,
+		filepath: filepath,
 	}
 }
 
