@@ -67,12 +67,9 @@ func (c *Converter) Do(
 	err error,
 ){
 
-	if size_px == 0 {
+	if size_px <= 0 {
 		return c.L.Typ.Error(logFP, logF05)
 	}
-	// if source == `` {
-	// 	return c.L.Typ.Error(logFP, logF01)
-	// }
 
 	err = c.CheckPreview.Check(typThumb, size_px)
 	if err != nil {

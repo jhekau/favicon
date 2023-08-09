@@ -11,16 +11,17 @@ import (
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	types_ "github.com/jhekau/favicon/internal/core/types"
+	mock_converters_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert/converters"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
 )
 
-type converter struct{
-	err error
-}
+// type converter struct{
+// 	err error
+// }
 
-func (c converter) Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error {
-	return c.err
-}
+// func (c converter) Proc(source, save types_.FilePath, size_px int, typ types_.FileType) error {
+// 	return c.err
+// }
 
 func TestConverterICOUnit( t *testing.T) {
 
@@ -28,7 +29,7 @@ func TestConverterICOUnit( t *testing.T) {
 		source, save types_.FilePath
 		size_px int
 		typ types_.FileType
-		conv converter
+		conv mock_converters_.
 		result_complite bool
 		result_error error
 	}{

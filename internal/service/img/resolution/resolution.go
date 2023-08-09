@@ -21,7 +21,7 @@ const (
 )
 
 type StorageOBJ interface{
-	Read() (io.ReadCloser , error)
+	Reader() (io.ReadCloser , error)
 }
 
 type Resolution struct {
@@ -31,7 +31,7 @@ type Resolution struct {
 // Get : получние разрешения изображения 
 func (r *Resolution) Get(obj StorageOBJ) ( w,h int, err error ) {
 
-	read, err := obj.Read()
+	read, err := obj.Reader()
 	if err != nil {
 		return 0,0, r.L.Typ.Error(logRP, logR02, err)
 	}

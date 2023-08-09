@@ -24,12 +24,14 @@ type StorageOBJ interface{
 	Writer() (io.WriteCloser, error)
 }
 
+type ConverterExec interface {
+	Proc(source, save StorageOBJ, size_px int, typ types_.FileType) error
+}
+
 type ConverterICO struct{
 	L *logger_.Logger
 	// пакет/утилита, который выполняет непосредственную конвертацию изображения
-	ConverterExec interface {
-		Proc(source, save StorageOBJ, size_px int, typ types_.FileType) error
-	}
+	ConverterExec ConverterExec
 }
 
 // интерфейс для конвертора ICO
