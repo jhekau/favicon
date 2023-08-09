@@ -62,10 +62,6 @@ type Converter interface{
 	Do(source, save StorageOBJ, originalSVG bool, typThumb types_.FileType, size_px int) error
 }
 
-// type Converter interface{
-// 	Do(source, save StorageOBJ, originalSVG bool, typ types_.FileType, size_px int) error
-// }
-
 
 ///
 ///
@@ -85,7 +81,6 @@ type attr_size struct {
 // Оригинальное изображение, с которого нарезается превьюха
 type original struct {
 	typSVG bool
-	// filepath types_.FilePath
 	obj StorageOBJ
 }
 
@@ -123,10 +118,6 @@ func (t *Thumb) SetSize(px uint16) *Thumb {
 func (t *Thumb) GetSize() uint16 {
 	return t.get_size()
 }
-
-// func (t *Thumb) SetNameFile( nameFile string ) *Thumb {
-// 	return t.set_name_file(nameFile)
-// }
 
 func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
 	return t.set_tag_rel(tagRel)
@@ -167,10 +158,6 @@ func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
 func (t *Thumb) GetTAG() string {
 	return t.get_tag()
 }
-
-// func (t *Thumb) SetTypeImage( typ types_.FileType ) *Thumb {
-// 	return t.set_type_image(typ)
-// }
 
 func (t *Thumb) SetSizeAttrEmpty() *Thumb {
 	return t.set_size_attr_empty()
