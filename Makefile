@@ -36,7 +36,8 @@ cover:
 MOCKS_FILEPATH = internal/service/convert/convert.go $\
 internal/service/convert/checks/source.go $\
 internal/service/convert/converters/converters.go $\
-internal/service/img/converter/anthonynsimon/convert.go
+internal/service/img/converter/anthonynsimon/convert.go $\
+internal/service/thumb/thumb.go
 
 MOCKGEN ?= $(GOPATH)/bin/mockgen
 ifeq ($(OS),Windows_NT)
