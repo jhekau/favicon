@@ -202,6 +202,9 @@ func (t *Thumb) Read() (io.ReadCloser, error) {
 
 // Используется по умолчанию файловое хранилище для изображений
 func (t *Thumb) OriginalFileSet( filepath string ) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
 	t.original = &original{
 		obj: file,
@@ -210,6 +213,9 @@ func (t *Thumb) OriginalFileSet( filepath string ) {
 
 // Используется по умолчанию файловое хранилище для изображений
 func (t *Thumb) OriginalFileSetSVG( filepath string ) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
 	t.original = &original{
 		typSVG: true,
@@ -217,11 +223,17 @@ func (t *Thumb) OriginalFileSetSVG( filepath string ) {
 	}
 }
 func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	t.original = &original{
 		obj: obj,
 	}
 }
 func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	t.original = &original{
 		typSVG: true,
 		obj: obj,
@@ -231,6 +243,8 @@ func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
 
 
 func (t *Thumb) original_get( filepath string ) *original {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 	return t.original
 }
 
@@ -252,27 +266,42 @@ func (t *Thumb) thumb_create() error {
 
 
 func (t *Thumb) get_original_key() string {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
 	if t.original == nil {
 		return ``
 	}
 	return string(t.original.obj.Key())
 }
 
+func (t *Thumb) storageNewObject( key string ) (StorageOBJ, error){
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	return t.storage.NewObject(key)
+}
+
 func (t *Thumb) read() (io.ReadCloser, error) {
 	
-	if t.thumb == nil {
-		tb, err := t.storage.NewObject( uuid.Must(uuid.NewRandom()) )
+	t.mu.RLock()
+	thumb := t.thumb
+	t.mu.RUnlock()
+
+	if thumb == nil {
+		obj, err := t.storageNewObject( uuid.Must(uuid.NewRandom()).String() )
 		if err != nil {
 			return nil, t.l.Typ.Error(logTP, logT09, err)
 		}
-		t.thumb = tb
+		t.thumb = obj
 	}
-	exist, err := t.thumb.IsExists()
+	
+	exist, err := thumb.IsExists()
 	if err != nil {
 		return nil, t.l.Typ.Error(logTP, logT10, err)
 	}
 	if exist {
-		return t.thumb.Reader()
+		return thumb.Reader()
 	}
 
 	err = t.thumb_create()
