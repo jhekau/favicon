@@ -30,7 +30,7 @@ cover:
 
 # *****
 # rename the destination for subfolders - "internal", otherwise it will be impossible to import packages
-# ренейм для вложенных папок назначения - "internal", иначе импортировать моки будет нереал
+# ренейм для вложенных папок назначения - "internal", такая сложнота нужна, в противном случае импортировать моки будет нереал
 # <!> go install go.uber.org/mock/mockgen@latest
 
 MOCKS_FILEPATH = internal/service/convert/convert.go $\
