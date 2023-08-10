@@ -242,7 +242,7 @@ func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
 
 
 
-func (t *Thumb) original_get( filepath string ) *original {
+func (t *Thumb) original_get() *original {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	return t.original

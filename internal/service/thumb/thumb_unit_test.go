@@ -423,7 +423,7 @@ func Test_SizeAttr( t *testing.T ) {
 }
 
 
-func Test_GetOriginalKey( t *testing.T ) {
+func Test_OriginalCustomSet( t *testing.T ) {
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -440,33 +440,33 @@ func Test_GetOriginalKey( t *testing.T ) {
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
+	obj := mock_thumb_.NewMockStorageOBJ(ctrl)
 	cache := mock_thumb_.NewMockcache(ctrl)
 
 	//
 	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
-	thumb.TestCacheSwap(cache)
+	thumb.
+		TestCacheSwap(cache). 
+		OriginalCustomSet(obj)
 
-	require.Equal(t, href, string(h))
+	objExpect := thumb.GetOriginalStorageObj()
+	require.Equal(t, obj, objExpect)
+
+	//
+	thumb, _ = thumb_.NewThumb(keyThumb, logger, storage, conv)
+	thumb.
+		TestCacheSwap(cache). 
+		OriginalCustomSetSVG(obj)
+
+	objExpect = thumb.GetOriginalStorageObj()
+	require.Equal(t, obj, objExpect)
 }
 
 
 
 /*
-func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) {
-	t.original = &original{
-		obj: obj,
-	}
-}
-func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
-	t.original = &original{
-		typSVG: true,
-		obj: obj,
-	}
-}
 
-func (t *Thumb) GetOriginalKey() string{
-	return t.get_original_key()
-}
+
 
 func (t *Thumb) Read() (io.ReadCloser, error) {
 	return t.read()
@@ -491,6 +491,9 @@ func (t *Thumb) OriginalFileSetSVG( filepath string ) {
 	}
 }
 
+func (t *Thumb) GetOriginalKey() string{
+	return t.get_original_key()
+}
 
 
 
