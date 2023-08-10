@@ -99,13 +99,15 @@ func Test_NewThumb( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
 
 	require.IsType(t, thumb, &thumb_.Thumb{}, fmt.Sprintf(`%T`, thumb))
 }
@@ -119,8 +121,10 @@ func Test_Size( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
@@ -132,7 +136,7 @@ func Test_Size( t *testing.T ) {
 	cache.EXPECT().Store(nil, nil).AnyTimes()
 
 	size := 16
-	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
 
 	thumb.TestCacheSwap(cache)
 	thumb.SetSize(size)
@@ -150,8 +154,10 @@ func Test_SetTagRel( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
@@ -162,7 +168,7 @@ func Test_SetTagRel( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() )
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	tagRel := `apple-touch-icon`
@@ -183,8 +189,10 @@ func Test_HTMLComment( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
@@ -195,7 +203,7 @@ func Test_HTMLComment( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	tagRel := `apple-touch-icon`
@@ -219,8 +227,10 @@ func Test_HTMLCommentEmptyTag( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
@@ -231,7 +241,7 @@ func Test_HTMLCommentEmptyTag( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	htmlComment := `hello`
@@ -252,8 +262,10 @@ func Test_ManifestUsed( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
@@ -264,7 +276,7 @@ func Test_ManifestUsed( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() )
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	thumb.SetManifestUsed()
@@ -282,8 +294,10 @@ func Test_TypeThumb( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
@@ -294,7 +308,7 @@ func Test_TypeThumb( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() )
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	typ := types_.PNG()
@@ -304,6 +318,10 @@ func Test_TypeThumb( t *testing.T ) {
 
 	tag := thumb.GetTAG()
 	require.Equal(t, expect, tag)
+
+	mimetype := thumb.GetType()
+	require.Equal(t, mimetype, typ)
+
 }
 
 func Test_Href( t *testing.T ) {
@@ -315,8 +333,10 @@ func Test_Href( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
@@ -327,7 +347,7 @@ func Test_Href( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() )
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb,  _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb,  _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	href := `/path/thumbs/image.png`
@@ -351,8 +371,10 @@ func Test_SizeAttr( t *testing.T ) {
 		Typ: &logger_mock_.LoggerErrorf{},
 	}
 
+	keyThumb := `123`
+
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject().AnyTimes()
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
@@ -366,8 +388,8 @@ func Test_SizeAttr( t *testing.T ) {
 	size := 16
 
 	//
-	thumb, _ := thumb_.
-		NewThumb(`123`, logger, storage, conv).
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
+	thumb.
 		TestCacheSwap(cache).
 		SetSize(size).
 		SetTagRel(`apple-touch-icon`)
@@ -377,8 +399,8 @@ func Test_SizeAttr( t *testing.T ) {
 	require.Equal(t, tag, `<link rel="apple-touch-icon" >`)
 
 	//
-	thumb, _ = thumb_.
-		NewThumb(`123`, logger, storage, conv).
+	thumb, _ = thumb_.NewThumb(keyThumb, logger, storage, conv)
+	thumb.
 		TestCacheSwap(cache).
 		SetSize(size)
 
@@ -389,8 +411,8 @@ func Test_SizeAttr( t *testing.T ) {
 
 	//
 	attrCustom := `1000xYYYY`
-	thumb, _ = thumb_.
-		NewThumb(`123`, logger, storage, conv).
+	thumb, _ = thumb_.NewThumb(keyThumb, logger, storage, conv)
+	thumb.
 		TestCacheSwap(cache).
 		SetSize(size)
 
@@ -401,10 +423,46 @@ func Test_SizeAttr( t *testing.T ) {
 }
 
 
+func Test_GetOriginalKey( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	keyThumb := `123`
+
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject(keyThumb).AnyTimes()
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+
+	//
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	require.Equal(t, href, string(h))
+}
 
 
 
 /*
+func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) {
+	t.original = &original{
+		obj: obj,
+	}
+}
+func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
+	t.original = &original{
+		typSVG: true,
+		obj: obj,
+	}
+}
 
 func (t *Thumb) GetOriginalKey() string{
 	return t.get_original_key()
@@ -416,6 +474,9 @@ func (t *Thumb) Read() (io.ReadCloser, error) {
 
 
 
+
+
+// Integration
 func (t *Thumb) OriginalFileSet( filepath string ) {
 	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
 	t.original = &original{
@@ -429,16 +490,9 @@ func (t *Thumb) OriginalFileSetSVG( filepath string ) {
 		obj: file,
 	}
 }
-func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) {
-	t.original = &original{
-		obj: obj,
-	}
-}
-func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
-	t.original = &original{
-		typSVG: true,
-		obj: obj,
-	}
-}
+
+
+
+
 
 */

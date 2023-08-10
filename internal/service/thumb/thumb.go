@@ -123,7 +123,6 @@ type Thumb struct {
 	size_attr_value attr_size
 	comment string // <!-- comment -->
 	url_href types_.URLHref // domain{/name_url}, first -> `/`
-	// url_href_clear types_.URLHref 
 	tag_rel string
 	manifest bool
 	mimetype types_.FileType
@@ -166,10 +165,6 @@ func (t *Thumb) SetHREF(src string) *Thumb {
 func (t *Thumb) GetHREF() types_.URLHref {
 	return t.get_href()
 }
-
-// func (t *Thumb) GetHREFClear() types_.URLHref {
-// 	return t.get_href_clear()
-// }
 
 func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
 	return t.status_manifest()
