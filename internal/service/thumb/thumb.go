@@ -21,12 +21,12 @@ import (
 const (
 	logTP  = `/thumb/thumb.go`
 	logT01 = `T01: create file`
-	// logT02 = `T02: thumb file not exists`
-	// logT03 = `T03: create thumb file`
-	// logT04 = `T04: not complite - file create`
-	// logT05 = `T05: thumb not exists`
-	// logT06 = `T06: os stat save thumb`
-	// logT07 = `T07: save thumb is a folder`
+	// logT02 = `T02: `
+	// logT03 = `T03: `
+	// logT04 = `T04: `
+	// logT05 = `T05: `
+	// logT06 = `T06: `
+	// logT07 = `T07: `
 	logT08 = `T08: url parse standart template domain.com`
 	logT09 = `T09: create new storage object`
 
@@ -62,6 +62,14 @@ type Converter interface{
 	Do(source, save StorageOBJ, originalSVG bool, typThumb types_.FileType, size_px int) error
 }
 
+type cache interface{
+	Delete(key any)
+	Load(key any) (value any, ok bool)
+	Range(f func(key any, value any) bool)
+	Store(key any, value any)
+}
+
+
 
 ///
 ///
@@ -84,31 +92,36 @@ type original struct {
 	obj StorageOBJ
 }
 
+func NewThumb(l *logger_.Logger, s Storage, c Converter) *Thumb {
+	return &Thumb{ l:l, storage:s, conv:c, cache: &sync.Map{} }
+}
+
+
+
 ///
 ///
 type Thumb struct {
 
-	s sync.RWMutex
+	mu sync.RWMutex
+
 	l *logger_.Logger
+	storage Storage
+	conv Converter
+	cache cache
 
 	original *original
 	thumb StorageOBJ
-
-	storage Storage
-	conv Converter
 
 	size_px uint16
 	size_attr_value attr_size
 	comment string // <!-- comment -->
 	url_href types_.URLHref // domain{/name_url}, first -> `/`
 	url_href_clear types_.URLHref 
-	// filename string 
 	tag_rel string
 	manifest bool
 	mimetype types_.FileType
 	typ types_.FileType
-	cache cache
-
+	
 }
 
 func (t *Thumb) SetSize(px uint16) *Thumb {
@@ -156,7 +169,7 @@ func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
 }
 
 func (t *Thumb) GetTAG() string {
-	return t.get_tag()
+	return t.tagGet()
 }
 
 func (t *Thumb) SetSizeAttrEmpty() *Thumb {
@@ -220,8 +233,8 @@ func (t *Thumb) original_get( filepath string ) *original {
 
 func (t *Thumb) thumb_create() error {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
 	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.typ, int(t.size_px))
 	if err != nil {
@@ -265,25 +278,25 @@ func (t *Thumb) read() (io.ReadCloser, error) {
 // ...
 func (t *Thumb) set_size(px uint16) *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
-	t.cache.clean()
+	t.cacheClean()
 	t.size_px = px
 	return t
 }
 
 func (t *Thumb) get_size() uint16 {
 
-	t.s.RLock()
-	defer t.s.RUnlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
 	return t.size_px
 }
 
 // ...
 // func (t *Thumb) SetNameURL( nameURL string ) *Thumb {
-// 	t.cache.clean()
+// 	t.cacheClean()
 // 	t.url_path = nameURL
 // 	return t
 // }
@@ -291,10 +304,10 @@ func (t *Thumb) get_size() uint16 {
 // ...
 func (t *Thumb) set_tag_rel( tagRel string ) *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
-	t.cache.clean()
+	t.cacheClean()
 	t.tag_rel = tagRel
 	return t
 }
@@ -302,10 +315,10 @@ func (t *Thumb) set_tag_rel( tagRel string ) *Thumb {
 // ...
 func (t *Thumb) set_manifest_used() *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
-	t.cache.clean()
+	t.cacheClean()
 	t.manifest = true
 	return t
 }
@@ -313,8 +326,8 @@ func (t *Thumb) set_manifest_used() *Thumb {
 // <!-- comment -->
 func (t *Thumb) set_html_comment(comment string) *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
 	t.comment = comment
 	return t
@@ -323,18 +336,18 @@ func (t *Thumb) set_html_comment(comment string) *Thumb {
 // ...
 func (t *Thumb) set_type(typ types_.FileType) *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
-	t.cache.clean()
+	t.cacheClean()
 	t.typ = typ
 	return t
 }
 
 func (t *Thumb) get_type() types_.FileType {
 
-	t.s.RLock()
-	defer t.s.RUnlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
 	return t.typ
 }
@@ -342,10 +355,10 @@ func (t *Thumb) get_type() types_.FileType {
 // ...
 func (t *Thumb) set_href(src string) *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
-	t.cache.clean()
+	t.cacheClean()
 	t.url_href = types_.URLHref(src)
 	{
 		u, err := url.Parse(`http://domain.com`)
@@ -360,15 +373,15 @@ func (t *Thumb) set_href(src string) *Thumb {
 
 func (t *Thumb) get_href() types_.URLHref {
 
-	t.s.RLock()
-	defer t.s.RUnlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
 	return t.url_href
 }
 func (t *Thumb) get_href_clear() types_.URLHref {
 
-	t.s.RLock()
-	defer t.s.RUnlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
 	return t.url_href_clear
 }
@@ -378,18 +391,19 @@ func (t *Thumb) get_href_clear() types_.URLHref {
 // ...
 func (t *Thumb) status_manifest() bool { // ( string, bool /*true - used*/ )
 
-	t.s.RLock()
-	defer t.s.RUnlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
 	return t.manifest
 }
 
 // ...
-func (t *Thumb) get_tag() string {
+func (t *Thumb) tagGet() string {
 
-	t.s.RLock()
-	if str := t.cache.get_tag(); str != `` {
-		t.s.Unlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	if str := t.tagCacheGet(); str != `` {
 		return str
 	}
 
@@ -425,7 +439,7 @@ func (t *Thumb) get_tag() string {
 	// if comment <tag /> <!-- comment -->
 	comment := t.comment
 
-	t.s.RUnlock()
+	t.mu.RUnlock()
 
 	str := ``
 	if len(attr) > 0 {
@@ -439,21 +453,30 @@ func (t *Thumb) get_tag() string {
 		if comment != `` {
 			str += `<!-- `+html.EscapeString(comment)+` -->`
 		}
-		t.s.Lock()
-		t.cache.set_tag(str)
-		t.s.Unlock()
+		t.tagCacheSet(str)
 	}
 
 	return str
 }
 
+func (t *Thumb) tagCacheGet() string {
+	c, ok := t.cache.Load(`tag`)
+	if ok {
+		return c.(string)
+	}
+	return ``
+}
+func (t *Thumb) tagCacheSet( s string ) {
+	t.cache.Store(`tag`, s)
+}
+
 // ...
 func (t *Thumb) set_size_attr_empty() *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
-	t.cache.clean()
+	t.cacheClean()
 	t.size_attr_value = attr_size{
 		state: attr_size_state_empty,
 	}
@@ -462,10 +485,10 @@ func (t *Thumb) set_size_attr_empty() *Thumb {
 
 func (t *Thumb) set_size_attr_default() *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
-	t.cache.clean()
+	t.cacheClean()
 	t.size_attr_value = attr_size{
 		state: attr_size_state_custom,
 	}
@@ -474,10 +497,10 @@ func (t *Thumb) set_size_attr_default() *Thumb {
 
 func (t *Thumb) set_size_attr_custom(val string) *Thumb {
 
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
-	t.cache.clean()
+	t.cacheClean()
 	t.size_attr_value = attr_size{
 		state: attr_size_state_custom,
 		value: val,
@@ -487,42 +510,15 @@ func (t *Thumb) set_size_attr_custom(val string) *Thumb {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-type cache struct {
-	sync.RWMutex
-	tag string
+func (t *Thumb) cacheClean() {
+	t.cache.Range(func(k, _ any) bool{
+		t.cache.Delete(k)
+		return true
+	})
 }
 
-//
-func (c *cache) get_tag() string {
 
-	c.RLock()
-	defer c.RUnlock()
 
-	return c.tag
-}
-func (c *cache) set_tag( tag string ) {
-	c.Lock()
-	c.tag = tag
-	c.Unlock()
-}
-
-//
-func (c *cache) clean() {
-	c.Lock()
-	c = &cache{}
-	c.Unlock()
-}
 
 
 
