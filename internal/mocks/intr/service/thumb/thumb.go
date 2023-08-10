@@ -120,18 +120,18 @@ func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 }
 
 // NewObject mocks base method.
-func (m *MockStorage) NewObject() (thumb.StorageOBJ, error) {
+func (m *MockStorage) NewObject(key any) (thumb.StorageOBJ, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NewObject")
+	ret := m.ctrl.Call(m, "NewObject", key)
 	ret0, _ := ret[0].(thumb.StorageOBJ)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // NewObject indicates an expected call of NewObject.
-func (mr *MockStorageMockRecorder) NewObject() *gomock.Call {
+func (mr *MockStorageMockRecorder) NewObject(key interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewObject", reflect.TypeOf((*MockStorage)(nil).NewObject))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewObject", reflect.TypeOf((*MockStorage)(nil).NewObject), key)
 }
 
 // MockConverter is a mock of Converter interface.
