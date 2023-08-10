@@ -112,7 +112,7 @@ type Thumb struct {
 	original *original
 	thumb StorageOBJ
 
-	size_px uint16
+	size_px int
 	size_attr_value attr_size
 	comment string // <!-- comment -->
 	url_href types_.URLHref // domain{/name_url}, first -> `/`
@@ -124,11 +124,11 @@ type Thumb struct {
 	
 }
 
-func (t *Thumb) SetSize(px uint16) *Thumb {
+func (t *Thumb) SetSize(px int) *Thumb {
 	return t.set_size(px)
 }
 
-func (t *Thumb) GetSize() uint16 {
+func (t *Thumb) GetSize() int {
 	return t.get_size()
 }
 
@@ -136,6 +136,7 @@ func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
 	return t.set_tag_rel(tagRel)
 }
 
+// Добавлять ли превью в список манифеста
 func (t *Thumb) SetManifestUsed() *Thumb {
 	return t.set_manifest_used()
 }
@@ -195,13 +196,15 @@ func (t *Thumb) Read() (io.ReadCloser, error) {
 
 
 
-// source image
+// Используется по умолчанию файловое хранилище для изображений
 func (t *Thumb) OriginalFileSet( filepath string ) {
 	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
 	t.original = &original{
 		obj: file,
 	}
 }
+
+// Используется по умолчанию файловое хранилище для изображений
 func (t *Thumb) OriginalFileSetSVG( filepath string ) {
 	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
 	t.original = &original{
@@ -276,7 +279,7 @@ func (t *Thumb) read() (io.ReadCloser, error) {
 }
 
 // ...
-func (t *Thumb) set_size(px uint16) *Thumb {
+func (t *Thumb) set_size(px int) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -286,7 +289,7 @@ func (t *Thumb) set_size(px uint16) *Thumb {
 	return t
 }
 
-func (t *Thumb) get_size() uint16 {
+func (t *Thumb) get_size() int {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -416,7 +419,9 @@ func (t *Thumb) tagGet() string {
 	case attr_size_state_empty:
 	case attr_size_state_default:
 		sz := strconv.Itoa(int(t.size_px))
-		attr[`sizes`] = sz+`x`+sz
+		if t.size_px > 0 {
+			attr[`sizes`] = sz+`x`+sz
+		}
 	case attr_size_state_custom:
 		attr[`sizes`] = html.EscapeString(t.size_attr_value.value)
 	}
@@ -439,12 +444,10 @@ func (t *Thumb) tagGet() string {
 	// if comment <tag /> <!-- comment -->
 	comment := t.comment
 
-	t.mu.RUnlock()
-
 	str := ``
 	if len(attr) > 0 {
 
-		str += `<`
+		str += `<link`
 		for name, val := range attr {
 			str += ` `+name+`="`+val+`" `
 		}
