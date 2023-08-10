@@ -6,6 +6,7 @@ package thumb
  */
 
 // замена кеша для тестирования
-func (t *Thumb) TestCacheSwap( c cache ) {
+func (t *Thumb) TestCacheSwap( c cache ) *Thumb {
 	t.cache = c
+	return t
 }

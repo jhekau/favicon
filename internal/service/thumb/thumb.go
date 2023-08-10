@@ -7,11 +7,12 @@ package thumb
 import (
 	"html"
 	"io"
-	"log"
+
 	"net/url"
 	"strconv"
 	"sync"
 
+	"github.com/google/uuid"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
@@ -21,7 +22,7 @@ import (
 const (
 	logTP  = `/thumb/thumb.go`
 	logT01 = `T01: create file`
-	// logT02 = `T02: `
+	logT02 = `T02: create new object thumb into storage`
 	// logT03 = `T03: `
 	// logT04 = `T04: `
 	// logT05 = `T05: `
@@ -55,7 +56,7 @@ type StorageOBJ interface{
 }
 
 type Storage interface {
-	NewObject() (StorageOBJ, error)
+	NewObject(key any) (StorageOBJ, error)
 }
 
 type Converter interface{
@@ -92,14 +93,20 @@ type original struct {
 	obj StorageOBJ
 }
 
-func NewThumb(l *logger_.Logger, s Storage, c Converter) *Thumb {
-	return &Thumb{ l:l, storage:s, conv:c, cache: &sync.Map{} }
+func NewThumb(key string, l *logger_.Logger, s Storage, c Converter) (*Thumb, error) {
+	t, err := s.NewObject(key)
+	if err != nil {
+		return nil, l.Typ.Error(logTP, logT02, err)
+	}
+	return &Thumb{
+		l:l,
+		storage:s,
+		conv:c, 
+		cache: &sync.Map{},
+		thumb: t,
+	}, nil
 }
 
-
-
-///
-///
 type Thumb struct {
 
 	mu sync.RWMutex
@@ -116,11 +123,10 @@ type Thumb struct {
 	size_attr_value attr_size
 	comment string // <!-- comment -->
 	url_href types_.URLHref // domain{/name_url}, first -> `/`
-	url_href_clear types_.URLHref 
+	// url_href_clear types_.URLHref 
 	tag_rel string
 	manifest bool
 	mimetype types_.FileType
-	typ types_.FileType
 	
 }
 
@@ -145,8 +151,8 @@ func (t *Thumb) SetHTMLComment(comment string) *Thumb {
 	return t.set_html_comment(comment)
 }
 
-func (t *Thumb) SetType(typ types_.FileType) *Thumb {
-	return t.set_type(typ)
+func (t *Thumb) SetType(mimetype types_.FileType) *Thumb {
+	return t.set_type(mimetype)
 }
 
 func (t *Thumb) GetType() types_.FileType {
@@ -161,9 +167,9 @@ func (t *Thumb) GetHREF() types_.URLHref {
 	return t.get_href()
 }
 
-func (t *Thumb) GetHREFClear() types_.URLHref {
-	return t.get_href_clear()
-}
+// func (t *Thumb) GetHREFClear() types_.URLHref {
+// 	return t.get_href_clear()
+// }
 
 func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
 	return t.status_manifest()
@@ -173,14 +179,17 @@ func (t *Thumb) GetTAG() string {
 	return t.tagGet()
 }
 
+// аттрибут size не будет добавлен в тег
 func (t *Thumb) SetSizeAttrEmpty() *Thumb {
 	return t.set_size_attr_empty()
 }
 
+// аттрибут size будет добавлен только в том случае, если указан размер превью
 func (t *Thumb) SetSizeAttrDefault() *Thumb {
 	return t.set_size_attr_default()
 }
 
+// аттрибут size будет содержать кастомное значение val
 func (t *Thumb) SetSizeAttrCustom(val string) *Thumb {
 	return t.set_size_attr_custom(val)
 }
@@ -239,7 +248,7 @@ func (t *Thumb) thumb_create() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.typ, int(t.size_px))
+	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.mimetype, int(t.size_px))
 	if err != nil {
 		return t.l.Typ.Error(logTP, logT01, err)
 	}
@@ -257,7 +266,7 @@ func (t *Thumb) get_original_key() string {
 func (t *Thumb) read() (io.ReadCloser, error) {
 	
 	if t.thumb == nil {
-		tb, err := t.storage.NewObject()
+		tb, err := t.storage.NewObject( uuid.Must(uuid.NewRandom()) )
 		if err != nil {
 			return nil, t.l.Typ.Error(logTP, logT09, err)
 		}
@@ -337,13 +346,13 @@ func (t *Thumb) set_html_comment(comment string) *Thumb {
 }
 
 // ...
-func (t *Thumb) set_type(typ types_.FileType) *Thumb {
+func (t *Thumb) set_type(mimetype types_.FileType) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.cacheClean()
-	t.typ = typ
+	t.mimetype = mimetype
 	return t
 }
 
@@ -352,7 +361,7 @@ func (t *Thumb) get_type() types_.FileType {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 
-	return t.typ
+	return t.mimetype
 }
 
 // ...
@@ -363,14 +372,14 @@ func (t *Thumb) set_href(src string) *Thumb {
 
 	t.cacheClean()
 	t.url_href = types_.URLHref(src)
-	{
-		u, err := url.Parse(`http://domain.com`)
-		if err != nil {
-			log.Println( t.l.Typ.Error(logTP, logT08, err) )
-		} else {
-			t.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
-		}
-	}
+	// {
+	// 	u, err := url.Parse(`http://domain.com`)
+	// 	if err != nil {
+	// 		log.Println( t.l.Typ.Error(logTP, logT08, err) )
+	// 	} else {
+	// 		t.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
+	// 	}
+	// }
 	return t
 }
 
@@ -381,13 +390,13 @@ func (t *Thumb) get_href() types_.URLHref {
 
 	return t.url_href
 }
-func (t *Thumb) get_href_clear() types_.URLHref {
+// func (t *Thumb) get_href_clear() types_.URLHref {
 
-	t.mu.RLock()
-	defer t.mu.RUnlock()
+// 	t.mu.RLock()
+// 	defer t.mu.RUnlock()
 
-	return t.url_href_clear
-}
+// 	return t.url_href_clear
+// }
 
 
 
@@ -493,7 +502,7 @@ func (t *Thumb) set_size_attr_default() *Thumb {
 
 	t.cacheClean()
 	t.size_attr_value = attr_size{
-		state: attr_size_state_custom,
+		state: attr_size_state_default,
 	}
 	return t
 }

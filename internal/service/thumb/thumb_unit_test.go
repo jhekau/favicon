@@ -10,6 +10,7 @@ import (
 
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
+	types_ "github.com/jhekau/favicon/internal/core/types"
 	mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	"github.com/stretchr/testify/require"
@@ -104,7 +105,7 @@ func Test_NewThumb( t *testing.T ) {
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
-	thumb := thumb_.NewThumb(logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
 
 	require.IsType(t, thumb, &thumb_.Thumb{}, fmt.Sprintf(`%T`, thumb))
 }
@@ -131,14 +132,13 @@ func Test_Size( t *testing.T ) {
 	cache.EXPECT().Store(nil, nil).AnyTimes()
 
 	size := 16
-	thumb := thumb_.NewThumb(logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
 
 	thumb.TestCacheSwap(cache)
 	thumb.SetSize(size)
 
-	res := thumb.GetSize()
-
-	require.Equal(t, res, size)
+	expect := thumb.GetSize()
+	require.Equal(t, expect, size)
 }
 
 func Test_SetTagRel( t *testing.T ) {
@@ -162,7 +162,7 @@ func Test_SetTagRel( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() )
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb := thumb_.NewThumb(logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	tagRel := `apple-touch-icon`
@@ -170,60 +170,241 @@ func Test_SetTagRel( t *testing.T ) {
 
 	thumb.SetTagRel(tagRel)
 
-	res := thumb.GetTAG()
-
-	require.Equal(t, expect, res)
+	tag := thumb.GetTAG()
+	require.Equal(t, expect, tag)
 }
+
+func Test_HTMLComment( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject().AnyTimes()
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+	cache.EXPECT().Delete(nil).AnyTimes()
+	cache.EXPECT().Load(gomock.Any()).Return(nil, false)
+	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
+	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
+
+	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	tagRel := `apple-touch-icon`
+	htmlComment := `hello`
+	expect := `<link rel="`+tagRel+`" ><!-- `+htmlComment+` -->`
+
+	thumb.
+		SetTagRel(tagRel).
+		SetHTMLComment(htmlComment)
+
+	tag := thumb.GetTAG()
+	require.Equal(t, expect, tag)
+}
+
+func Test_HTMLCommentEmptyTag( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject().AnyTimes()
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+	cache.EXPECT().Delete(nil).AnyTimes()
+	cache.EXPECT().Load(gomock.Any()).Return(nil, false)
+	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
+	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
+
+	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	htmlComment := `hello`
+	expect := ``
+
+	thumb.SetHTMLComment(htmlComment)
+
+	tag := thumb.GetTAG()
+	require.Equal(t, expect, tag)
+}
+
+func Test_ManifestUsed( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject().AnyTimes()
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+	cache.EXPECT().Delete(nil).AnyTimes()
+	cache.EXPECT().Load(gomock.Any()).Return(nil, false).AnyTimes()
+	cache.EXPECT().Range( gomock.Any() )
+	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
+
+	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	thumb.SetManifestUsed()
+	expect := thumb.StatusManifest()
+
+	require.Equal(t, expect, true)
+}
+
+func Test_TypeThumb( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject().AnyTimes()
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+	cache.EXPECT().Delete(nil).AnyTimes()
+	cache.EXPECT().Load(gomock.Any()).Return(nil, false)
+	cache.EXPECT().Range( gomock.Any() )
+	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
+
+	thumb, _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	typ := types_.PNG()
+	expect := `<link type="`+string(typ)+`" >`
+
+	thumb.SetType(typ)
+
+	tag := thumb.GetTAG()
+	require.Equal(t, expect, tag)
+}
+
+func Test_Href( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject().AnyTimes()
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+	cache.EXPECT().Delete(nil).AnyTimes()
+	cache.EXPECT().Load(gomock.Any()).Return(nil, false)
+	cache.EXPECT().Range( gomock.Any() )
+	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
+
+	thumb,  _ := thumb_.NewThumb(`123`, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	href := `/path/thumbs/image.png`
+	expect := `<link href="`+string(href)+`" >`
+
+	thumb.SetHREF(href)
+
+	tag := thumb.GetTAG()
+	require.Equal(t, expect, tag)
+
+	h := thumb.GetHREF()
+	require.Equal(t, href, string(h))
+}
+
+func Test_SizeAttr( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject().AnyTimes()
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+	cache.EXPECT().Delete(nil).AnyTimes()
+	cache.EXPECT().Load(gomock.Any()).Return(nil, false).AnyTimes()
+	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
+	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
+
+	size := 16
+
+	//
+	thumb, _ := thumb_.
+		NewThumb(`123`, logger, storage, conv).
+		TestCacheSwap(cache).
+		SetSize(size).
+		SetTagRel(`apple-touch-icon`)
+
+	thumb.SetSizeAttrEmpty()
+	tag := thumb.GetTAG()
+	require.Equal(t, tag, `<link rel="apple-touch-icon" >`)
+
+	//
+	thumb, _ = thumb_.
+		NewThumb(`123`, logger, storage, conv).
+		TestCacheSwap(cache).
+		SetSize(size)
+
+	thumb.SetSizeAttrDefault()
+	tag = thumb.GetTAG()
+	require.Equal(t, tag, fmt.Sprintf(`<link sizes="%vx%v" >`, size, size), 
+		fmt.Sprintf(`size: '%v'`, thumb.GetSize()))
+
+	//
+	attrCustom := `1000xYYYY`
+	thumb, _ = thumb_.
+		NewThumb(`123`, logger, storage, conv).
+		TestCacheSwap(cache).
+		SetSize(size)
+
+	thumb.SetSizeAttrCustom(attrCustom)
+	tag = thumb.GetTAG()
+	require.Equal(t, tag, fmt.Sprintf(`<link sizes="%s" >`, attrCustom))
+
+}
+
+
+
 
 
 /*
-func (t *Thumb) SetManifestUsed() *Thumb {
-	return t.set_manifest_used()
-}
-
-func (t *Thumb) SetHTMLComment(comment string) *Thumb {
-	return t.set_html_comment(comment)
-}
-
-func (t *Thumb) SetType(typ types_.FileType) *Thumb {
-	return t.set_type(typ)
-}
-
-func (t *Thumb) GetType() types_.FileType {
-	return t.get_type()
-}
-
-func (t *Thumb) SetHREF(src string) *Thumb {
-	return t.set_href(src)
-}
-
-func (t *Thumb) GetHREF() types_.URLHref {
-	return t.get_href()
-}
-
-func (t *Thumb) GetHREFClear() types_.URLHref {
-	return t.get_href_clear()
-}
-
-func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used )
-	return t.status_manifest()
-}
-
-func (t *Thumb) GetTAG() string {
-	return t.tagGet()
-}
-
-func (t *Thumb) SetSizeAttrEmpty() *Thumb {
-	return t.set_size_attr_empty()
-}
-
-func (t *Thumb) SetSizeAttrDefault() *Thumb {
-	return t.set_size_attr_default()
-}
-
-func (t *Thumb) SetSizeAttrCustom(val string) *Thumb {
-	return t.set_size_attr_custom(val)
-}
 
 func (t *Thumb) GetOriginalKey() string{
 	return t.get_original_key()
