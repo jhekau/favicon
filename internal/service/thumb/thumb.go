@@ -44,7 +44,7 @@ const (
 )
 
 var (
-	URLExists = url_Exists
+	URLExists = urlExists
 )
 
 type Typ types_.FileType
@@ -561,7 +561,7 @@ func (t *Thumb) cacheClean() {
 
 // url_Exists : проверка наличия превьюхи в запросе 
 // http.Request.URL.Path -> URLpath
-func url_Exists( url_ *url.URL, thumbs map[types_.URLHref /*url_href_clear*/]*Thumb ) ( *Thumb, bool /*exists*/ ) {
+func urlExists( url_ *url.URL, thumbs map[types_.URLHref]*Thumb ) ( *Thumb, bool /*exists*/ ) {
 	t, ok := thumbs[types_.URLHref(url_.Path)]
 	return t, ok
 }

@@ -8,6 +8,7 @@ package thumb
 const (
 	LogTP  = logTP
 	LogT01 = logT01
+	LogT02 = logT02
 	LogT03 = logT03
 	LogT10 = logT10
 	LogT11 = logT11

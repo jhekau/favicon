@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
+	"sync"
 	"testing"
 
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
@@ -16,82 +18,12 @@ import (
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
+	domain_ "github.com/jhekau/favicon/pkg/domain"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
-/*
 
-type Thumb struct {
-
-	s sync.RWMutex
-	l *logger_.Logger
-
-	original *original
-	thumb StorageOBJ
-
-	storage Storage
-	conv Converter
-
-	size_px uint16
-	size_attr_value attr_size
-	comment string // <!-- comment -->
-	url_href types_.URLHref // domain{/name_url}, first -> `/`
-	url_href_clear types_.URLHref
-	tag_rel string
-	manifest bool
-	mimetype types_.FileType
-	typ types_.FileType
-	cache cache
-
-}
-
-func (*Thumb).GetHREF() types_.URLHref
-func (*Thumb).GetHREFClear() types_.URLHref
-func (*Thumb).GetOriginalKey() string
-func (*Thumb).GetSize() uint16
-func (*Thumb).GetTAG() string
-func (*Thumb).GetType() types_.FileType
-func (*Thumb).OriginalCustomSet(obj StorageOBJ)
-func (*Thumb).OriginalCustomSetSVG(obj StorageOBJ)
-func (*Thumb).OriginalFileSet(filepath string)
-func (*Thumb).OriginalFileSetSVG(filepath string)
-func (*Thumb).Read() (io.ReadCloser, error)
-func (*Thumb).SetHREF(src string) *Thumb
-func (*Thumb).SetHTMLComment(comment string) *Thumb
-func (*Thumb).SetManifestUsed() *Thumb
-func (*Thumb).SetSize(px uint16) *Thumb
-func (*Thumb).SetSizeAttrCustom(val string) *Thumb
-func (*Thumb).SetSizeAttrDefault() *Thumb
-func (*Thumb).SetSizeAttrEmpty() *Thumb
-func (*Thumb).SetTagRel(tagRel string) *Thumb
-func (*Thumb).SetType(typ types_.FileType) *Thumb
-func (*Thumb).StatusManifest() bool
-
-
-
-
-func (*Thumb).get_href() types_.URLHref
-func (*Thumb).get_href_clear() types_.URLHref
-func (*Thumb).get_original_key() string
-func (*Thumb).get_size() uint16
-func (*Thumb).get_tag() string
-func (*Thumb).get_type() types_.FileType
-func (*Thumb).original_get(filepath string) *original
-func (*Thumb).read() (io.ReadCloser, error)
-func (*Thumb).set_href(src string) *Thumb
-func (*Thumb).set_html_comment(comment string) *Thumb
-func (*Thumb).set_manifest_used() *Thumb
-func (*Thumb).set_size(px uint16) *Thumb
-func (*Thumb).set_size_attr_custom(val string) *Thumb
-func (*Thumb).set_size_attr_default() *Thumb
-func (*Thumb).set_size_attr_empty() *Thumb
-func (*Thumb).set_tag_rel(tagRel string) *Thumb
-func (*Thumb).set_type(typ types_.FileType) *Thumb
-func (*Thumb).status_manifest() bool
-func (*Thumb).thumb_create() error
-
-*/
 
 func Test_NewThumb( t *testing.T ) {
 
@@ -105,14 +37,37 @@ func Test_NewThumb( t *testing.T ) {
 	keyThumb := `123`
 
 	storage := mock_thumb_.NewMockStorage(ctrl)
-	storage.EXPECT().NewObject(keyThumb).AnyTimes()
+	storage.EXPECT().NewObject(keyThumb)
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+
+	//
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+
+	require.IsType(t, thumb, &thumb_.Thumb{}, fmt.Sprintf(`%T`, thumb))
+}
+
+func Test_NewThumbError( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	keyThumb := `123`
+
+	instanceErr := errors.New(`error new object`)
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject(keyThumb).Return(nil, instanceErr)
 
 	conv := mock_thumb_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	_, err := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
 
-	require.IsType(t, thumb, &thumb_.Thumb{}, fmt.Sprintf(`%T`, thumb))
+	require.Equal(t, err, logger.Typ.Error(thumb_.LogTP, thumb_.LogT02, instanceErr))
 }
 
 func Test_Size( t *testing.T ) {
@@ -643,15 +598,97 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 
 }
 
-/*
+func Test_OriginalKeyGet( t *testing.T ) {
 
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
 
-func (t *Thumb) Read() (io.ReadCloser, error) {
-	return t.read()
+	keyThumb := `123`
+
+	instanceKey := domain_.StorageKey(`325`)
+	originalObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	originalObj.EXPECT().Key().Return(instanceKey)
+	
+	thumbObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject(keyThumb).Return(thumbObj, (error)(nil))
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+	conv := mock_thumb_.NewMockConverter(ctrl)
+
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	expectKey := thumb.GetOriginalKey()
+	require.Equal(t, expectKey, `` )
+
+	//
+	thumb.OriginalCustomSet(originalObj)
+
+	expectKey = thumb.GetOriginalKey()
+	require.Equal(t, expectKey, string(instanceKey) )
+}
+
+func Test_Cache( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	keyThumb := `123`
+
+	thumbObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject(keyThumb).Return(thumbObj, (error)(nil))
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	
+
+	instanceKey := `tag`
+	instanceTag := `<link test />`
+	var cache sync.Map
+	
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb.TestCacheSwap(&cache)
+
+	//
+	cache.Store(instanceKey, instanceTag)
+	expectTag := thumb.GetTAG()
+	require.Equal(t, expectTag, instanceTag)
+
+	//
+	thumb.SetSize(0)
+	expectTag = thumb.GetTAG()
+	require.Equal(t, expectTag, ``)
+}
+
+func Test_URLExist( t *testing.T ) {
+
+	href := `https://domain.org/stories/icon.png`
+	u, err := url.ParseRequestURI(href)
+	require.Equal(t, err, (error)(nil))
+
+	instanceThumb := thumb_.Thumb{}
+	m := map[types_.URLHref]*thumb_.Thumb{
+		`/stories/icon.png`: &instanceThumb,
+	}
+
+	expectThumb, exist := thumb_.URLExists(u, m)
+	require.True(t, exist, u.Path)
+	require.Equal(t, *expectThumb, instanceThumb)
 }
 
 
+/*
 
 
 
@@ -669,12 +706,6 @@ func (t *Thumb) OriginalFileSetSVG( filepath string ) {
 		obj: file,
 	}
 }
-
-func (t *Thumb) GetOriginalKey() string{
-	return t.get_original_key()
-}
-
-
 
 
 */
