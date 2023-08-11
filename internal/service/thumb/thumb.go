@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
@@ -23,13 +23,13 @@ const (
 	logTP  = `/thumb/thumb.go`
 	logT01 = `T01: create file`
 	logT02 = `T02: create new object thumb into storage`
-	// logT03 = `T03: `
+	logT03 = `T03: original image undefined`
 	// logT04 = `T04: `
 	// logT05 = `T05: `
 	// logT06 = `T06: `
 	// logT07 = `T07: `
 	logT08 = `T08: url parse standart template domain.com`
-	logT09 = `T09: create new storage object`
+	// logT09 = `T09: create new storage object`
 
 	logT10 = `T10: thumb check is exists`
 	logT11 = `T11: create new thumb image`
@@ -47,6 +47,11 @@ var (
 	URLExists = url_Exists
 )
 
+type Typ types_.FileType
+var (
+	ICO Typ = Typ(types_.ICO())
+	PNG Typ = Typ(types_.PNG())
+)
 
 type StorageOBJ interface{
 	Reader() (io.ReadCloser , error)
@@ -93,7 +98,7 @@ type original struct {
 	obj StorageOBJ
 }
 
-func NewThumb(key string, l *logger_.Logger, s Storage, c Converter) (*Thumb, error) {
+func NewThumb(key string, typThumb Typ, l *logger_.Logger, s Storage, c Converter) (*Thumb, error) {
 	t, err := s.NewObject(key)
 	if err != nil {
 		return nil, l.Typ.Error(logTP, logT02, err)
@@ -104,6 +109,7 @@ func NewThumb(key string, l *logger_.Logger, s Storage, c Converter) (*Thumb, er
 		conv:c, 
 		cache: &sync.Map{},
 		thumb: t,
+		mimetype: types_.FileType(typThumb),
 	}, nil
 }
 
@@ -150,9 +156,9 @@ func (t *Thumb) SetHTMLComment(comment string) *Thumb {
 	return t.set_html_comment(comment)
 }
 
-func (t *Thumb) SetType(mimetype types_.FileType) *Thumb {
-	return t.set_type(mimetype)
-}
+// func (t *Thumb) SetType(mimetype types_.FileType) *Thumb {
+// 	return t.set_type(mimetype)
+// }
 
 func (t *Thumb) GetType() types_.FileType {
 	return t.get_type()
@@ -201,7 +207,7 @@ func (t *Thumb) Read() (io.ReadCloser, error) {
 
 
 // Используется по умолчанию файловое хранилище для изображений
-func (t *Thumb) OriginalFileSet( filepath string ) {
+func (t *Thumb) OriginalFileSet( filepath string ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -209,10 +215,11 @@ func (t *Thumb) OriginalFileSet( filepath string ) {
 	t.original = &original{
 		obj: file,
 	}
+	return t
 }
 
 // Используется по умолчанию файловое хранилище для изображений
-func (t *Thumb) OriginalFileSetSVG( filepath string ) {
+func (t *Thumb) OriginalFileSetSVG( filepath string ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -221,16 +228,18 @@ func (t *Thumb) OriginalFileSetSVG( filepath string ) {
 		typSVG: true,
 		obj: file,
 	}
+	return t
 }
-func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) {
+func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.original = &original{
 		obj: obj,
 	}
+	return t
 }
-func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
+func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -238,6 +247,7 @@ func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) {
 		typSVG: true,
 		obj: obj,
 	}
+	return t
 }
 
 
@@ -257,13 +267,16 @@ func (t *Thumb) thumb_create() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
+	if t.original == nil {
+		return t.l.Typ.Error(logTP, logT03)
+	}
+
 	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.mimetype, int(t.size_px))
 	if err != nil {
 		return t.l.Typ.Error(logTP, logT01, err)
 	}
 	return nil
 }
-
 
 func (t *Thumb) get_original_key() string {
 	t.mu.RLock()
@@ -275,31 +288,11 @@ func (t *Thumb) get_original_key() string {
 	return string(t.original.obj.Key())
 }
 
-func (t *Thumb) storageNewObject( key string ) (StorageOBJ, error){
-	t.mu.Lock()
-	defer t.mu.Unlock()
-
-	thumb, err := t.storage.NewObject(key)
-	if err != nil{
-		return nil, err
-	}
-	t.thumb = thumb
-	return thumb, nil
-}
-
 func (t *Thumb) read() (io.ReadCloser, error) {
 	
 	t.mu.RLock()
 	thumb := t.thumb
 	t.mu.RUnlock()
-
-	if thumb == nil {
-		var err error
-		thumb, err = t.storageNewObject( uuid.Must(uuid.NewRandom()).String() )
-		if err != nil {
-			return nil, t.l.Typ.Error(logTP, logT09, err)
-		}
-	}
 	
 	exist, err := thumb.IsExists()
 	if err != nil {
@@ -375,15 +368,15 @@ func (t *Thumb) set_html_comment(comment string) *Thumb {
 }
 
 // ...
-func (t *Thumb) set_type(mimetype types_.FileType) *Thumb {
+// func (t *Thumb) set_type(mimetype types_.FileType) *Thumb {
 
-	t.mu.Lock()
-	defer t.mu.Unlock()
+// 	t.mu.Lock()
+// 	defer t.mu.Unlock()
 
-	t.cacheClean()
-	t.mimetype = mimetype
-	return t
-}
+// 	t.cacheClean()
+// 	t.mimetype = mimetype
+// 	return t
+// }
 
 func (t *Thumb) get_type() types_.FileType {
 
