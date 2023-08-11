@@ -5,6 +5,11 @@ package thumb
  * 10 August 2023
  */
 
+const (
+	LogTP  = logTP
+	LogT10 = logT10
+)
+
 // замена кеша для тестирования
 func (t *Thumb) TestCacheSwap( c cache ) *Thumb {
 	t.cache = c

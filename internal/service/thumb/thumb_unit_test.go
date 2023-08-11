@@ -5,7 +5,10 @@ package thumb_test
  * 10 August 2023
  */
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"testing"
 
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
@@ -462,6 +465,79 @@ func Test_OriginalCustomSet( t *testing.T ) {
 	require.Equal(t, obj, objExpect)
 }
 
+
+
+
+
+
+func Test_Read( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	keyThumb := `123`
+	instanceData := []byte(`1234`)
+	instanceReader := io.NopCloser(bytes.NewBuffer(instanceData))
+
+	storageObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	storageObj.EXPECT().IsExists().Return(true, (error)(nil))
+	storageObj.EXPECT().Reader().Return(instanceReader, nil)
+	
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject(keyThumb).Return(storageObj, (error)(nil))
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+
+	//
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	expectReader, err := thumb.Read()
+	require.Equal(t, err, (error)(nil))
+
+	expectData, err := io.ReadAll(expectReader)
+	require.Equal(t, err, (error)(nil))
+
+	require.Equal(t, expectData, instanceData)
+}
+
+func Test_ReadExistError( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	keyThumb := `123`
+
+	storageObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	storageObj.EXPECT().IsExists().Return(true, errors.New(`error exist`))
+	
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject(keyThumb).Return(storageObj, (error)(nil))
+
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+
+	//
+	thumb, _ := thumb_.NewThumb(keyThumb, logger, storage, conv)
+	thumb.TestCacheSwap(cache)
+
+	_, err := thumb.Read()
+	require.Equal(t, err, logger.Typ.Error(thumb_.LogTP, thumb_.LogT10, errors.New(`error exist`)))
+
+}
 
 
 /*
