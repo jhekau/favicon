@@ -9,13 +9,13 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-	"io"
 
 	ico_ "github.com/Kodeworks/golang-image-ico"
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
@@ -27,16 +27,12 @@ const (
 )
 
 
-type StorageOBJ interface{
-	Reader() (io.ReadCloser, error)
-	Writer() (io.WriteCloser, error)
-}
 
 type Exec struct{
 	L *logger_.Logger
 }
 
-func (e *Exec) Proc(original, save StorageOBJ, size_px int, thumbTyp types_.FileType) error {
+func (e *Exec) Proc(original, save storage_.StorageOBJ , size_px int, thumbTyp types_.FileType) error {
 
 	r, err := original.Reader()
 	if err != nil {

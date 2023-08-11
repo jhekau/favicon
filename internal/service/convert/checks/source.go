@@ -7,12 +7,11 @@ package checks
  */
 import (
 	"fmt"
-	"io"
 	"sync"
 
 	config_ "github.com/jhekau/favicon/internal/config"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
@@ -31,10 +30,10 @@ const (
 type CacheStatus struct {
 	m sync.Map
 }
-func (c *CacheStatus) cache_key(original domain_.StorageKey, originalSVG bool, thumb_size int) string {
+func (c *CacheStatus) cache_key(original storage_.StorageKey, originalSVG bool, thumb_size int) string {
 	return fmt.Sprintf(`%s, %v, %d`, original, originalSVG, thumb_size)
 }
-func (c *CacheStatus) Status(original domain_.StorageKey, originalSVG bool, thumb_size int) (bool, error) {
+func (c *CacheStatus) Status(original storage_.StorageKey, originalSVG bool, thumb_size int) (bool, error) {
 
 	e, ok := c.m.Load(c.cache_key(original, originalSVG, thumb_size))
 
@@ -45,31 +44,25 @@ func (c *CacheStatus) Status(original domain_.StorageKey, originalSVG bool, thum
 
 	return ok, err
 }
-func (c *CacheStatus) SetErr(original domain_.StorageKey, originalSVG bool, thumb_size int, err error) error {
+func (c *CacheStatus) SetErr(original storage_.StorageKey, originalSVG bool, thumb_size int, err error) error {
 	c.m.Store(c.cache_key(original, originalSVG, thumb_size), err)
 	return err
-}
-
-type StorageOBJ interface{
-	IsExists() ( bool, error )
-	Read() (io.ReadCloser, error)
-	Key() domain_.StorageKey
 }
 
 //
 type Source struct {
 	L *logger_.Logger
 	Cache interface{
-		Status(original domain_.StorageKey, originalSVG bool, thumb_size int) (bool, error)
-		SetErr(original domain_.StorageKey, originalSVG bool, thumb_size int, err error) error
+		Status(original storage_.StorageKey, originalSVG bool, thumb_size int) (bool, error)
+		SetErr(original storage_.StorageKey, originalSVG bool, thumb_size int, err error) error
 	}
 	Resolution interface{
-		Get(_ StorageOBJ) (w int, h int, err error)
+		Get(_ storage_.StorageOBJ) (w int, h int, err error)
 	}
 }
 
 // проверка исходного изображения на корректность
-func (c *Source) Check( original StorageOBJ, originalSVG bool, thumb_size int ) error {
+func (c *Source) Check( original storage_.StorageOBJ, originalSVG bool, thumb_size int ) error {
 
 	ok, err := c.Cache.Status(original.Key(), originalSVG, thumb_size)
 	if ok {

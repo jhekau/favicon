@@ -16,7 +16,8 @@ import (
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
+	"github.com/jhekau/favicon/pkg/core/types"
+	"github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
@@ -47,26 +48,26 @@ var (
 	URLExists = urlExists
 )
 
-type Typ types_.FileType
+type Typ types.FileType
 var (
-	ICO Typ = Typ(types_.ICO())
-	PNG Typ = Typ(types_.PNG())
+	ICO Typ = Typ(types.ICO())
+	PNG Typ = Typ(types.PNG())
 )
 
-type StorageOBJ interface{
-	Reader() (io.ReadCloser , error)
-	Writer() (io.WriteCloser, error)
-	Key() domain_.StorageKey
-	IsExists() ( bool, error )
-}
+// type StorageOBJ interface{
+// 	Reader() (io.ReadCloser , error)
+// 	Writer() (io.WriteCloser, error)
+// 	Key() domain_.StorageKey
+// 	IsExists() ( bool, error )
+// }
 
-type Storage interface {
-	NewObject(key any) (StorageOBJ, error)
-}
+// type Storage interface {
+// 	NewObject(key any) (StorageOBJ, error)
+// }
 
-type Converter interface{
-	Do(source, save StorageOBJ, originalSVG bool, typThumb types_.FileType, size_px int) error
-}
+// type Converter interface{
+// 	Do(source, save StorageOBJ, originalSVG bool, typThumb types_.FileType, size_px int) error
+// }
 
 type cache interface{
 	Delete(key any)
@@ -95,10 +96,10 @@ type attr_size struct {
 // Оригинальное изображение, с которого нарезается превьюха
 type original struct {
 	typSVG bool
-	obj StorageOBJ
+	obj storage.StorageOBJ
 }
 
-func NewThumb(key string, typThumb Typ, l *logger_.Logger, s Storage, c Converter) (*Thumb, error) {
+func NewThumb(key string, typThumb Typ, l *logger_.Logger, s storage.Storage, c Converter) (*Thumb, error) {
 	t, err := s.NewObject(key)
 	if err != nil {
 		return nil, l.Typ.Error(logTP, logT02, err)

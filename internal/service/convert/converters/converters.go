@@ -6,12 +6,13 @@ package converters
  * конвертеры для различных типов файлов
  */
 import (
-	"io"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	converter_ "github.com/jhekau/favicon/pkg/models/converter"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
-// 
+//
 const (
 	logF   = `/internal/service/convert.go`
 	logF01 = `F01: convert ico`
@@ -19,23 +20,23 @@ const (
 )
 
 
-type StorageOBJ interface{
-	Reader() (io.ReadCloser, error)
-	Writer() (io.WriteCloser, error)
-}
+// type StorageOBJ interface{
+// 	Reader() (io.ReadCloser, error)
+// 	Writer() (io.WriteCloser, error)
+// }
 
-type ConverterExec interface {
-	Proc(source, save StorageOBJ, size_px int, typ types_.FileType) error
-}
+// type ConverterExec interface {
+// 	Proc(source, save StorageOBJ, size_px int, typ types_.FileType) error
+// }
 
 type ConverterICO struct{
 	L *logger_.Logger
 	// пакет/утилита, который выполняет непосредственную конвертацию изображения
-	ConverterExec ConverterExec
+	ConverterExec converter_.ConverterExec
 }
 
 // интерфейс для конвертора ICO
-func (t *ConverterICO) Do(source, save StorageOBJ, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
+func (t *ConverterICO) Do(source, save storage_.StorageOBJ, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
 	if typ != types_.ICO() {
 		return false, nil
 	}
@@ -51,12 +52,12 @@ type ConverterPNG struct{
 	L *logger_.Logger
 	// пакет/утилита, который выполняет непосредственную конвертацию изображения
 	ConverterExec interface {
-		Proc(source, save StorageOBJ, size_px int, typ types_.FileType) error
+		Proc(source, save storage_.StorageOBJ, size_px int, typ types_.FileType) error
 	}
 }
 
 // интерфейс для конвертора PNG
-func (t *ConverterPNG) Do(source, save StorageOBJ, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
+func (t *ConverterPNG) Do(source, save storage_.StorageOBJ, size_px int, typ types_.FileType/*, conv Converter*/) (complete bool, err error) {
 	if typ != types_.PNG() {
 		return false, nil
 	}

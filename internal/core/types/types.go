@@ -6,50 +6,30 @@ package types
  * TDD
  */
 
-import (
-	"mime"
-)
 
 //
-type FileName string
-func (f FileName) String() string {
-	return string(f)
-}
+// type FileName string
+// func (f FileName) String() string {
+// 	return string(f)
+// }
 
-type FilePath string
-func (f FilePath) String() string {
-	return string(f)
-}
+// type FilePath string
+// func (f FilePath) String() string {
+// 	return string(f)
+// }
 
-type Folder string
-func (f Folder) String() string {
-	return string(f)
-}
-
-//
-type FileType string 
-func (f FileType) String() string {
-	return string(f)
-}
-var (
-	ico = FileType(mime.TypeByExtension(".ico"))
-	svg = FileType(mime.TypeByExtension(".svg"))
-	png = FileType(mime.TypeByExtension(".png"))
-	jpg = FileType(mime.TypeByExtension(".png"))
-
-	ICO = func() FileType { return ico }
-	SVG = func() FileType { return svg }
-	PNG = func() FileType { return png }
-	JPG = func() FileType { return jpg }
-) 
+// type Folder string
+// func (f Folder) String() string {
+// 	return string(f)
+// }
 
 //
-type FileExists int
-const (
-	FileExistsNotCheck FileExists = 0
-	FileExistsOK FileExists = 1
-	FileExistsNOT FileExists = -1
-)
+// type FileExists int
+// const (
+// 	FileExistsNotCheck FileExists = 0
+// 	FileExistsOK FileExists = 1
+// 	FileExistsNOT FileExists = -1
+// )
 
 
 

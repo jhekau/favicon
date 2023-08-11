@@ -32,9 +32,9 @@ type StorageOBJ interface{
 
 
 // конвертер для конкретного типа
-type ConverterT interface{
-	Do(source, save StorageOBJ, size_px int, typ types_.FileType) (complete bool, err error)
-}
+// type ConverterT interface{
+// 	Do(source, save StorageOBJ, size_px int, typ types_.FileType) (complete bool, err error)
+// }
 
 // проверка валидности запрашиваемой превьюхи
 type CheckPreview interface {

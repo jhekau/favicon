@@ -8,9 +8,9 @@ package checks
 import (
 	"fmt"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	config_ "github.com/jhekau/favicon/internal/config"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
 )
 
 const (
