@@ -607,6 +607,42 @@ func Test_Read_Create( t *testing.T ) {
 
 }
 
+func Test_Read_CreateConverterError( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := &logger_.Logger{
+		Typ: &logger_mock_.LoggerErrorf{},
+	}
+
+	keyThumb := `123`
+	size := 16
+
+	originalObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+
+	thumbObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	thumbObj.EXPECT().IsExists().Return(false, (error)(nil)).AnyTimes()
+	
+	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage.EXPECT().NewObject(keyThumb).Return(thumbObj, (error)(nil))
+
+	cache := mock_thumb_.NewMockcache(ctrl)
+	cache.EXPECT().Range(gomock.Any())
+
+	//
+	convErr := errors.New(`error converter`)
+	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), size).Return( convErr )
+
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb.TestCacheSwap(cache).OriginalCustomSet(originalObj).SetSize(16)
+
+	_, err := thumb.Read()
+	require.Equal(t, err, logger.Typ.Error(thumb_.LogTP, thumb_.LogT11, logger.Typ.Error(thumb_.LogTP, thumb_.LogT01, convErr)))
+
+}
+
 /*
 
 
