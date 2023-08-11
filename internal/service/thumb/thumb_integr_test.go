@@ -10,7 +10,12 @@ import (
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
-	mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"
+	converter_ "github.com/jhekau/favicon/pkg/models/converter"
+	"github.com/stretchr/testify/require"
+
+	// mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"
+	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
+	mock_storage_ "github.com/jhekau/favicon/internal/mocks/pkg/models/storage"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	"go.uber.org/mock/gomock"
@@ -54,27 +59,17 @@ func Test_Inegration_Converter( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage := mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb)
 
 	//
-	converterTyp := mock_convert_.NewMockConverterT(ctrl)
+	converterTyp := mock_converter_.NewMockConverterTyp(ctrl)
 	checkPreview := mock_convert_.NewMockCheckPreview(ctrl)
 	checkSource  := mock_convert_.NewMockCheckSource(ctrl)
 
-	// conv := &convert_.Converter{
-	// 	L            : logger,
-	// 	Converters   : []convert_.ConverterT{ 
-	// 		converterTyp,
-	// 	},
-	// 	CheckPreview : checkPreview,
-	// 	CheckSource  : checkSource,
-	// }
-
-	var convT thumb_.Converter
-	convT = &convert_.Converter{
+	conv := &convert_.Converter{
 		L            : logger,
-		Converters   : []convert_.ConverterT{ 
+		Converters   : []converter_.ConverterTyp{ 
 			converterTyp,
 		},
 		CheckPreview : checkPreview,
@@ -82,6 +77,7 @@ func Test_Inegration_Converter( t *testing.T ) {
 	}
 
 	//
-	thumb, err := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, convT)
+	_, err := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	require.Equal(t, err, (error)(nil))
 
 }

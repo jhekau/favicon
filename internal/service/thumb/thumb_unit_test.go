@@ -15,10 +15,15 @@ import (
 
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+
+	typ_ "github.com/jhekau/favicon/internal/core/types"
+	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
+	mock_storage_ "github.com/jhekau/favicon/internal/mocks/pkg/models/storage"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+
 	mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -36,10 +41,10 @@ func Test_NewThumb( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage := mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb)
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 
 	//
 	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
@@ -59,10 +64,10 @@ func Test_NewThumbError( t *testing.T ) {
 	keyThumb := `123`
 
 	instanceErr := errors.New(`error new object`)
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).Return(nil, instanceErr)
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	_, err := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
@@ -81,10 +86,10 @@ func Test_Size( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -114,10 +119,10 @@ func Test_SetTagRel( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -149,10 +154,10 @@ func Test_HTMLComment( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -187,10 +192,10 @@ func Test_HTMLCommentEmptyTag( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -222,10 +227,10 @@ func Test_ManifestUsed( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -254,10 +259,10 @@ func Test_TypeThumb( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -291,10 +296,10 @@ func Test_Href( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -329,10 +334,10 @@ func Test_SizeAttr( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -390,13 +395,13 @@ func Test_OriginalCustomSet( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).AnyTimes()
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
-	obj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	obj :=mock_storage_.NewMockStorageOBJ(ctrl)
 	cache := mock_thumb_.NewMockcache(ctrl)
 
 	//
@@ -436,14 +441,14 @@ func Test_Read( t *testing.T ) {
 	instanceData := []byte(`1234`)
 	instanceReader := io.NopCloser(bytes.NewBuffer(instanceData))
 
-	storageObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	storageObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 	storageObj.EXPECT().IsExists().Return(true, (error)(nil))
 	storageObj.EXPECT().Reader().Return(instanceReader, nil)
 	
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).Return(storageObj, (error)(nil))
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -472,13 +477,13 @@ func Test_Read_ExistError( t *testing.T ) {
 
 	keyThumb := `123`
 
-	storageObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	storageObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 	storageObj.EXPECT().IsExists().Return(true, errors.New(`error exist`))
 	
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).Return(storageObj, (error)(nil))
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -503,18 +508,18 @@ func Test_Read_CreateOriginalIsNil( t *testing.T ) {
 
 	keyThumb := `123`
 
-	originalObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	originalObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 
-	thumbObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	thumbObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 	thumbObj.EXPECT().IsExists().Return(false, (error)(nil))
 	
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).Return(thumbObj, (error)(nil))
 
 	cache := mock_thumb_.NewMockcache(ctrl)
 
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), 16).Return((error)(nil)).AnyTimes()
 
 	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
@@ -538,20 +543,20 @@ func Test_Read_Create( t *testing.T ) {
 	keyThumb := `123`
 	size := 16
 
-	originalObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	originalObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 
-	thumbObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	thumbObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 	thumbObj.EXPECT().IsExists().Return(false, (error)(nil)).AnyTimes()
 	thumbObj.EXPECT().Reader().Return(nil, (error)(nil))
 	
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).Return(thumbObj, (error)(nil))
 
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Range(gomock.Any())
 
 	//
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), size).Return((error)(nil))
 
 	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
@@ -574,12 +579,12 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 	keyThumb := `123`
 	size := 16
 
-	originalObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	originalObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 
-	thumbObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	thumbObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 	thumbObj.EXPECT().IsExists().Return(false, (error)(nil)).AnyTimes()
 	
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).Return(thumbObj, (error)(nil))
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -587,7 +592,7 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 
 	//
 	convErr := errors.New(`error converter`)
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), size).Return( convErr )
 
 	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
@@ -609,17 +614,17 @@ func Test_OriginalKeyGet( t *testing.T ) {
 
 	keyThumb := `123`
 
-	instanceKey := domain_.StorageKey(`325`)
-	originalObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	instanceKey := storage_.StorageKey(`325`)
+	originalObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 	originalObj.EXPECT().Key().Return(instanceKey)
 	
-	thumbObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	thumbObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 	
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).Return(thumbObj, (error)(nil))
 
 	cache := mock_thumb_.NewMockcache(ctrl)
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 
 	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
 	thumb.TestCacheSwap(cache)
@@ -645,12 +650,12 @@ func Test_Cache( t *testing.T ) {
 
 	keyThumb := `123`
 
-	thumbObj := mock_thumb_.NewMockStorageOBJ(ctrl)
+	thumbObj :=mock_storage_.NewMockStorageOBJ(ctrl)
 
-	storage := mock_thumb_.NewMockStorage(ctrl)
+	storage :=mock_storage_.NewMockStorage(ctrl)
 	storage.EXPECT().NewObject(keyThumb).Return(thumbObj, (error)(nil))
 
-	conv := mock_thumb_.NewMockConverter(ctrl)
+	conv := mock_converter_.NewMockConverter(ctrl)
 	
 
 	instanceKey := `tag`
@@ -678,7 +683,7 @@ func Test_URLExist( t *testing.T ) {
 	require.Equal(t, err, (error)(nil))
 
 	instanceThumb := thumb_.Thumb{}
-	m := map[types_.URLHref]*thumb_.Thumb{
+	m := map[typ_.URLHref]*thumb_.Thumb{
 		`/stories/icon.png`: &instanceThumb,
 	}
 
