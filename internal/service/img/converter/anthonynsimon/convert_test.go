@@ -14,11 +14,12 @@ import (
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
 	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_exec_anthonynsimon_ "github.com/jhekau/favicon/internal/service/img/converter/anthonynsimon"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 	"github.com/stretchr/testify/require"
 	"github.com/pressly/goico"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 
@@ -44,6 +45,12 @@ func (s *storage) Reader() (io.ReadCloser , error) {
 }
 func (s *storage) Writer() (io.WriteCloser, error) {
 	return s.obj, nil
+}
+func (s *storage) IsExists() (bool, error){
+	return false, nil
+}
+func (s *storage) Key() storage_.StorageKey {
+	return ``
 }
 
 
