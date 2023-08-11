@@ -687,25 +687,3 @@ func Test_URLExist( t *testing.T ) {
 	require.Equal(t, *expectThumb, instanceThumb)
 }
 
-
-/*
-
-
-
-// Integration
-func (t *Thumb) OriginalFileSet( filepath string ) {
-	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
-	t.original = &original{
-		obj: file,
-	}
-}
-func (t *Thumb) OriginalFileSetSVG( filepath string ) {
-	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
-	t.original = &original{
-		typSVG: true,
-		obj: file,
-	}
-}
-
-
-*/
