@@ -279,7 +279,12 @@ func (t *Thumb) storageNewObject( key string ) (StorageOBJ, error){
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	return t.storage.NewObject(key)
+	thumb, err := t.storage.NewObject(key)
+	if err != nil{
+		return nil, err
+	}
+	t.thumb = thumb
+	return thumb, nil
 }
 
 func (t *Thumb) read() (io.ReadCloser, error) {
@@ -289,11 +294,11 @@ func (t *Thumb) read() (io.ReadCloser, error) {
 	t.mu.RUnlock()
 
 	if thumb == nil {
-		obj, err := t.storageNewObject( uuid.Must(uuid.NewRandom()).String() )
+		var err error
+		thumb, err = t.storageNewObject( uuid.Must(uuid.NewRandom()).String() )
 		if err != nil {
 			return nil, t.l.Typ.Error(logTP, logT09, err)
 		}
-		t.thumb = obj
 	}
 	
 	exist, err := thumb.IsExists()
