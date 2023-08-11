@@ -10,5 +10,5 @@ import (
 )
 
 type Converter interface{
-	Do(source, save storage.StorageOBJ, originalSVG bool, typThumb types.FileType, size_px int)
+	Do(source, save storage.StorageOBJ, originalSVG bool, typThumb types.FileType, size_px int) error
 }

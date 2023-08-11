@@ -13,10 +13,10 @@ package types
 // 	return string(f)
 // }
 
-// type FilePath string
-// func (f FilePath) String() string {
-// 	return string(f)
-// }
+type FilePath string
+func (f FilePath) String() string {
+	return string(f)
+}
 
 // type Folder string
 // func (f Folder) String() string {

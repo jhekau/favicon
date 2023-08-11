@@ -12,12 +12,12 @@ import (
 	"strconv"
 	"sync"
 
-	// "github.com/google/uuid"
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	typ_ "github.com/jhekau/favicon/internal/core/types"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
-	"github.com/jhekau/favicon/pkg/core/types"
-	"github.com/jhekau/favicon/pkg/models/storage"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	converter_ "github.com/jhekau/favicon/pkg/models/converter"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
@@ -48,10 +48,10 @@ var (
 	URLExists = urlExists
 )
 
-type Typ types.FileType
+type Typ types_.FileType
 var (
-	ICO Typ = Typ(types.ICO())
-	PNG Typ = Typ(types.PNG())
+	ICO Typ = Typ(types_.ICO())
+	PNG Typ = Typ(types_.PNG())
 )
 
 // type StorageOBJ interface{
@@ -96,10 +96,10 @@ type attr_size struct {
 // Оригинальное изображение, с которого нарезается превьюха
 type original struct {
 	typSVG bool
-	obj storage.StorageOBJ
+	obj storage_.StorageOBJ
 }
 
-func NewThumb(key string, typThumb Typ, l *logger_.Logger, s storage.Storage, c Converter) (*Thumb, error) {
+func NewThumb(key string, typThumb Typ, l *logger_.Logger, s storage_.Storage, c converter_.Converter) (*Thumb, error) {
 	t, err := s.NewObject(key)
 	if err != nil {
 		return nil, l.Typ.Error(logTP, logT02, err)
@@ -119,17 +119,17 @@ type Thumb struct {
 	mu sync.RWMutex
 
 	l *logger_.Logger
-	storage Storage
-	conv Converter
+	storage storage_.Storage
+	conv converter_.Converter
 	cache cache
 
 	original *original
-	thumb StorageOBJ
+	thumb storage_.StorageOBJ
 
 	size_px int
 	size_attr_value attr_size
 	comment string // <!-- comment -->
-	url_href types_.URLHref // domain{/name_url}, first -> `/`
+	url_href typ_.URLHref // domain{/name_url}, first -> `/`
 	tag_rel string
 	manifest bool
 	mimetype types_.FileType
@@ -169,7 +169,7 @@ func (t *Thumb) SetHREF(src string) *Thumb {
 	return t.set_href(src)
 }
 
-func (t *Thumb) GetHREF() types_.URLHref {
+func (t *Thumb) GetHREF() typ_.URLHref {
 	return t.get_href()
 }
 
@@ -212,7 +212,7 @@ func (t *Thumb) OriginalFileSet( filepath string ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
+	file := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
 	t.original = &original{
 		obj: file,
 	}
@@ -224,14 +224,14 @@ func (t *Thumb) OriginalFileSetSVG( filepath string ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
+	file := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
 	t.original = &original{
 		typSVG: true,
 		obj: file,
 	}
 	return t
 }
-func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) *Thumb {
+func (t *Thumb) OriginalCustomSet( obj storage_.StorageOBJ ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -240,7 +240,7 @@ func (t *Thumb) OriginalCustomSet( obj StorageOBJ ) *Thumb {
 	}
 	return t
 }
-func (t *Thumb) OriginalCustomSetSVG( obj StorageOBJ ) *Thumb {
+func (t *Thumb) OriginalCustomSetSVG( obj storage_.StorageOBJ ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -394,7 +394,7 @@ func (t *Thumb) set_href(src string) *Thumb {
 	defer t.mu.Unlock()
 
 	t.cacheClean()
-	t.url_href = types_.URLHref(src)
+	t.url_href = typ_.URLHref(src)
 	// {
 	// 	u, err := url.Parse(`http://domain.com`)
 	// 	if err != nil {
@@ -406,7 +406,7 @@ func (t *Thumb) set_href(src string) *Thumb {
 	return t
 }
 
-func (t *Thumb) get_href() types_.URLHref {
+func (t *Thumb) get_href() typ_.URLHref {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -562,8 +562,8 @@ func (t *Thumb) cacheClean() {
 
 // url_Exists : проверка наличия превьюхи в запросе 
 // http.Request.URL.Path -> URLpath
-func urlExists( url_ *url.URL, thumbs map[types_.URLHref]*Thumb ) ( *Thumb, bool /*exists*/ ) {
-	t, ok := thumbs[types_.URLHref(url_.Path)]
+func urlExists( url_ *url.URL, thumbs map[typ_.URLHref]*Thumb ) ( *Thumb, bool /*exists*/ ) {
+	t, ok := thumbs[typ_.URLHref(url_.Path)]
 	return t, ok
 }
 

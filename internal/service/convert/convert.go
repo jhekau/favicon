@@ -5,11 +5,10 @@ package convert
  * 1 August 2023
  */
 import (
-	"io"
-
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	types_ "github.com/jhekau/favicon/internal/core/types"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	converter_ "github.com/jhekau/favicon/pkg/models/converter"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
@@ -23,12 +22,12 @@ const (
 )
 
 // хранимые объекты
-type StorageOBJ interface{
-	IsExists() ( bool, error )
-	Key() domain_.StorageKey
-	Reader() (io.ReadCloser, error)
-	Writer() (io.WriteCloser, error)
-}
+// type StorageOBJ interface{
+// 	IsExists() ( bool, error )
+// 	Key() storage_.StorageKey
+// 	Reader() (io.ReadCloser, error)
+// 	Writer() (io.WriteCloser, error)
+// }
 
 
 // конвертер для конкретного типа
@@ -43,7 +42,7 @@ type CheckPreview interface {
 
 // проверка валидности исходника для нарезания превьюхи
 type CheckSource interface {
-	Check(original StorageOBJ, originalSVG bool, thumb_size int) error
+	Check(original storage_.StorageOBJ, originalSVG bool, thumb_size int) error
 }
 
 
@@ -53,13 +52,13 @@ type CheckSource interface {
 // конвертирование исходного изображения нужную превьюшку
 type Converter struct{
 	L *logger_.Logger
-	Converters []ConverterT
+	Converters []converter_.ConverterTyp
 	CheckPreview CheckPreview
 	CheckSource CheckSource
 }
 
 func (c *Converter) Do( 
-	source, /*source_svg,*/ save StorageOBJ, // types_.FilePath,
+	source, /*source_svg,*/ save storage_.StorageOBJ, // types_.FilePath,
 	originalSVG bool,
 	typThumb types_.FileType,
 	size_px int,

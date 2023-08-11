@@ -9,8 +9,8 @@ import (
 	"os"
 
 	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	types_ "github.com/jhekau/favicon/internal/core/types"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
+	typ_ "github.com/jhekau/favicon/internal/core/types"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
@@ -33,7 +33,7 @@ var (
 // storage object
 type file struct{
 	l *logger_.Logger
-	filepath types_.FilePath
+	filepath typ_.FilePath
 	f *os.File
 }
 
@@ -87,15 +87,15 @@ func (s *file) IsExists() ( bool, error ) {
 	return true, nil
 }
 
-func (s *file) Key() domain_.StorageKey {
-	return domain_.StorageKey(s.filepath.String())
+func (s *file) Key() storage_.StorageKey {
+	return storage_.StorageKey(s.filepath.String())
 }
 
 // TODO ?
 // func (s *File) Delete()....
 
 // получаем интерфейсы на объект в storage
-func (fl *Files) NewObject( filepath types_.FilePath ) *file {
+func (fl *Files) NewObject( filepath typ_.FilePath ) *file {
 	return &file{
 		l: fl.L,
 		filepath: filepath,
