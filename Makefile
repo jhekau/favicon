@@ -39,6 +39,7 @@ pkg/models/converter/converter.go $\
 pkg/models/storage/storage.go $\
 pkg/models/storage/storage.key.go $\
 pkg/models/storage/storage.obj.go $\
+pkg/models/logger/logger.go $\
 internal/service/thumb/thumb.go $\
 internal/service/convert/convert.go $\
 internal/service/convert/checks/source.go
