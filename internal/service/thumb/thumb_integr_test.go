@@ -8,8 +8,8 @@ import (
 	"io"
 	"testing"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
 	mock_checks_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert/checks"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
@@ -62,8 +62,8 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -128,8 +128,8 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -199,8 +199,8 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -278,8 +278,8 @@ func Test_Inegration_ConverterConverters( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	cache := mock_thumb_.NewMockcache(ctrl)

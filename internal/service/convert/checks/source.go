@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
@@ -37,7 +37,7 @@ type Resolution interface{
 
 //
 type Source struct {
-	L *logger_.Logger
+	L *logs_.Logger
 	Cache Cache
 	Resolution Resolution
 }

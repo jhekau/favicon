@@ -5,7 +5,7 @@ package convert
  * 1 August 2023
  */
 import (
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
@@ -51,7 +51,7 @@ type CheckSource interface {
 
 // конвертирование исходного изображения нужную превьюшку
 type Converter struct{
-	L *logger_.Logger
+	L *logs_.Logger
 	Converters []converter_.ConverterTyp
 	CheckPreview CheckPreview
 	CheckSource CheckSource

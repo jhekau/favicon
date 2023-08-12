@@ -10,8 +10,8 @@ import (
 	"io"
 	"testing"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
@@ -29,9 +29,9 @@ import (
 
 // image test data
 type storage struct{
-	l *logger_.Logger
+	l *logs_.Logger
 	img interface{ 
-		Base64Reader(l *logger_.Logger) (io.Reader, string, error)
+		Base64Reader(l *logs_.Logger) (io.Reader, string, error)
 	}
 	ifExist bool
 	ifExistError error
@@ -61,8 +61,8 @@ func (s *storage) Writer() (io.WriteCloser, error) {
 func TestUnit_Convert_JPGxICO( t *testing.T ) {
 
 	// Data
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	original := &storage{
@@ -116,8 +116,8 @@ func TestUnit_Convert_JPGxICO( t *testing.T ) {
 func TestUnit_Convert_CoverterError( t *testing.T ) {
 
 	// Data
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	original := &storage{
@@ -173,8 +173,8 @@ func TestUnit_Convert_CoverterError( t *testing.T ) {
 func TestUnit_Convert_CoverterMulti( t *testing.T ) {
 
 	// Data
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	original := &storage{
@@ -233,8 +233,8 @@ func TestUnit_Convert_CoverterMulti( t *testing.T ) {
 func TestUnit_Convert_NoConverters( t *testing.T ) {
 
 	// Data
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	original := &storage{
@@ -284,8 +284,8 @@ func TestUnit_Convert_NoConverters( t *testing.T ) {
 func TestUnit_Convert_SizePX0( t *testing.T ) {
 
 	// Data
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	original := &storage{
@@ -335,8 +335,8 @@ func TestUnit_Convert_SizePX0( t *testing.T ) {
 func TestUnit_Convert_PreviewCheckError( t *testing.T ) {
 
 	// Data
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	original := &storage{
@@ -391,8 +391,8 @@ func TestUnit_Convert_PreviewCheckError( t *testing.T ) {
 func TestUnit_Convert_OriginalCheckError( t *testing.T ) {
 
 	// Data
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	original := &storage{
@@ -475,8 +475,8 @@ func TestUnit_Convert_OriginalCheckError( t *testing.T ) {
 func TestIntegrationConvert( t *testing.T ) {
 
 	// Data 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 	
 	_ = logger
@@ -515,8 +515,8 @@ func TestIntegrationConvert( t *testing.T ) {
 	save := types_.FilePath(`1.ico`)
 	size := 16
 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	// Mock

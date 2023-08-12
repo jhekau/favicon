@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 )
 
@@ -23,7 +23,7 @@ const (
 
 
 type Preview struct{
-	L *logger_.Logger
+	L *logs_.Logger
 }
 
 func (p Preview) Check(typ types_.FileType, size_px int) error {

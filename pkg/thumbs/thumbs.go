@@ -194,7 +194,7 @@ func (t *Thumbs) get_filepath_source_img() typ_.FilePath {
 func (t *Thumbs) handle() {
 	http.Handle(`/`, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		switch r.Method {
-		case http.MethodGet, http.MethodPost:
+		case http.MethodGet:
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return

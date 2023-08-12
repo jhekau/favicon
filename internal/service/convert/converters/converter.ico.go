@@ -6,7 +6,7 @@ package converters
  * конвертер для создания ICO превьюх
  */
 import (
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
@@ -20,7 +20,7 @@ const (
 
 
 type ConverterICO struct{
-	L *logger_.Logger
+	L *logs_.Logger
 	// пакет/утилита, который выполняет непосредственную конвертацию изображения
 	ConverterExec converter_.ConverterExec
 }

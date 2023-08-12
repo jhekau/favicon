@@ -13,7 +13,7 @@ import (
 	ico_ "github.com/Kodeworks/golang-image-ico"
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
@@ -29,7 +29,7 @@ const (
 
 
 type Exec struct{
-	L *logger_.Logger
+	L *logs_.Logger
 }
 
 func (e *Exec) Proc(original, save storage_.StorageOBJ , size_px int, thumbTyp types_.FileType) error {

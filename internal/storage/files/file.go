@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
@@ -32,14 +32,14 @@ var (
 
 // storage object
 type file struct{
-	l *logger_.Logger
+	l *logs_.Logger
 	filepath typ_.FilePath
 	f *os.File
 }
 
 // storage
 type Files struct{
-	L *logger_.Logger
+	L *logs_.Logger
 }
 
 func (s *file) Reader() (io.ReadCloser, error) {

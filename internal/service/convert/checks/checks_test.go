@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
 	domain_ "github.com/jhekau/favicon/pkg/domain"
@@ -38,8 +38,8 @@ func TestCheckPreviewUnit( t *testing.T ) {
 		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), errors.New(`error`) },
 	}{
 		err := checks_.Preview{
-			&logger_.Logger{
-				Typ: &logger_mock_.LoggerErrorf{},
+			&logs_.Logger{
+				Typ: &logs_mock_.LoggerErrorf{},
 			},
 		}.Check( ts.typ, ts.size)
 
@@ -254,8 +254,8 @@ func TestCheckSourceUnit( t *testing.T ) {
 	}{
 
 		err := (&checks_.Source{
-			L: &logger_.Logger{
-				Typ: &logger_mock_.LoggerErrorf{},
+			L: &logs_.Logger{
+				Typ: &logs_mock_.LoggerErrorf{},
 			},
 			Cache: dt.cache,
 			Resolution: resolution{ dt.file_resolution },

@@ -10,8 +10,8 @@ import (
 	"io"
 	"testing"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 	"github.com/stretchr/testify/require"
@@ -33,7 +33,7 @@ func (o *obj) Close() error {
 
 // image test data
 type storage struct{
-	l *logger_.Logger
+	l *logs_.Logger
 	obj *obj
 }
 func (s *storage) Reader() (io.ReadCloser , error) {
@@ -46,13 +46,13 @@ func (s *storage) Writer() (io.WriteCloser, error) {
 
 func TestGetResolution(t *testing.T){
 	
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 	errNil := (error)(nil)
 
 	for _, d := range []struct{
-		img interface{ Base64Reader(l *logger_.Logger) (io.Reader, string, error) }
+		img interface{ Base64Reader(l *logs_.Logger) (io.Reader, string, error) }
 		w, h int
 		err error
 	}{

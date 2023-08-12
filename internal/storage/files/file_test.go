@@ -14,8 +14,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	logger_mock_ "github.com/jhekau/favicon/internal/core/logger/mock"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 )
 
@@ -39,8 +39,8 @@ func TestIsExists(t *testing.T) {
 		*files_.OsOpen = backupOsOpen
 	}()
 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	for _, d := range []struct{
@@ -92,8 +92,8 @@ func TestRead(t *testing.T) {
 		*files_.OsOpen = backupOsOpen
 	}()
 
-	logger := &logger_.Logger{
-		Typ: &logger_mock_.LoggerErrorf{},
+	logger := &logs_.Logger{
+		Typ: &logs_mock_.LoggerErrorf{},
 	}
 
 	for _, d := range []struct{

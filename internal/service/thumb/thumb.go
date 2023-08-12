@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"sync"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
@@ -99,7 +99,7 @@ type original struct {
 	obj storage_.StorageOBJ
 }
 
-func NewThumb(key string, typThumb Typ, l *logger_.Logger, s storage_.Storage, c converter_.Converter) (*Thumb, error) {
+func NewThumb(key string, typThumb Typ, l *logs_.Logger, s storage_.Storage, c converter_.Converter) (*Thumb, error) {
 	t, err := s.NewObject(key)
 	if err != nil {
 		return nil, l.Typ.Error(logTP, logT02, err)
@@ -118,7 +118,7 @@ type Thumb struct {
 
 	mu sync.RWMutex
 
-	l *logger_.Logger
+	l *logs_.Logger
 	storage storage_.Storage
 	conv converter_.Converter
 	cache cache

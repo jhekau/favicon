@@ -9,7 +9,7 @@ import (
 	"image"
 	"io"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 )
 
 const (
@@ -25,7 +25,7 @@ type StorageOBJ interface{
 }
 
 type Resolution struct {
-	L *logger_.Logger
+	L *logs_.Logger
 }
 
 // Get : получние разрешения изображения 

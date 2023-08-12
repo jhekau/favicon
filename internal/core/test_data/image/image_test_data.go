@@ -15,7 +15,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 )
 
 const (
@@ -27,7 +27,7 @@ const (
 )
 
 type Imgb64 string
-func (img Imgb64) Base64Reader(l *logger_.Logger) (io.Reader, string /*type image*/, error) {
+func (img Imgb64) Base64Reader(l *logs_.Logger) (io.Reader, string /*type image*/, error) {
 	idx := strings.Index(string(img), ";base64,")
     if idx < 0 {
         return nil, ``, l.Typ.Error( logIP, logI01 )
@@ -61,7 +61,7 @@ const (
 )
 
 //
-func GetFileReader(img interface{ Base64Reader(l *logger_.Logger)(io.Reader, string, error) }, l *logger_.Logger) (io.Reader, error) {
+func GetFileReader(img interface{ Base64Reader(l *logs_.Logger)(io.Reader, string, error) }, l *logs_.Logger) (io.Reader, error) {
 	
 	r, typ, err := img.Base64Reader(l)
 	if err != nil {

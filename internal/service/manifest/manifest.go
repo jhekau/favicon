@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
@@ -42,7 +42,7 @@ const (
 
 type Manifest struct {
 	s sync.RWMutex
-	l *logger_.Logger
+	l *logs_.Logger
 	cache cache
 
 	url_href types_.URLHref
