@@ -40,8 +40,16 @@ type storage struct{
 	l logger_.Logger
 	obj *obj
 }
-func (s *storage) Reader() (io.ReadCloser , error) {
-	return io.NopCloser(bytes.NewBuffer(s.obj.Bytes())), nil
+type reader struct {
+	io.ReadCloser
+}
+func (r *reader) Seek(offset int64, whence int) (int64, error){
+	return 0,nil
+}
+func (s *storage) Reader() (io.ReadSeekCloser , error) {
+	return &reader{
+		io.NopCloser(bytes.NewBuffer(s.obj.Bytes())),
+	}, nil
 }
 func (s *storage) Writer() (io.WriteCloser, error) {
 	return s.obj, nil

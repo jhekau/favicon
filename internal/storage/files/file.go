@@ -42,7 +42,7 @@ type Files struct{
 	L logger_.Logger
 }
 
-func (s *file) Reader() (io.ReadCloser, error) {
+func (s *file) Reader() (io.ReadSeekCloser, error) {
 	f, err := osOpen(s.filepath.String())
 	if err != nil {
 		return nil, s.l.Error(logP, logS02, err)

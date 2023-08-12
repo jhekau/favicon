@@ -42,9 +42,18 @@ func (s *storage) IsExists() (bool, error) {
 func (s *storage) Key() storage_.StorageKey {
 	return s.storageKey
 }
-func (s *storage) Reader() (io.ReadCloser, error) {
+type reader struct {
+	io.ReadCloser
+}
+func (r *reader) Seek(offset int64, whence int) (int64, error){
+	return 0,nil
+}
+
+func (s *storage) Reader() (io.ReadSeekCloser, error) {
 	r, err := image_test_data_.GetFileReader(s.img, s.l)
-	return io.NopCloser(r), err
+	return &reader{
+		io.NopCloser(r),
+	}, err
 }
 func (s *storage) Writer() (io.WriteCloser, error) {
 	var w io.WriteCloser
