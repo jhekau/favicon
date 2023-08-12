@@ -40,7 +40,8 @@ pkg/models/storage/storage.go $\
 pkg/models/storage/storage.key.go $\
 pkg/models/storage/storage.obj.go $\
 internal/service/thumb/thumb.go $\
-internal/service/convert/convert.go
+internal/service/convert/convert.go $\
+internal/service/convert/convert/checks/source.go
 
 MOCKGEN ?= $(GOPATH)/bin/mockgen
 ifeq ($(OS),Windows_NT)
