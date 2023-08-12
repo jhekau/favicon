@@ -14,6 +14,7 @@ import (
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,6 +42,12 @@ func (s *storage) Reader() (io.ReadCloser , error) {
 }
 func (s *storage) Writer() (io.WriteCloser, error) {
 	return s.obj, nil
+}
+func (s *storage) Key() storage_.StorageKey{
+	return ``
+}
+func (s *storage) IsExists() ( bool, error ){
+	return false, nil
 }
 
 

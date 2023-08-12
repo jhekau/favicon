@@ -71,7 +71,8 @@ func TestIsExists(t *testing.T) {
 		*files_.OsStat = d.osStat
 		*files_.OsOpen = d.osOpen
 
-		isExist, err := (&files_.Files{L: logger}).NewObject(``).IsExists()
+		obj, _ := (&files_.Files{L: logger}).NewObject(``)
+		isExist, err := obj.IsExists()
 
 		require.Equal(t, err, d.resultError, fmt.Sprintf(
 			`error: isExists: '%v', resultIsExist: '%v', err: '%v', data: %#v`, isExist, d.resultIsExist, err, d))
@@ -112,7 +113,8 @@ func TestRead(t *testing.T) {
 	} {
 		*files_.OsOpen = d.osOpen
 
-		f, err := (&files_.Files{L: logger}).NewObject(``).Reader()
+		obj, _ := (&files_.Files{L: logger}).NewObject(``)
+		f, err := obj.Reader()
 
 		require.Equal(t, err, d.resultError,
 			fmt.Sprintf(`error: f: '%v', err: '%v', data: %#v`, f, err, d))

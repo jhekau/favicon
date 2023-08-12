@@ -125,7 +125,7 @@ type storageOBJ struct {
 func (s *storageOBJ) Key() storage_.StorageKey {
 	return storage_.StorageKey(s.key)
 }
-func (s *storageOBJ) Reader() (io.ReadCloser, error) {
+func (s *storageOBJ) Reader() (io.ReadSeekCloser, error) {
 	return nil, nil
 }
 func (s *storageOBJ) Writer() (io.WriteCloser, error) {

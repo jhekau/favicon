@@ -9,7 +9,7 @@ import(
 )
 
 type StorageOBJ interface{
-	Reader() (io.ReadCloser , error)
+	Reader() (io.ReadSeekCloser , error)
 	Writer() (io.WriteCloser, error)
 	Key() StorageKey
 	IsExists() ( bool, error )

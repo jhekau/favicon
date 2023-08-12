@@ -7,9 +7,9 @@ package resolution
  */
 import (
 	"image"
-	"io"
 
 	logger_ "github.com/jhekau/favicon/pkg/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
@@ -20,16 +20,12 @@ const (
 	// logR04 = `R04: `
 )
 
-type StorageOBJ interface{
-	Reader() (io.ReadCloser , error)
-}
-
 type Resolution struct {
 	L logger_.Logger
 }
 
 // Get : получние разрешения изображения 
-func (r *Resolution) Get(obj StorageOBJ) ( w,h int, err error ) {
+func (r *Resolution) Get(obj storage_.StorageOBJ) ( w,h int, err error ) {
 
 	read, err := obj.Reader()
 	if err != nil {

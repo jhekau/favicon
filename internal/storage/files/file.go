@@ -95,10 +95,10 @@ func (s *file) Key() storage_.StorageKey {
 // func (s *File) Delete()....
 
 // получаем интерфейсы на объект в storage
-func (fl *Files) NewObject( filepath typ_.FilePath ) *file {
+func (fl Files) NewObject( filepath any ) (storage_.StorageOBJ, error) {
 	return &file{
 		l: fl.L,
-		filepath: filepath,
-	}
+		filepath: filepath.(typ_.FilePath),
+	}, nil
 }
 

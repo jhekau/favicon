@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	logger_default_ "github.com/jhekau/favicon/internal/core/logs/default"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
@@ -20,6 +21,7 @@ import (
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 	manifest_ "github.com/jhekau/favicon/internal/service/manifest"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
+	files_ "github.com/jhekau/favicon/internal/storage/files"
 
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
@@ -60,33 +62,74 @@ var (
 	}
 )
 
-// type StorageOBJ interface{
-// 	Reader() (io.ReadCloser , error)
-// 	Writer() (io.WriteCloser, error)
-// 	Key() storage_.StorageKey
-// 	IsExists() ( bool, error )
-// }
+// создание пустого набора превьюх для одного оригинального изображения
+func NewThumbs() *Thumbs {
+	logger := &logger_default_.Logger{}
+	return &Thumbs{
+		l: logger,
+		storage: files_.Files{L: logger},
+		conv: &convert_.Converter{
+			L: logger,
+			Converters: []converter_.ConverterTyp{
+				&converters_.ConverterICO{
+					ConverterExec: &converter_exec_anthonynsimon_.Exec{},
+				},
+				&converters_.ConverterPNG{
+					ConverterExec: &converter_exec_anthonynsimon_.Exec{},
+				},
+			},
+			CheckPreview: checks_.Preview{},
+			CheckSource: &checks_.Source{
+				L: logger,
+				Cache: &checks_.CacheStatus{},
+				Resolution: &resolution_.Resolution{
+					L: logger,
+				},
+			},
+		},
+	}
+}
 
-// type Converter interface{
-// 	Do(source, save StorageOBJ, originalSVG bool, typ types_.FileType, size_px int) error
-// }
-
-// type StorageObject interface{
-// 	Read() (*os.File, error)
-// 	Close() error
-// 	IsExists() ( bool, error )
-// }
+// создание набора по умолчанию превьюх для оригинала
+func NewThumbs_Defaults() *Thumbs {
+	t := NewThumbs()
+	return t
+}
 
 type Thumbs struct {
-	s           sync.RWMutex
+	mu          sync.RWMutex
 	l           logger_.Logger
 	storage     storage_.Storage
+	conv 		converter_.Converter
 	source_svg  typ_.FilePath
 	source_img  typ_.FilePath
 	folder_work typ_.Folder
-	thumbs      map[typ_.URLHref] /*clear*/ *thumb_.Thumb
+	thumbs      map[typ_.URLHref]*thumb_.Thumb
 	manifest    manifest_.Manifest
 }
+
+// возможность заменить логгер на собственную реализацию
+func (t *Thumbs) LoggerSet( l logger_.Logger ) {
+	t.mu.Lock()
+	t.l = l
+	t.mu.Unlock()
+}
+
+// возможность заменить систему хранения на собственную реализацию
+func (t *Thumbs) StorageSet( s storage_.Storage ) {
+	t.mu.Lock()
+	t.storage = s
+	t.mu.Unlock()
+}
+
+// возможность заменить конвертер на собственную реализацию
+func (t *Thumbs) ConvertSet( conv converter_.Converter ) {
+	t.mu.Lock()
+	t.conv = conv
+	t.mu.Unlock()
+}
+
+
 
 func (t *Thumbs) Append(thumb *thumb_.Thumb) *Thumbs {
 	return t.append(thumb)
@@ -104,86 +147,71 @@ func (t *Thumbs) Handle() {
 	t.handle()
 }
 
-// использует конвертер и систему хранения изображений по умолчанию
+
+
+// 
 func (t *Thumbs) ServeFile(url_ *url.URL) (fpath string, exists bool, err error) {
-
-	converter := converter_exec_anthonynsimon_.Exec{}
-	tb, exist := t.getThumb(typ_.URLHref(url_.Path))
-	if !exist {
-		return ``, false, nil
-	}
-
-	// storage := files_.Files{ t.l }
-
-	storageObj := t.storage.Object(tb.GetOriginalKey)
-
-	return t.serve_file(url_, &convert_.Converter{
-		L: t.l,
-		Converters: []converter_.ConverterTyp{
-			&converters_.ConverterPNG{ConverterExec: &converter},
-			&converters_.ConverterICO{ConverterExec: &converter},
-		},
-		CheckPreview: checks_.Preview{},
-		CheckSource: &checks_.Source{
-			Cache:      &checks_.CacheStatus{},
-			StorageObj: storageObj,
-			Resolution: &resolution_.Resolution{
-				L: t.l,
-			},
-		},
-	})
+	return t.serve_file(url_)
 }
+
+
+
 func (t *Thumbs) TagsHTML() string {
 	return t.tags_html()
 }
 
 func (t *Thumbs) append(thumb *thumb_.Thumb) *Thumbs {
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
 	t.thumbs[thumb.GetHREF()] = thumb
 	return t
 }
 
 func (t *Thumbs) set_folder_work(folder string) *Thumbs {
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
 	t.folder_work = typ_.Folder(folder)
 	return t
 }
 func (t *Thumbs) get_folder_work() typ_.Folder {
-	t.s.RLock()
-	defer t.s.RUnlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
 	return t.folder_work
 }
+
+/*
+... это всё в storage
 func (t *Thumbs) set_filepath_source_svg(fpath string) *Thumbs {
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
 	t.source_svg = typ_.FilePath(fpath)
 	return t
 }
 func (t *Thumbs) get_filepath_source_svg() typ_.FilePath {
-	t.s.RLock()
-	defer t.s.RUnlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
 	return t.source_svg
 }
 func (t *Thumbs) set_filepath_source_img(fpath string) *Thumbs {
-	t.s.Lock()
-	defer t.s.Unlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 
 	t.source_img = typ_.FilePath(fpath)
 	return t
 }
 func (t *Thumbs) get_filepath_source_img() typ_.FilePath {
-	t.s.RLock()
-	defer t.s.RUnlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 
 	return t.source_img
 }
+.....
+*/
 
 func (t *Thumbs) handle() {
 	http.Handle(`/`, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -206,7 +234,7 @@ func (t *Thumbs) handle() {
 	}))
 }
 
-func (t *Thumbs) serve_file(url_ *url.URL, conv convert_.Converter) (fpath string, exists bool, err error) {
+func (t *Thumbs) serve_file(url_ *url.URL) (fpath string, exists bool, err error) {
 
 	if manifest, exists, err := t.server_file_manifest(url_); err != nil {
 		return ``, false, t.l.Error(logTP, logT02, err)
@@ -224,9 +252,9 @@ func (t *Thumbs) serve_file(url_ *url.URL, conv convert_.Converter) (fpath strin
 
 func (t *Thumbs) server_file_thumb(url_ *url.URL, conv convert_.Converter) (fpath typ_.FilePath, exists bool, err error) {
 
-	t.s.RLock()
+	t.mu.RLock()
 	thumb, exists := thumb_.URLExists(url_, t.thumbs)
-	t.s.RUnlock()
+	t.mu.RUnlock()
 
 	if !exists {
 		return ``, false, nil
@@ -265,12 +293,12 @@ func (t *Thumbs) tags_html() string {
 
 	var tags strings.Builder
 
-	t.s.RLock()
+	t.mu.RLock()
 	for _, thumb := range t.thumbs {
 		tags.WriteString(thumb.GetTAG())
 	}
 	tags.WriteString(t.manifest.GetTAG())
-	t.s.RUnlock()
+	t.mu.RUnlock()
 
 	return tags.String()
 }

@@ -54,20 +54,6 @@ var (
 	PNG Typ = Typ(types_.PNG())
 )
 
-// type StorageOBJ interface{
-// 	Reader() (io.ReadCloser , error)
-// 	Writer() (io.WriteCloser, error)
-// 	Key() storage_.StorageKey
-// 	IsExists() ( bool, error )
-// }
-
-// type Storage interface {
-// 	NewObject(key any) (StorageOBJ, error)
-// }
-
-// type Converter interface{
-// 	Do(source, save StorageOBJ, originalSVG bool, typThumb types_.FileType, size_px int) error
-// }
 
 type cache interface{
 	Delete(key any)
@@ -75,8 +61,6 @@ type cache interface{
 	Range(f func(key any, value any) bool)
 	Store(key any, value any)
 }
-
-
 
 ///
 ///
@@ -121,7 +105,7 @@ type Thumb struct {
 	l logger_.Logger
 	storage storage_.Storage
 	conv converter_.Converter
-	cache cache
+	cache cache // from test
 
 	original *original
 	thumb storage_.StorageOBJ
@@ -212,7 +196,7 @@ func (t *Thumb) OriginalFileSet( filepath string ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	file := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
+	file, _ := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
 	t.original = &original{
 		obj: file,
 	}
@@ -224,7 +208,7 @@ func (t *Thumb) OriginalFileSetSVG( filepath string ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	file := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
+	file, _ := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
 	t.original = &original{
 		typSVG: true,
 		obj: file,
