@@ -65,10 +65,10 @@ func (mr *MockStorageOBJMockRecorder) Key() *gomock.Call {
 }
 
 // Reader mocks base method.
-func (m *MockStorageOBJ) Reader() (io.ReadCloser, error) {
+func (m *MockStorageOBJ) Reader() (io.ReadSeekCloser, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Reader")
-	ret0, _ := ret[0].(io.ReadCloser)
+	ret0, _ := ret[0].(io.ReadSeekCloser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
