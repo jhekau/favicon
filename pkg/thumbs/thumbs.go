@@ -222,15 +222,14 @@ func (t *Thumbs) handle() {
 			return
 		}
 
-		fpath, exists, err := t.ServeFile(r.URL)
+		reader, name, exists, err := t.ServeFile(r.URL)
 		if err != nil {
 			log.Println(t.l.Error(logT01, err))
 			w.WriteHeader(http.StatusInternalServerError)
 		} else if !exists {
 			w.WriteHeader(http.StatusNotFound)
 		} else {
-			// http.ServeContent(w http.ResponseWriter, req *http.Request, name string, modtime time.Time, content io.ReadSeeker)
-			http.ServeFile(w, r, fpath)
+			http.ServeContent(w, r, name string, modtime time.Time, content io.ReadSeeker)
 		}
 	}))
 }
