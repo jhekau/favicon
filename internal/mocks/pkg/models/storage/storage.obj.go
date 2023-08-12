@@ -7,6 +7,7 @@ package mock_storage
 import (
 	io "io"
 	reflect "reflect"
+	time "time"
 
 	storage "github.com/jhekau/favicon/pkg/models/storage"
 	gomock "go.uber.org/mock/gomock"
@@ -62,6 +63,20 @@ func (m *MockStorageOBJ) Key() storage.StorageKey {
 func (mr *MockStorageOBJMockRecorder) Key() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Key", reflect.TypeOf((*MockStorageOBJ)(nil).Key))
+}
+
+// ModTime mocks base method.
+func (m *MockStorageOBJ) ModTime() time.Time {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ModTime")
+	ret0, _ := ret[0].(time.Time)
+	return ret0
+}
+
+// ModTime indicates an expected call of ModTime.
+func (mr *MockStorageOBJMockRecorder) ModTime() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ModTime", reflect.TypeOf((*MockStorageOBJ)(nil).ModTime))
 }
 
 // Reader mocks base method.
