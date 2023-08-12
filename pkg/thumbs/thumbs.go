@@ -229,6 +229,7 @@ func (t *Thumbs) handle() {
 		} else if !exists {
 			w.WriteHeader(http.StatusNotFound)
 		} else {
+			// http.ServeContent(w http.ResponseWriter, req *http.Request, name string, modtime time.Time, content io.ReadSeeker)
 			http.ServeFile(w, r, fpath)
 		}
 	}))
