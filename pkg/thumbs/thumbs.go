@@ -5,16 +5,13 @@ package favicon
  * 09 March 2023
  */
 import (
-	"io"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"sync"
 
-	logger_ "github.com/jhekau/favicon/internal/core/logger"
-	types_ "github.com/jhekau/favicon/internal/core/types"
+	typ_ "github.com/jhekau/favicon/internal/core/types"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
@@ -23,8 +20,10 @@ import (
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 	manifest_ "github.com/jhekau/favicon/internal/service/manifest"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
-	files_ "github.com/jhekau/favicon/internal/storage/files"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
+
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	converter_ "github.com/jhekau/favicon/pkg/models/converter"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
@@ -61,22 +60,22 @@ var (
 	}
 )
 
-type StorageOBJ interface{
-	Reader() (io.ReadCloser , error)
-	Writer() (io.WriteCloser, error)
-	Key() domain_.StorageKey
-	IsExists() ( bool, error )
-}
+// type StorageOBJ interface{
+// 	Reader() (io.ReadCloser , error)
+// 	Writer() (io.WriteCloser, error)
+// 	Key() domain_.StorageKey
+// 	IsExists() ( bool, error )
+// }
 
-type Converter interface{
-	Do(source, save StorageOBJ, originalSVG bool, typ types_.FileType, size_px int) error
-}
+// type Converter interface{
+// 	Do(source, save StorageOBJ, originalSVG bool, typ types_.FileType, size_px int) error
+// }
 
-type StorageObject interface{
-	Read() (*os.File, error)
-	Close() error
-	IsExists() ( bool, error )
-}
+// type StorageObject interface{
+// 	Read() (*os.File, error)
+// 	Close() error
+// 	IsExists() ( bool, error )
+// }
 
 type Thumbs struct {
 	s sync.RWMutex
@@ -85,13 +84,11 @@ type Thumbs struct {
         Alert(path string, messages ...interface{}) error
         Error(path string, messages ...interface{}) error
     }
-	storage interface {
-		Object( key func() string ) StorageObject
-	}
-	source_svg types_.FilePath
-	source_img types_.FilePath
-	folder_work types_.Folder
-	thumbs map[types_.URLHref/*clear*/]*thumb_.Thumb
+	storage storage_.Storage
+	source_svg typ_.FilePath
+	source_img typ_.FilePath
+	folder_work typ_.Folder
+	thumbs map[typ_.URLHref/*clear*/]*thumb_.Thumb
 	manifest manifest_.Manifest
 }
 
@@ -116,7 +113,7 @@ func (t *Thumbs) Handle() {
 func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err error ) {
 
 	converter := converter_exec_anthonynsimon_.Exec{}
-	tb, exist := t.getThumb(types_.URLHref(url_.Path))
+	tb, exist := t.getThumb(typ_.URLHref(url_.Path))
 	if !exist {
 		return ``, false, nil
 	}
@@ -150,7 +147,7 @@ func (t *Thumbs) append(thumb *thumb_.Thumb) *Thumbs {
 	t.s.Lock()
 	defer t.s.Unlock()
 	
-	t.thumbs[thumb.GetHREFClear()] = thumb
+	t.thumbs[thumb.GetHREF()] = thumb
 	return t
 }
 
@@ -158,10 +155,10 @@ func (t *Thumbs) set_folder_work( folder string ) *Thumbs {
 	t.s.Lock()
 	defer t.s.Unlock()
 
-	t.folder_work = types_.Folder(folder)
+	t.folder_work = typ_.Folder(folder)
 	return t
 }
-func (t *Thumbs) get_folder_work() types_.Folder {
+func (t *Thumbs) get_folder_work() typ_.Folder {
 	t.s.RLock()
 	defer t.s.RUnlock()
 
@@ -171,10 +168,10 @@ func (t *Thumbs) set_filepath_source_svg( fpath string ) *Thumbs {
 	t.s.Lock()
 	defer t.s.Unlock()
 
-	t.source_svg = types_.FilePath(fpath)
+	t.source_svg = typ_.FilePath(fpath)
 	return t
 }
-func (t *Thumbs) get_filepath_source_svg() types_.FilePath {
+func (t *Thumbs) get_filepath_source_svg() typ_.FilePath {
 	t.s.RLock()
 	defer t.s.RUnlock()
 
@@ -184,10 +181,10 @@ func (t *Thumbs) set_filepath_source_img( fpath string ) *Thumbs {
 	t.s.Lock()
 	defer t.s.Unlock()
 
-	t.source_img = types_.FilePath(fpath)
+	t.source_img = typ_.FilePath(fpath)
 	return t
 }
-func (t *Thumbs) get_filepath_source_img() types_.FilePath {
+func (t *Thumbs) get_filepath_source_img() typ_.FilePath {
 	t.s.RLock()
 	defer t.s.RUnlock()
 
@@ -215,7 +212,7 @@ func (t *Thumbs) handle() {
 	}))
 }
 
-func (t *Thumbs) serve_file( url_ *url.URL, conv Converter ) ( fpath string, exists bool, err error ) {
+func (t *Thumbs) serve_file( url_ *url.URL, conv convert_.Converter ) ( fpath string, exists bool, err error ) {
 
 	if manifest, exists, err := t.server_file_manifest(url_); err != nil {
 		return ``, false, t.l.Error(logTP, logT02, err)
@@ -231,7 +228,7 @@ func (t *Thumbs) serve_file( url_ *url.URL, conv Converter ) ( fpath string, exi
 	return ``, false, nil
 }
 
-func (t *Thumbs) server_file_thumb( url_ *url.URL, conv Converter ) (fpath types_.FilePath, exists bool, err error) {
+func (t *Thumbs) server_file_thumb( url_ *url.URL, conv convert_.Converter ) (fpath typ_.FilePath, exists bool, err error) {
 
 	t.s.RLock()
 	thumb, exists := thumb_.URLExists(url_, t.thumbs)
@@ -254,7 +251,7 @@ func (t *Thumbs) server_file_thumb( url_ *url.URL, conv Converter ) (fpath types
 	return fpath, true, nil
 }
 
-func (t *Thumbs) server_file_manifest( url_ *url.URL ) (manifest types_.FilePath, exists bool, err error) {
+func (t *Thumbs) server_file_manifest( url_ *url.URL ) (manifest typ_.FilePath, exists bool, err error) {
 
 	if !t.manifest.URLExists(url_) {
 		return ``, false, nil
@@ -284,17 +281,17 @@ func (t *Thumbs) tags_html() string {
 	return tags.String()
 }
 
-func (t *Thumbs) getThumb(u types_.URLHref) (*thumb_.Thumb, bool) {
+func (t *Thumbs) getThumb(u typ_.URLHref) (*thumb_.Thumb, bool) {
 	tb, ok := t.thumbs[u]
 	return tb, ok
 }
 
 func default_list() *Thumbs {
 	return &Thumbs{
-		thumbs: func() map[types_.URLHref]*thumb_.Thumb {
-			m := map[types_.URLHref]*thumb_.Thumb{}
+		thumbs: func() map[typ_.URLHref]*thumb_.Thumb {
+			m := map[typ_.URLHref]*thumb_.Thumb{}
 			for _, thumb := range defaults_.Defaults() {
-				m[thumb.GetHREFClear()] = thumb
+				m[thumb.GetHREF()] = thumb
 			}
 			return m
 		}(),
@@ -304,10 +301,10 @@ func default_list() *Thumbs {
 
 func custom_list( thumbs ...*thumb_.Thumb ) *Thumbs {
 	return &Thumbs{
-		thumbs: func() map[types_.URLHref]*thumb_.Thumb {
-			m := map[types_.URLHref]*thumb_.Thumb{}
+		thumbs: func() map[typ_.URLHref]*thumb_.Thumb {
+			m := map[typ_.URLHref]*thumb_.Thumb{}
 			for _, thumb := range thumbs {
-				m[thumb.GetHREFClear()] = thumb
+				m[thumb.GetHREF()] = thumb
 			}
 			return m
 		}(),

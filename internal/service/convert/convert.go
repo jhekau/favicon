@@ -13,7 +13,7 @@ import (
 
 const (
 	logFP  = `/internal/service/convert.go`
-	// logF01 = `F01: empty original image`
+	// logF01 = `F01: `
 	logF02 = `F02: check preview image`
 	logF03 = `F03: convert thumb`
 	logF04 = `F04: check source image`
