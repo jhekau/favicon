@@ -26,16 +26,20 @@ const (
 	// logC09 = `C09: `
 )
 
+type Cache interface{
+	Status(original storage_.StorageKey, originalSVG bool, thumb_size int) (bool, error)
+	SetErr(original storage_.StorageKey, originalSVG bool, thumb_size int, err error) error
+}
+
+type Resolution interface{
+	Get(_ storage_.StorageOBJ) (w int, h int, err error)
+}
+
 //
 type Source struct {
 	L *logger_.Logger
-	Cache interface{
-		Status(original storage_.StorageKey, originalSVG bool, thumb_size int) (bool, error)
-		SetErr(original storage_.StorageKey, originalSVG bool, thumb_size int, err error) error
-	}
-	Resolution interface{
-		Get(_ storage_.StorageOBJ) (w int, h int, err error)
-	}
+	Cache Cache
+	Resolution Resolution
 }
 
 // проверка исходного изображения на корректность
