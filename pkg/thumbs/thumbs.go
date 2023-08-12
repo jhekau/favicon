@@ -22,8 +22,8 @@ import (
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
@@ -38,12 +38,11 @@ const (
 )
 
 var (
-
 	TypePNG = types_.PNG()
 	TypeICO = types_.ICO()
 	// TypeSVG = types_.SVG()
 
-	// ~~ interface ~~ 
+	// ~~ interface ~~
 
 	DefaultList = default_list
 
@@ -79,35 +78,34 @@ var (
 // }
 
 type Thumbs struct {
-	s sync.RWMutex
-	l logger_.Logger
-	storage storage_.Storage
-	source_svg typ_.FilePath
-	source_img typ_.FilePath
+	s           sync.RWMutex
+	l           logger_.Logger
+	storage     storage_.Storage
+	source_svg  typ_.FilePath
+	source_img  typ_.FilePath
 	folder_work typ_.Folder
-	thumbs map[typ_.URLHref/*clear*/]*thumb_.Thumb
-	manifest manifest_.Manifest
+	thumbs      map[typ_.URLHref] /*clear*/ *thumb_.Thumb
+	manifest    manifest_.Manifest
 }
 
 func (t *Thumbs) Append(thumb *thumb_.Thumb) *Thumbs {
 	return t.append(thumb)
 }
-func (t *Thumbs) SetFolderWork( folder string ) *Thumbs {
+func (t *Thumbs) SetFolderWork(folder string) *Thumbs {
 	return t.set_folder_work(folder)
 }
-func (t *Thumbs) SetFilepathSourceSVG( fpath string ) *Thumbs {
-	return t.set_filepath_source_svg( fpath )
+func (t *Thumbs) SetFilepathSourceSVG(fpath string) *Thumbs {
+	return t.set_filepath_source_svg(fpath)
 }
-func (t *Thumbs) SetFilepathSourceIMG( fpath string ) *Thumbs {
-	return t.set_filepath_source_img( fpath )
+func (t *Thumbs) SetFilepathSourceIMG(fpath string) *Thumbs {
+	return t.set_filepath_source_img(fpath)
 }
 func (t *Thumbs) Handle() {
 	t.handle()
 }
 
-
 // использует конвертер и систему хранения изображений по умолчанию
-func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err error ) {
+func (t *Thumbs) ServeFile(url_ *url.URL) (fpath string, exists bool, err error) {
 
 	converter := converter_exec_anthonynsimon_.Exec{}
 	tb, exist := t.getThumb(typ_.URLHref(url_.Path))
@@ -117,21 +115,21 @@ func (t *Thumbs) ServeFile( url_ *url.URL ) ( fpath string, exists bool, err err
 
 	// storage := files_.Files{ t.l }
 
-	storageObj := t.storage.Object( tb.GetOriginalKey )
+	storageObj := t.storage.Object(tb.GetOriginalKey)
 
 	return t.serve_file(url_, &convert_.Converter{
 		L: t.l,
-		Converters: []convert_.ConverterT{
+		Converters: []converter_.ConverterTyp{
 			&converters_.ConverterPNG{ConverterExec: &converter},
 			&converters_.ConverterICO{ConverterExec: &converter},
 		},
 		CheckPreview: checks_.Preview{},
 		CheckSource: &checks_.Source{
-			Cache: &checks_.CacheStatus{},
+			Cache:      &checks_.CacheStatus{},
 			StorageObj: storageObj,
 			Resolution: &resolution_.Resolution{
 				L: t.l,
-			} ,
+			},
 		},
 	})
 }
@@ -139,16 +137,15 @@ func (t *Thumbs) TagsHTML() string {
 	return t.tags_html()
 }
 
-
 func (t *Thumbs) append(thumb *thumb_.Thumb) *Thumbs {
 	t.s.Lock()
 	defer t.s.Unlock()
-	
+
 	t.thumbs[thumb.GetHREF()] = thumb
 	return t
 }
 
-func (t *Thumbs) set_folder_work( folder string ) *Thumbs {
+func (t *Thumbs) set_folder_work(folder string) *Thumbs {
 	t.s.Lock()
 	defer t.s.Unlock()
 
@@ -161,7 +158,7 @@ func (t *Thumbs) get_folder_work() typ_.Folder {
 
 	return t.folder_work
 }
-func (t *Thumbs) set_filepath_source_svg( fpath string ) *Thumbs {
+func (t *Thumbs) set_filepath_source_svg(fpath string) *Thumbs {
 	t.s.Lock()
 	defer t.s.Unlock()
 
@@ -174,7 +171,7 @@ func (t *Thumbs) get_filepath_source_svg() typ_.FilePath {
 
 	return t.source_svg
 }
-func (t *Thumbs) set_filepath_source_img( fpath string ) *Thumbs {
+func (t *Thumbs) set_filepath_source_img(fpath string) *Thumbs {
 	t.s.Lock()
 	defer t.s.Unlock()
 
@@ -189,7 +186,7 @@ func (t *Thumbs) get_filepath_source_img() typ_.FilePath {
 }
 
 func (t *Thumbs) handle() {
-	http.Handle(`/`, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+	http.Handle(`/`, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 		default:
@@ -209,7 +206,7 @@ func (t *Thumbs) handle() {
 	}))
 }
 
-func (t *Thumbs) serve_file( url_ *url.URL, conv convert_.Converter ) ( fpath string, exists bool, err error ) {
+func (t *Thumbs) serve_file(url_ *url.URL, conv convert_.Converter) (fpath string, exists bool, err error) {
 
 	if manifest, exists, err := t.server_file_manifest(url_); err != nil {
 		return ``, false, t.l.Error(logTP, logT02, err)
@@ -225,7 +222,7 @@ func (t *Thumbs) serve_file( url_ *url.URL, conv convert_.Converter ) ( fpath st
 	return ``, false, nil
 }
 
-func (t *Thumbs) server_file_thumb( url_ *url.URL, conv convert_.Converter ) (fpath typ_.FilePath, exists bool, err error) {
+func (t *Thumbs) server_file_thumb(url_ *url.URL, conv convert_.Converter) (fpath typ_.FilePath, exists bool, err error) {
 
 	t.s.RLock()
 	thumb, exists := thumb_.URLExists(url_, t.thumbs)
@@ -248,7 +245,7 @@ func (t *Thumbs) server_file_thumb( url_ *url.URL, conv convert_.Converter ) (fp
 	return fpath, true, nil
 }
 
-func (t *Thumbs) server_file_manifest( url_ *url.URL ) (manifest typ_.FilePath, exists bool, err error) {
+func (t *Thumbs) server_file_manifest(url_ *url.URL) (manifest typ_.FilePath, exists bool, err error) {
 
 	if !t.manifest.URLExists(url_) {
 		return ``, false, nil
@@ -296,7 +293,7 @@ func default_list() *Thumbs {
 	}
 }
 
-func custom_list( thumbs ...*thumb_.Thumb ) *Thumbs {
+func custom_list(thumbs ...*thumb_.Thumb) *Thumbs {
 	return &Thumbs{
 		thumbs: func() map[typ_.URLHref]*thumb_.Thumb {
 			m := map[typ_.URLHref]*thumb_.Thumb{}

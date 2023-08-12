@@ -10,12 +10,12 @@ import (
 	"io"
 	"testing"
 
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
-	types_ "github.com/jhekau/favicon/internal/core/types"
-	mock_converters_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert/converters"
+	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -26,17 +26,19 @@ import (
 type obj struct {
 	bytes.Buffer
 }
+
 func (o *obj) Close() error {
 	return nil
 }
 
 // image test data
-type storage struct{
-	l logger_.Logger
+type storage struct {
+	l   logger_.Logger
 	obj *obj
 	key storage_.StorageKey
 }
-func (s *storage) Reader() (io.ReadCloser , error) {
+
+func (s *storage) Reader() (io.ReadCloser, error) {
 	return io.NopCloser(bytes.NewBuffer(s.obj.Bytes())), nil
 }
 func (s *storage) Writer() (io.WriteCloser, error) {
@@ -45,9 +47,11 @@ func (s *storage) Writer() (io.WriteCloser, error) {
 func (s *storage) Key() storage_.StorageKey {
 	return s.key
 }
+func (s *storage) IsExists() (bool, error) {
+	return true, nil
+}
 
-
-func readTestImage(img image_test_data_.Imgb64, logger logger_.Logger) ( *storage, error ) {
+func readTestImage(img image_test_data_.Imgb64, logger logger_.Logger) (*storage, error) {
 	obj := &storage{l: logger, obj: &obj{}}
 	r, err := image_test_data_.GetFileReader(image_test_data_.PNG_32x32, logger)
 	if err != nil {
@@ -57,8 +61,7 @@ func readTestImage(img image_test_data_.Imgb64, logger logger_.Logger) ( *storag
 	return obj, nil
 }
 
-
-func TestConverterICOUnit( t *testing.T) {
+func TestConverterICOUnit(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -66,36 +69,36 @@ func TestConverterICOUnit( t *testing.T) {
 	png16 := image_test_data_.PNG_16x16
 	errNil := (error)(nil)
 	logger := &logs_mock_.LoggerErrorf{}
-	
-	for _, d := range []struct{
-		source image_test_data_.Imgb64
-		save_key storage_.StorageKey
-		size_px int
-		typ types_.FileType
+
+	for _, d := range []struct {
+		source          image_test_data_.Imgb64
+		save_key        storage_.StorageKey
+		size_px         int
+		typ             types_.FileType
 		converter_error error
 		result_complite bool
-		result_error error
+		result_error    error
 	}{
-		{ png16, `1_preview.png`, 16, types_.PNG(), nil, false, nil },
-		{ png16, `1_preview.png`, 16, types_.ICO(), nil, true, nil },
-		{ png16, `1_preview.png`, 16, types_.SVG(), nil, false, nil },
-		{ png16, `1_preview.png`, 16, types_.ICO(), errors.New(`error`), false, errors.New(`error`) },
-	}{
+		{png16, `1_preview.png`, 16, types_.PNG(), nil, false, nil},
+		{png16, `1_preview.png`, 16, types_.ICO(), nil, true, nil},
+		{png16, `1_preview.png`, 16, types_.SVG(), nil, false, nil},
+		{png16, `1_preview.png`, 16, types_.ICO(), errors.New(`error`), false, errors.New(`error`)},
+	} {
 
 		orig, err := readTestImage(d.source, logger)
 		require.Equal(t, err, errNil)
 
-		save := &storage{ key: d.save_key }
+		save := &storage{key: d.save_key}
 
-		convExec := mock_converters_.NewMockConverterExec(ctrl)
+		convExec := mock_converter_.NewMockConverterExec(ctrl)
 		convExec.EXPECT().Proc(orig, save, d.size_px, d.typ).Return(d.converter_error).AnyTimes()
 
 		res, err := (&converters_.ConverterICO{
-			L: &logs_mock_.LoggerErrorf{},
+			L:             &logs_mock_.LoggerErrorf{},
 			ConverterExec: convExec,
 		}).Do(orig, save, d.size_px, d.typ)
 
-		if ( err != nil && d.result_error == nil ) || ( err == nil && d.result_error != nil ) {
+		if (err != nil && d.result_error == nil) || (err == nil && d.result_error != nil) {
 			t.Fatalf(`TestConverterICOUnit:error - result: '%v', err: '%v', testdata: '%#v'`, res, err, d)
 		}
 		if res != d.result_complite {
@@ -104,8 +107,7 @@ func TestConverterICOUnit( t *testing.T) {
 	}
 }
 
-
-func TestConverterPNGUnit( t *testing.T) {
+func TestConverterPNGUnit(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -114,35 +116,35 @@ func TestConverterPNGUnit( t *testing.T) {
 	errNil := (error)(nil)
 	logger := &logs_mock_.LoggerErrorf{}
 
-	for _, d := range []struct{
-		source image_test_data_.Imgb64
-		save_key storage_.StorageKey
-		size_px int
-		typ types_.FileType
+	for _, d := range []struct {
+		source          image_test_data_.Imgb64
+		save_key        storage_.StorageKey
+		size_px         int
+		typ             types_.FileType
 		converter_error error
 		result_complite bool
-		result_error error
+		result_error    error
 	}{
-		{ png16, `1_preview.png`, 16, types_.PNG(), nil, true, nil },
-		{ png16, `1_preview.png`, 16, types_.ICO(), nil, false, nil },
-		{ png16, `1_preview.png`, 16, types_.SVG(), nil, false, nil },
-		{ png16, `1_preview.png`, 16, types_.PNG(), errors.New(`error`), false, errors.New(`error`) },
-	}{
+		{png16, `1_preview.png`, 16, types_.PNG(), nil, true, nil},
+		{png16, `1_preview.png`, 16, types_.ICO(), nil, false, nil},
+		{png16, `1_preview.png`, 16, types_.SVG(), nil, false, nil},
+		{png16, `1_preview.png`, 16, types_.PNG(), errors.New(`error`), false, errors.New(`error`)},
+	} {
 
 		orig, err := readTestImage(d.source, logger)
 		require.Equal(t, err, errNil)
 
-		save := &storage{ key: d.save_key }
+		save := &storage{key: d.save_key}
 
-		convExec := mock_converters_.NewMockConverterExec(ctrl)
+		convExec := mock_converter_.NewMockConverterExec(ctrl)
 		convExec.EXPECT().Proc(orig, save, d.size_px, d.typ).Return(d.converter_error).AnyTimes()
 
 		res, err := (&converters_.ConverterPNG{
-			L: &logs_mock_.LoggerErrorf{},
+			L:             &logs_mock_.LoggerErrorf{},
 			ConverterExec: convExec,
 		}).Do(orig, save, d.size_px, d.typ)
-		
-		if ( err != nil && d.result_error == nil ) || ( err == nil && d.result_error != nil ) {
+
+		if (err != nil && d.result_error == nil) || (err == nil && d.result_error != nil) {
 			t.Fatalf(`TestConverterICOUnit:error - result: '%v', err: '%v', testdata: '%#v'`, res, err, d)
 		}
 		if res != d.result_complite {
