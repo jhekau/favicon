@@ -13,7 +13,7 @@ import (
 	"sync"
 	"testing"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	// logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 
 	typ_ "github.com/jhekau/favicon/internal/core/types"
@@ -35,9 +35,7 @@ func Test_NewThumb( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -57,9 +55,7 @@ func Test_NewThumbError( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -72,7 +68,7 @@ func Test_NewThumbError( t *testing.T ) {
 
 	_, err := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
 
-	require.Equal(t, err, logger.Typ.Error(thumb_.LogTP, thumb_.LogT02, instanceErr))
+	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT02, instanceErr))
 }
 
 func Test_Size( t *testing.T ) {
@@ -80,9 +76,7 @@ func Test_Size( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -113,9 +107,7 @@ func Test_SetTagRel( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -148,9 +140,7 @@ func Test_HTMLComment( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -186,9 +176,7 @@ func Test_HTMLCommentEmptyTag( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -221,9 +209,7 @@ func Test_ManifestUsed( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -253,9 +239,7 @@ func Test_TypeThumb( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -290,9 +274,7 @@ func Test_Href( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -328,9 +310,7 @@ func Test_SizeAttr( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -389,9 +369,7 @@ func Test_OriginalCustomSet( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -433,9 +411,7 @@ func Test_Read( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 	instanceData := []byte(`1234`)
@@ -471,9 +447,7 @@ func Test_Read_ExistError( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -493,7 +467,7 @@ func Test_Read_ExistError( t *testing.T ) {
 	thumb.TestCacheSwap(cache)
 
 	_, err := thumb.Read()
-	require.Equal(t, err, logger.Typ.Error(thumb_.LogTP, thumb_.LogT10, errors.New(`error exist`)))
+	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT10, errors.New(`error exist`)))
 
 }
 
@@ -502,9 +476,7 @@ func Test_Read_CreateOriginalIsNil( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -526,7 +498,7 @@ func Test_Read_CreateOriginalIsNil( t *testing.T ) {
 	thumb.TestCacheSwap(cache)
 
 	_, err := thumb.Read()
-	require.Equal(t, err, logger.Typ.Error(thumb_.LogTP, thumb_.LogT11, logger.Typ.Error(thumb_.LogTP, thumb_.LogT03)))
+	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT11, logger.Error(thumb_.LogTP, thumb_.LogT03)))
 
 }
 
@@ -536,9 +508,7 @@ func Test_Read_Create( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 	size := 16
@@ -572,9 +542,7 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 	size := 16
@@ -599,7 +567,7 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 	thumb.TestCacheSwap(cache).OriginalCustomSet(originalObj).SetSize(16)
 
 	_, err := thumb.Read()
-	require.Equal(t, err, logger.Typ.Error(thumb_.LogTP, thumb_.LogT11, logger.Typ.Error(thumb_.LogTP, thumb_.LogT01, convErr)))
+	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT11, logger.Error(thumb_.LogTP, thumb_.LogT01, convErr)))
 
 }
 
@@ -608,9 +576,7 @@ func Test_OriginalKeyGet( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 
@@ -644,9 +610,7 @@ func Test_Cache( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	keyThumb := `123`
 

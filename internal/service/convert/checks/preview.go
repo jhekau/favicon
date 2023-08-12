@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 )
 
@@ -23,7 +23,7 @@ const (
 
 
 type Preview struct{
-	L *logs_.Logger
+	L logger_.Logger
 }
 
 func (p Preview) Check(typ types_.FileType, size_px int) error {
@@ -34,7 +34,7 @@ func (p Preview) Check(typ types_.FileType, size_px int) error {
 
 	if 	size_px < config_.ImagePreviewResolutionMin || 
 		size_px > config_.ImagePreviewResolutionMax {
-		return p.L.Typ.Error(
+		return p.L.Error(
 			logPP,
 			fmt.Sprintf(
 				`Minimum Resolution: %d, Maximum Resolution %d, Current Value: %d`,

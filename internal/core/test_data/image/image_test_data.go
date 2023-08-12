@@ -15,7 +15,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 )
 
 const (
@@ -27,10 +27,10 @@ const (
 )
 
 type Imgb64 string
-func (img Imgb64) Base64Reader(l *logs_.Logger) (io.Reader, string /*type image*/, error) {
+func (img Imgb64) Base64Reader(l logger_.Logger) (io.Reader, string /*type image*/, error) {
 	idx := strings.Index(string(img), ";base64,")
     if idx < 0 {
-        return nil, ``, l.Typ.Error( logIP, logI01 )
+        return nil, ``, l.Error( logIP, logI01 )
     }
     return base64.NewDecoder(base64.StdEncoding, strings.NewReader(string(img)[idx+8:])), string(img)[len(`data:`):idx], nil
 }
@@ -61,11 +61,11 @@ const (
 )
 
 //
-func GetFileReader(img interface{ Base64Reader(l *logs_.Logger)(io.Reader, string, error) }, l *logs_.Logger) (io.Reader, error) {
+func GetFileReader(img interface{ Base64Reader(l logger_.Logger)(io.Reader, string, error) }, l logger_.Logger) (io.Reader, error) {
 	
 	r, typ, err := img.Base64Reader(l)
 	if err != nil {
-		return nil, l.Typ.Error( logIP, logI04 )
+		return nil, l.Error( logIP, logI04 )
 	}
 
 	// обязательно вычитываем полностью base64
@@ -74,7 +74,7 @@ func GetFileReader(img interface{ Base64Reader(l *logs_.Logger)(io.Reader, strin
     buff := bytes.Buffer{}
     _, err = buff.ReadFrom(r)
     if err != nil {
-        return nil, l.Typ.Error( logIP, logI02 )
+        return nil, l.Error( logIP, logI02 )
     }
 
 	b := buff.Bytes()
@@ -85,7 +85,7 @@ func GetFileReader(img interface{ Base64Reader(l *logs_.Logger)(io.Reader, strin
 	case `image/png`, `image/jpg`:
 		_, _, err = image.DecodeConfig(bytes.NewReader(b))
 		if err != nil {
-			return nil, l.Typ.Error( logIP, typ, err)
+			return nil, l.Error( logIP, typ, err)
 		}
 	case `image/svg+xml`:
 	}

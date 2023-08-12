@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )
@@ -42,7 +42,7 @@ const (
 
 type Manifest struct {
 	s sync.RWMutex
-	l *logs_.Logger
+	l logger_.Logger
 	cache cache
 
 	url_href types_.URLHref
@@ -104,7 +104,7 @@ func (m *Manifest) set_name_url(src string) *Manifest {
 	{
 		u, err := url.Parse(`http://domain.com`)
 		if err != nil {
-			log.Println(m.l.Typ.Error(logM, logM01, err))
+			log.Println(m.l.Error(logM, logM01, err))
 		} else {
 			m.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
 		}
@@ -200,7 +200,7 @@ func (m *Manifest) generate(
 
 	body, err := json.Marshal(list)
 	if err != nil {
-		return nil, false, m.l.Typ.Error(logM, logM02, err)
+		return nil, false, m.l.Error(logM, logM02, err)
 	}
 	return body, true, nil
 }
@@ -217,7 +217,7 @@ func (m *Manifest) file_create(
 ){
 	filebody, status, err := m.generate(thumbs)
 	if err != nil {
-		return ``, false, m.l.Typ.Error(logM, logM03, err)
+		return ``, false, m.l.Error(logM, logM03, err)
 	}
 	if !status {
 		return ``, false, nil
@@ -240,7 +240,7 @@ func (m *Manifest) file_create(
 	os.Remove(fpath.String())
 
 	if err = os.WriteFile(fpath.String(), filebody, 0775); err != nil {
-		return ``, false, m.l.Typ.Error(logM, logM04, err)
+		return ``, false, m.l.Error(logM, logM04, err)
 	}
 	return fpath, true, nil
 }
@@ -267,7 +267,7 @@ func (m *Manifest) get_file(
 
 	fpath, state_create, err := m.file_create(folder_work, thumbs)
 	if err != nil {
-		return ``, false, m.l.Typ.Error(logM, logM05, err)
+		return ``, false, m.l.Error(logM, logM05, err)
 	}
 	if !state_create {
 		m.cache.set_file_exists(types_.FileExistsNOT)

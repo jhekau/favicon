@@ -9,7 +9,7 @@ import (
 	"image"
 	"io"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 )
 
 const (
@@ -25,7 +25,7 @@ type StorageOBJ interface{
 }
 
 type Resolution struct {
-	L *logs_.Logger
+	L logger_.Logger
 }
 
 // Get : получние разрешения изображения 
@@ -33,13 +33,13 @@ func (r *Resolution) Get(obj StorageOBJ) ( w,h int, err error ) {
 
 	read, err := obj.Reader()
 	if err != nil {
-		return 0,0, r.L.Typ.Error(logRP, logR02, err)
+		return 0,0, r.L.Error(logRP, logR02, err)
 	}
 	defer read.Close()
 
 	image, _, err := image.DecodeConfig(read)
     if err != nil {
-		return 0,0, r.L.Typ.Error(logRP, logR01, err)
+		return 0,0, r.L.Error(logRP, logR01, err)
     }
     return image.Width, image.Height, nil
 }

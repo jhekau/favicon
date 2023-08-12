@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
@@ -32,27 +32,27 @@ var (
 
 // storage object
 type file struct{
-	l *logs_.Logger
+	l logger_.Logger
 	filepath typ_.FilePath
 	f *os.File
 }
 
 // storage
 type Files struct{
-	L *logs_.Logger
+	L logger_.Logger
 }
 
 func (s *file) Reader() (io.ReadCloser, error) {
 	f, err := osOpen(s.filepath.String())
 	if err != nil {
-		return nil, s.l.Typ.Error(logP, logS02, err)
+		return nil, s.l.Error(logP, logS02, err)
 	}
 	return f, nil
 }
 func (s *file) Writer() (io.WriteCloser, error){
 	f, err := os.OpenFile(s.filepath.String(), os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
-		return nil, s.l.Typ.Error(logP, logS05, err)
+		return nil, s.l.Error(logP, logS05, err)
 	}
 	return f, nil
 }
@@ -63,7 +63,7 @@ func (s *file) Close() error {
 	}
 	err := s.f.Close()
 	if err != nil {
-		return s.l.Typ.Error(logP, logS01, err)
+		return s.l.Error(logP, logS01, err)
 	}
 	return nil
 }
@@ -78,10 +78,10 @@ func (s *file) IsExists() ( bool, error ) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		return false, s.l.Typ.Error(logP, logS03, err)
+		return false, s.l.Error(logP, logS03, err)
 
 	} else if f.IsDir() {
-		return false, s.l.Typ.Error(logP, logS04)
+		return false, s.l.Error(logP, logS04)
 	}
 
 	return true, nil

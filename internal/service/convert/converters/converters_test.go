@@ -10,13 +10,13 @@ import (
 	"io"
 	"testing"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 	mock_converters_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert/converters"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -32,9 +32,9 @@ func (o *obj) Close() error {
 
 // image test data
 type storage struct{
-	l *logs_.Logger
+	l logger_.Logger
 	obj *obj
-	key domain_.StorageKey
+	key storage_.StorageKey
 }
 func (s *storage) Reader() (io.ReadCloser , error) {
 	return io.NopCloser(bytes.NewBuffer(s.obj.Bytes())), nil
@@ -42,12 +42,12 @@ func (s *storage) Reader() (io.ReadCloser , error) {
 func (s *storage) Writer() (io.WriteCloser, error) {
 	return s.obj, nil
 }
-func (s *storage) Key() domain_.StorageKey {
+func (s *storage) Key() storage_.StorageKey {
 	return s.key
 }
 
 
-func readTestImage(img image_test_data_.Imgb64, logger *logs_.Logger) ( *storage, error ) {
+func readTestImage(img image_test_data_.Imgb64, logger logger_.Logger) ( *storage, error ) {
 	obj := &storage{l: logger, obj: &obj{}}
 	r, err := image_test_data_.GetFileReader(image_test_data_.PNG_32x32, logger)
 	if err != nil {
@@ -65,13 +65,11 @@ func TestConverterICOUnit( t *testing.T) {
 
 	png16 := image_test_data_.PNG_16x16
 	errNil := (error)(nil)
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 	
 	for _, d := range []struct{
 		source image_test_data_.Imgb64
-		save_key domain_.StorageKey
+		save_key storage_.StorageKey
 		size_px int
 		typ types_.FileType
 		converter_error error
@@ -93,9 +91,7 @@ func TestConverterICOUnit( t *testing.T) {
 		convExec.EXPECT().Proc(orig, save, d.size_px, d.typ).Return(d.converter_error).AnyTimes()
 
 		res, err := (&converters_.ConverterICO{
-			L: &logs_.Logger{
-				Typ: &logs_mock_.LoggerErrorf{},
-			},
+			L: &logs_mock_.LoggerErrorf{},
 			ConverterExec: convExec,
 		}).Do(orig, save, d.size_px, d.typ)
 
@@ -116,13 +112,11 @@ func TestConverterPNGUnit( t *testing.T) {
 
 	png16 := image_test_data_.PNG_16x16
 	errNil := (error)(nil)
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	for _, d := range []struct{
 		source image_test_data_.Imgb64
-		save_key domain_.StorageKey
+		save_key storage_.StorageKey
 		size_px int
 		typ types_.FileType
 		converter_error error
@@ -144,9 +138,7 @@ func TestConverterPNGUnit( t *testing.T) {
 		convExec.EXPECT().Proc(orig, save, d.size_px, d.typ).Return(d.converter_error).AnyTimes()
 
 		res, err := (&converters_.ConverterPNG{
-			L: &logs_.Logger{
-				Typ: &logs_mock_.LoggerErrorf{},
-			},
+			L: &logs_mock_.LoggerErrorf{},
 			ConverterExec: convExec,
 		}).Do(orig, save, d.size_px, d.typ)
 		

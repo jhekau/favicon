@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
@@ -37,7 +37,7 @@ type Resolution interface{
 
 //
 type Source struct {
-	L *logs_.Logger
+	L logger_.Logger
 	Cache Cache
 	Resolution Resolution
 }
@@ -50,27 +50,27 @@ func (c *Source) Check( original storage_.StorageOBJ, originalSVG bool, thumb_si
 		if err == nil {
 			return nil
 		}
-		return c.L.Typ.Error(logCP, logC01, err)
+		return c.L.Error(logCP, logC01, err)
 	}
 
 	exist, err := original.IsExists()
 	if err != nil {
-		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Typ.Error(logCP, logC02, err))
+		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Error(logCP, logC02, err))
 	}
 	if !exist {
-		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Typ.Error(logCP, logC03, err))
+		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Error(logCP, logC03, err))
 	}
 
 	if !originalSVG {
 
 		source_width, source_height, err := c.Resolution.Get(original)
 		if err != nil {
-			return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Typ.Error(logCP, logC04, err))
+			return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Error(logCP, logC04, err))
 		}
 
 		if source_height < thumb_size || source_width < thumb_size {
 			return c.Cache.SetErr(
-				original.Key(), originalSVG, thumb_size, c.L.Typ.Error(logCP, 
+				original.Key(), originalSVG, thumb_size, c.L.Error(logCP, 
 					fmt.Sprintf(`Source: %vx%v, Preview: %v; %s`, source_width, source_height, thumb_size, logC05),
 					err),
 				)
@@ -82,7 +82,7 @@ func (c *Source) Check( original storage_.StorageOBJ, originalSVG bool, thumb_si
 			source_width > config_.ImageSourceResolutionMax {
 
 				return c.Cache.SetErr(
-					original.Key(), originalSVG, thumb_size, c.L.Typ.Error(logCP, 
+					original.Key(), originalSVG, thumb_size, c.L.Error(logCP, 
 						fmt.Sprintf(`Min Resolution: %v, Max Resolution: %v, Current Resolution: %vx%v`,
 						config_.ImageSourceResolutionMin,
 						config_.ImageSourceResolutionMax,

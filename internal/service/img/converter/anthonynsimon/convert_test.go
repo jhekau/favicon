@@ -11,7 +11,7 @@ import (
 	"image"
 	"testing"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
@@ -37,7 +37,7 @@ func (o *obj) Close() error {
 
 // image test data
 type storage struct{
-	l *logs_.Logger
+	l logger_.Logger
 	obj *obj
 }
 func (s *storage) Reader() (io.ReadCloser , error) {
@@ -58,9 +58,7 @@ func (s *storage) Key() storage_.StorageKey {
 func TestConvert_CreatePNG( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{l: logger, obj: &obj{} }
 	original_size := 32
@@ -96,9 +94,7 @@ func TestConvert_CreatePNG( t *testing.T ) {
 func TestConvert_CreateICO( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{l: logger, obj: &obj{} }
 	original_size := 32

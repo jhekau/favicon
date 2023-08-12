@@ -5,7 +5,7 @@ package convert
  * 1 August 2023
  */
 import (
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
@@ -51,7 +51,7 @@ type CheckSource interface {
 
 // конвертирование исходного изображения нужную превьюшку
 type Converter struct{
-	L *logs_.Logger
+	L logger_.Logger
 	Converters []converter_.ConverterTyp
 	CheckPreview CheckPreview
 	CheckSource CheckSource
@@ -67,27 +67,27 @@ func (c *Converter) Do(
 ){
 
 	if size_px <= 0 {
-		return c.L.Typ.Error(logFP, logF05)
+		return c.L.Error(logFP, logF05)
 	}
 
 	err = c.CheckPreview.Check(typThumb, size_px)
 	if err != nil {
-		return c.L.Typ.Error(logFP, logF02, err)
+		return c.L.Error(logFP, logF02, err)
 	}
 
 	err = c.CheckSource.Check(source, originalSVG, size_px)
 	if err != nil {
-		return c.L.Typ.Error(logFP, logF04, err)
+		return c.L.Error(logFP, logF04, err)
 	}
 
 	for _, fn := range c.Converters {
 		if ok, err := fn.Do(source, save, size_px, typThumb); err != nil {
-			return c.L.Typ.Error(logFP, logF03, err)
+			return c.L.Error(logFP, logF03, err)
 		} else if ok {
 			return nil
 		}
 	}
-	return c.L.Typ.Error(logFP, logF06)
+	return c.L.Error(logFP, logF06)
 }
 
 

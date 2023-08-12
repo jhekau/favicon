@@ -6,7 +6,7 @@ package converters
  * конвертер для создания PNG превьюх
  */
 import (
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
@@ -20,7 +20,7 @@ const (
 
 
 type ConverterPNG struct{
-	L *logs_.Logger
+	L logger_.Logger
 	// пакет/утилита, который выполняет непосредственную конвертацию изображения
 	ConverterExec converter_.ConverterExec
 }
@@ -31,7 +31,7 @@ func (t *ConverterPNG) Do(source, save storage_.StorageOBJ, size_px int, typ typ
 		return false, nil
 	}
     if err := t.ConverterExec.Proc(source, save, size_px, typ); err != nil {
-		return false, t.L.Typ.Error( logF, logF02, err )
+		return false, t.L.Error( logF, logF02, err )
 	}
 	return true, nil
 }

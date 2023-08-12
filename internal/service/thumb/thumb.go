@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"sync"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
@@ -57,7 +57,7 @@ var (
 // type StorageOBJ interface{
 // 	Reader() (io.ReadCloser , error)
 // 	Writer() (io.WriteCloser, error)
-// 	Key() domain_.StorageKey
+// 	Key() storage_.StorageKey
 // 	IsExists() ( bool, error )
 // }
 
@@ -99,10 +99,10 @@ type original struct {
 	obj storage_.StorageOBJ
 }
 
-func NewThumb(key string, typThumb Typ, l *logs_.Logger, s storage_.Storage, c converter_.Converter) (*Thumb, error) {
+func NewThumb(key string, typThumb Typ, l logger_.Logger, s storage_.Storage, c converter_.Converter) (*Thumb, error) {
 	t, err := s.NewObject(key)
 	if err != nil {
-		return nil, l.Typ.Error(logTP, logT02, err)
+		return nil, l.Error(logTP, logT02, err)
 	}
 	return &Thumb{
 		l:l,
@@ -118,7 +118,7 @@ type Thumb struct {
 
 	mu sync.RWMutex
 
-	l *logs_.Logger
+	l logger_.Logger
 	storage storage_.Storage
 	conv converter_.Converter
 	cache cache
@@ -269,12 +269,12 @@ func (t *Thumb) thumb_create() error {
 	defer t.mu.Unlock()
 
 	if t.original == nil {
-		return t.l.Typ.Error(logTP, logT03)
+		return t.l.Error(logTP, logT03)
 	}
 
 	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.mimetype, int(t.size_px))
 	if err != nil {
-		return t.l.Typ.Error(logTP, logT01, err)
+		return t.l.Error(logTP, logT01, err)
 	}
 	return nil
 }
@@ -297,7 +297,7 @@ func (t *Thumb) read() (io.ReadCloser, error) {
 	
 	exist, err := thumb.IsExists()
 	if err != nil {
-		return nil, t.l.Typ.Error(logTP, logT10, err)
+		return nil, t.l.Error(logTP, logT10, err)
 	}
 	if exist {
 		return thumb.Reader()
@@ -305,7 +305,7 @@ func (t *Thumb) read() (io.ReadCloser, error) {
 
 	err = t.thumb_create()
 	if err != nil {
-		return nil, t.l.Typ.Error(logTP, logT11, err)
+		return nil, t.l.Error(logTP, logT11, err)
 	}
 	return t.thumb.Reader()
 }
@@ -398,7 +398,7 @@ func (t *Thumb) set_href(src string) *Thumb {
 	// {
 	// 	u, err := url.Parse(`http://domain.com`)
 	// 	if err != nil {
-	// 		log.Println( t.l.Typ.Error(logTP, logT08, err) )
+	// 		log.Println( t.l.Error(logTP, logT08, err) )
 	// 	} else {
 	// 		t.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
 	// 	}

@@ -11,11 +11,10 @@ import (
 	"testing"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
-	types_ "github.com/jhekau/favicon/internal/core/types"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,9 +37,7 @@ func TestCheckPreviewUnit( t *testing.T ) {
 		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), errors.New(`error`) },
 	}{
 		err := checks_.Preview{
-			&logs_.Logger{
-				Typ: &logs_mock_.LoggerErrorf{},
-			},
+			&logs_mock_.LoggerErrorf{},
 		}.Check( ts.typ, ts.size)
 
 		if (err == nil && ts.err != nil) || (err != nil && ts.err == nil) {
@@ -54,7 +51,7 @@ func TestCheckSourceCacheNotExistUnit( t *testing.T ) {
 
 	check := checks_.CacheStatus{}
 
-	data_not_exist := map[domain_.StorageKey]struct{
+	data_not_exist := map[storage_.StorageKey]struct{
 		err error
 		exist bool
 	}{
@@ -81,7 +78,7 @@ func TestCheckSourceCacheExistUnit( t *testing.T ) {
 	check := checks_.CacheStatus{}
 
 	d := []struct{
-		originalKey domain_.StorageKey
+		originalKey storage_.StorageKey
 		originalSVG	bool
 		thumb_size 	int
 		err 		error
@@ -112,23 +109,26 @@ func TestCheckSourceCacheExistUnit( t *testing.T ) {
 }
 
 type CheckSourceUnitCacheDisable struct{}
-func (c CheckSourceUnitCacheDisable) Status(_ domain_.StorageKey, _ bool, _ int) (bool, error) {
+func (c CheckSourceUnitCacheDisable) Status(_ storage_.StorageKey, _ bool, _ int) (bool, error) {
 	return false, nil
 }
-func (c CheckSourceUnitCacheDisable) SetErr(_ domain_.StorageKey, _ bool, _ int, err error) error {
+func (c CheckSourceUnitCacheDisable) SetErr(_ storage_.StorageKey, _ bool, _ int, err error) error {
 	return err
 }
 
 
 type storageOBJ struct {
-	key domain_.StorageKey
+	key storage_.StorageKey
 	isExists bool
 	isExists_err error
 }
-func (s *storageOBJ) Key() domain_.StorageKey {
-	return domain_.StorageKey(s.key)
+func (s *storageOBJ) Key() storage_.StorageKey {
+	return storage_.StorageKey(s.key)
 }
-func (s *storageOBJ) Read() (io.ReadCloser, error) {
+func (s *storageOBJ) Reader() (io.ReadCloser, error) {
+	return nil, nil
+}
+func (s *storageOBJ) Writer() (io.WriteCloser, error) {
 	return nil, nil
 }
 func (s *storageOBJ) IsExists() ( bool, error ) {
@@ -138,7 +138,7 @@ func (s *storageOBJ) IsExists() ( bool, error ) {
 type resolution struct{
 	f func() (w int, h int, err error)
 }
-func (r resolution) Get(_ checks_.StorageOBJ) (w int, h int, err error){
+func (r resolution) Get(_ storage_.StorageOBJ) (w int, h int, err error){
 	return r.f()
 }
 
@@ -146,8 +146,8 @@ func TestCheckSourceUnit( t *testing.T ) {
 
 	// enable and disable cache ******************
 	type cache interface {
-		Status(_ domain_.StorageKey, _ bool, _ int) (bool, error)
-		SetErr(_ domain_.StorageKey, _ bool, _ int, _ error) error
+		Status(_ storage_.StorageKey, _ bool, _ int) (bool, error)
+		SetErr(_ storage_.StorageKey, _ bool, _ int, _ error) error
 	}
 
 	cache_enable := checks_.CacheStatus{}
@@ -254,9 +254,7 @@ func TestCheckSourceUnit( t *testing.T ) {
 	}{
 
 		err := (&checks_.Source{
-			L: &logs_.Logger{
-				Typ: &logs_mock_.LoggerErrorf{},
-			},
+			L: &logs_mock_.LoggerErrorf{},
 			Cache: dt.cache,
 			Resolution: resolution{ dt.file_resolution },
 		}).

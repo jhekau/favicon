@@ -14,7 +14,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 )
@@ -39,9 +39,7 @@ func TestIsExists(t *testing.T) {
 		*files_.OsOpen = backupOsOpen
 	}()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	for _, d := range []struct{
 		osOpen func(_ string) (*os.File, error)
@@ -57,7 +55,7 @@ func TestIsExists(t *testing.T) {
 		{	// true, nil, IsDir -> false, error				!если директория
 			func(_ string) (*os.File, error) { return nil, nil },
 			func(_ string) (fs.FileInfo, error) { return &file_info{ true }, nil }, // exist, not error
-			false, logger.Typ.Error(files_.LogP, files_.LogS04),
+			false, logger.Error(files_.LogP, files_.LogS04),
 		},
 		{	// false, error(os.ErrNotExist) -> false, nil	!если файла нет
 			func(_ string) (*os.File, error) { return nil, nil },
@@ -67,7 +65,7 @@ func TestIsExists(t *testing.T) {
 		{	// false, error(error) -> false, error
 			func(_ string) (*os.File, error) { return nil, nil },
 			func(_ string) (fs.FileInfo, error) { return &file_info{}, errors.New(`error`) }, // exist, error
-			false, logger.Typ.Error(files_.LogP, files_.LogS03, errors.New(`error`)),
+			false, logger.Error(files_.LogP, files_.LogS03, errors.New(`error`)),
 		},
 	}{
 		*files_.OsStat = d.osStat
@@ -92,9 +90,7 @@ func TestRead(t *testing.T) {
 		*files_.OsOpen = backupOsOpen
 	}()
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	for _, d := range []struct{
 		osOpen func(_ string) (*os.File, error)
@@ -112,7 +108,7 @@ func TestRead(t *testing.T) {
 		{ 
 			func(_ string) (*os.File, error) { return nil, errors.New(`error`) },
 			nil, 
-			logger.Typ.Error(files_.LogP, files_.LogS02, errors.New(`error`)) },
+			logger.Error(files_.LogP, files_.LogS02, errors.New(`error`)) },
 	}{
 		*files_.OsOpen = d.osOpen
 

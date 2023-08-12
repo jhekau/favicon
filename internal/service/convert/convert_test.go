@@ -10,7 +10,7 @@ import (
 	"io"
 	"testing"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	types_ "github.com/jhekau/favicon/internal/core/types"
@@ -18,9 +18,9 @@ import (
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	// checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
 	// converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
-	domain_ "github.com/jhekau/favicon/pkg/domain"
+	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 
-	// domain_ "github.com/jhekau/favicon/pkg/domain"
+	// storage_ "github.com/jhekau/favicon/pkg/models/storage"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -29,18 +29,18 @@ import (
 
 // image test data
 type storage struct{
-	l *logs_.Logger
+	l logger_.Logger
 	img interface{ 
-		Base64Reader(l *logs_.Logger) (io.Reader, string, error)
+		Base64Reader(l logger_.Logger) (io.Reader, string, error)
 	}
 	ifExist bool
 	ifExistError error
-	storageKey domain_.StorageKey
+	storageKey storage_.StorageKey
 }
 func (s *storage) IsExists() ( bool, error ) {
 	return s.ifExist, s.ifExistError
 }
-func (s *storage) Key() domain_.StorageKey {
+func (s *storage) Key() storage_.StorageKey {
 	return s.storageKey
 }
 func (s *storage) Reader() (io.ReadCloser , error) {
@@ -61,9 +61,7 @@ func (s *storage) Writer() (io.WriteCloser, error) {
 func TestUnit_Convert_JPGxICO( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{
 		l: logger,
@@ -116,9 +114,7 @@ func TestUnit_Convert_JPGxICO( t *testing.T ) {
 func TestUnit_Convert_CoverterError( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{
 		l: logger,
@@ -137,7 +133,7 @@ func TestUnit_Convert_CoverterError( t *testing.T ) {
 
 	errNil := (error)(nil)
 	errConverter := errors.New(`error converter`)
-	errReturn := logger.Typ.Error(convert_.LogFP, convert_.LogF03, errConverter)
+	errReturn := logger.Error(convert_.LogFP, convert_.LogF03, errConverter)
 
 	// Mock
 	ctrl := gomock.NewController(t)
@@ -173,9 +169,7 @@ func TestUnit_Convert_CoverterError( t *testing.T ) {
 func TestUnit_Convert_CoverterMulti( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{
 		l: logger,
@@ -233,9 +227,7 @@ func TestUnit_Convert_CoverterMulti( t *testing.T ) {
 func TestUnit_Convert_NoConverters( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{
 		l: logger,
@@ -253,7 +245,7 @@ func TestUnit_Convert_NoConverters( t *testing.T ) {
 	typ := types_.ICO()
 
 	errNil := (error)(nil)
-	errReturn := logger.Typ.Error(convert_.LogFP, convert_.LogF06)
+	errReturn := logger.Error(convert_.LogFP, convert_.LogF06)
 
 	// Mock
 	ctrl := gomock.NewController(t)
@@ -284,9 +276,7 @@ func TestUnit_Convert_NoConverters( t *testing.T ) {
 func TestUnit_Convert_SizePX0( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{
 		l: logger,
@@ -304,7 +294,7 @@ func TestUnit_Convert_SizePX0( t *testing.T ) {
 	typ := types_.ICO()
 
 
-	errReturn := logger.Typ.Error(convert_.LogFP, convert_.LogF05)
+	errReturn := logger.Error(convert_.LogFP, convert_.LogF05)
 
 	// Mock
 	ctrl := gomock.NewController(t)
@@ -335,9 +325,7 @@ func TestUnit_Convert_SizePX0( t *testing.T ) {
 func TestUnit_Convert_PreviewCheckError( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{
 		l: logger,
@@ -356,7 +344,7 @@ func TestUnit_Convert_PreviewCheckError( t *testing.T ) {
 
 	// errNil := (error)(nil)
 	errCheck := errors.New(`error check`)
-	errReturn := logger.Typ.Error(convert_.LogFP, convert_.LogF02, errCheck)
+	errReturn := logger.Error(convert_.LogFP, convert_.LogF02, errCheck)
 
 	// Mock
 	ctrl := gomock.NewController(t)
@@ -391,9 +379,7 @@ func TestUnit_Convert_PreviewCheckError( t *testing.T ) {
 func TestUnit_Convert_OriginalCheckError( t *testing.T ) {
 
 	// Data
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	original := &storage{
 		l: logger,
@@ -412,7 +398,7 @@ func TestUnit_Convert_OriginalCheckError( t *testing.T ) {
 
 	errNil := (error)(nil)
 	errCheck := errors.New(`error check`)
-	errReturn := logger.Typ.Error(convert_.LogFP, convert_.LogF04, errCheck)
+	errReturn := logger.Error(convert_.LogFP, convert_.LogF04, errCheck)
 
 	// Mock
 	ctrl := gomock.NewController(t)
@@ -475,9 +461,7 @@ func TestUnit_Convert_OriginalCheckError( t *testing.T ) {
 func TestIntegrationConvert( t *testing.T ) {
 
 	// Data 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 	
 	_ = logger
 
@@ -515,9 +499,7 @@ func TestIntegrationConvert( t *testing.T ) {
 	save := types_.FilePath(`1.ico`)
 	size := 16
 
-	logger := &logs_.Logger{
-		Typ: &logs_mock_.LoggerErrorf{},
-	}
+	logger := &logs_mock_.LoggerErrorf{}
 
 	// Mock
 	ctrl := gomock.NewController(t)

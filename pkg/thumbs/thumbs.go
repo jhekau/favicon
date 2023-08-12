@@ -22,6 +22,7 @@ import (
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 
 	types_ "github.com/jhekau/favicon/pkg/core/types"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
@@ -63,7 +64,7 @@ var (
 // type StorageOBJ interface{
 // 	Reader() (io.ReadCloser , error)
 // 	Writer() (io.WriteCloser, error)
-// 	Key() domain_.StorageKey
+// 	Key() storage_.StorageKey
 // 	IsExists() ( bool, error )
 // }
 
@@ -79,11 +80,7 @@ var (
 
 type Thumbs struct {
 	s sync.RWMutex
-	l interface { // logger
-        Info(path string, messages ...interface{}) error
-        Alert(path string, messages ...interface{}) error
-        Error(path string, messages ...interface{}) error
-    }
+	l logger_.Logger
 	storage storage_.Storage
 	source_svg typ_.FilePath
 	source_img typ_.FilePath
