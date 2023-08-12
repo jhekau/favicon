@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"testing"
+	"time"
 
 	config_ "github.com/jhekau/favicon/internal/config"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
@@ -133,6 +134,9 @@ func (s *storageOBJ) Writer() (io.WriteCloser, error) {
 }
 func (s *storageOBJ) IsExists() ( bool, error ) {
 	return s.isExists, s.isExists_err
+}
+func (s *storageOBJ) ModTime() time.Time {
+	return time.Time{}
 }
 
 type resolution struct{

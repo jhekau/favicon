@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"testing"
+	"time"
 
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
@@ -58,6 +59,9 @@ func (s *storage) Reader() (io.ReadSeekCloser, error) {
 func (s *storage) Writer() (io.WriteCloser, error) {
 	var w io.WriteCloser
 	return w, nil
+}
+func (s *storage) ModTime() time.Time {
+	return time.Time{}
 }
 
 // Unit *******

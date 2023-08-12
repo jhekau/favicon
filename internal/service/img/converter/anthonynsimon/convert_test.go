@@ -7,19 +7,20 @@ package converter_exec_anthonynsimon_test
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"image"
+	"io"
 	"testing"
+	"time"
 
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_exec_anthonynsimon_ "github.com/jhekau/favicon/internal/service/img/converter/anthonynsimon"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
-	"github.com/stretchr/testify/require"
-	"github.com/pressly/goico"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	"github.com/pressly/goico"
+	"github.com/stretchr/testify/require"
 )
 
 
@@ -59,6 +60,9 @@ func (s *storage) IsExists() (bool, error){
 }
 func (s *storage) Key() storage_.StorageKey {
 	return ``
+}
+func (s *storage) ModTime() time.Time {
+	return time.Time{}
 }
 
 

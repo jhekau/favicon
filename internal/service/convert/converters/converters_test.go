@@ -9,6 +9,7 @@ import (
 	"errors"
 	"io"
 	"testing"
+	"time"
 
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
@@ -58,6 +59,9 @@ func (s *storage) Key() storage_.StorageKey {
 }
 func (s *storage) IsExists() (bool, error) {
 	return true, nil
+}
+func (s *storage) ModTime() time.Time {
+	return time.Time{}
 }
 
 func readTestImage(img image_test_data_.Imgb64, logger logger_.Logger) (*storage, error) {
