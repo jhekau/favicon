@@ -7,19 +7,21 @@ package files
 import (
 	"io"
 	"os"
+	"time"
 
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
 const (
 	logP = `/internal/storage/files/stat.go`
-	logS01 = `S01: failed close file`
-	logS02 = `S02: error open file`
+	// logS01 = `S01: `
+	logS02 = `S02: failed open file`
 	logS03 = `S03: os stat source image`
 	logS04 = `S04: save thumb image is a folder`
 	logS05 = `S05: failed open file`
+	logS06 = `S06: os stat source image`
 )
 
 // for test 
@@ -34,7 +36,7 @@ var (
 type file struct{
 	l logger_.Logger
 	filepath typ_.FilePath
-	f *os.File
+	// f *os.File
 }
 
 // storage
@@ -55,17 +57,6 @@ func (s *file) Writer() (io.WriteCloser, error){
 		return nil, s.l.Error(logP, logS05, err)
 	}
 	return f, nil
-}
-
-func (s *file) Close() error {
-	if s.f == nil {
-		return nil
-	}
-	err := s.f.Close()
-	if err != nil {
-		return s.l.Error(logP, logS01, err)
-	}
-	return nil
 }
 
 func (s *file) IsExists() ( bool, error ) {
@@ -89,6 +80,20 @@ func (s *file) IsExists() ( bool, error ) {
 
 func (s *file) Key() storage_.StorageKey {
 	return storage_.StorageKey(s.filepath.String())
+}
+
+func (s *file) ModTime() time.Time {
+
+	if s.filepath == `` {
+		return time.Time{}
+	}
+	st, err := osStat(s.filepath.String())
+	if err != nil {
+		s.l.Error(logP, logS06, err)
+		return time.Time{}
+	}
+	
+	return st.ModTime()
 }
 
 // TODO ?
