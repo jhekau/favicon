@@ -7,16 +7,16 @@ package thumb
 import (
 	"html"
 	"io"
+	"time"
 
-	"net/url"
 	"strconv"
 	"sync"
 
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
+	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
 
@@ -45,7 +45,7 @@ const (
 )
 
 var (
-	URLExists = urlExists
+	URLPath_Get = urlPath_Get
 )
 
 type Typ types_.FileType
@@ -62,19 +62,6 @@ type cache interface{
 	Store(key any, value any)
 }
 
-///
-///
-// type attr_size_state int
-// const (
-// 	attr_size_state_empty attr_size_state = -1
-// 	attr_size_state_default attr_size_state = 0
-// 	attr_size_state_custom attr_size_state = 1
-// )
-
-// type attr_size struct {
-// 	state attr_size_state
-// 	value string
-// }
 
 type attrSizeState int
 const (
@@ -195,6 +182,10 @@ func (t *Thumb) Read() (io.ReadSeekCloser, error) {
 	return t.read()
 }
 
+func (t *Thumb) ModTime() time.Time {
+	return t.modtime()
+}
+
 
 
 
@@ -251,7 +242,16 @@ func (t *Thumb) original_get() *original {
 }
 
 
+func (t *Thumb) modtime() time.Time {
+	t.mu.RLock()
+	tt := t.thumb
+	t.mu.RUnlock()
 
+	if tt == nil {
+		return time.Time{}
+	}
+	return tt.ModTime()
+}
 
 
 func (t *Thumb) thumb_create() error {
@@ -518,10 +518,8 @@ func (t *Thumb) cacheClean() {
 
 
 
-// url_Exists : проверка наличия превьюхи в запросе 
-// http.Request.URL.Path -> URLpath
-func urlExists( url_ *url.URL, thumbs map[typ_.URLPath]*Thumb ) ( *Thumb, bool /*exists*/ ) {
-	t, ok := thumbs[typ_.URLPath(url_.Path)]
+func urlPath_Get( urlPath string, thumbs map[typ_.URLPath]*Thumb ) ( *Thumb, bool /*exists*/ ) {
+	t, ok := thumbs[typ_.URLPath(urlPath)]
 	return t, ok
 }
 

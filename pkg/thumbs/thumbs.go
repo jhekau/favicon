@@ -1,4 +1,4 @@
-package favicon
+package thumbs
 
 /* *
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	logger_default_ "github.com/jhekau/favicon/internal/core/logs/default"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
@@ -92,10 +93,15 @@ func NewThumbs() *Thumbs {
 	}
 }
 
-// создание набора по умолчанию превьюх для оригинала
-func NewThumbs_Defaults() *Thumbs {
+// создание набора превьюх по умолчанию для оригинала
+func NewThumbs_DefaultsIcons() *Thumbs {
 	t := NewThumbs()
 	return t
+}
+
+type original struct {
+	image storage_.StorageOBJ
+	svg bool
 }
 
 type Thumbs struct {
@@ -103,8 +109,7 @@ type Thumbs struct {
 	l           logger_.Logger
 	storage     storage_.Storage
 	conv 		converter_.Converter
-	source_svg  typ_.FilePath
-	source_img  typ_.FilePath
+	original 	*original
 	folder_work typ_.Folder
 	thumbs      map[typ_.URLPath]*thumb_.Thumb
 	manifest    manifest_.Manifest
@@ -132,29 +137,14 @@ func (t *Thumbs) ConvertSet( conv converter_.Converter ) {
 }
 
 
-
 func (t *Thumbs) Append(thumb *thumb_.Thumb) *Thumbs {
 	return t.append(thumb)
 }
-func (t *Thumbs) SetFolderWork(folder string) *Thumbs {
-	return t.set_folder_work(folder)
-}
-func (t *Thumbs) SetFilepathSourceSVG(fpath string) *Thumbs {
-	return t.set_filepath_source_svg(fpath)
-}
-func (t *Thumbs) SetFilepathSourceIMG(fpath string) *Thumbs {
-	return t.set_filepath_source_img(fpath)
-}
+
 func (t *Thumbs) Handle() {
 	t.handle()
 }
 
-
-
-// 
-func (t *Thumbs) ServeFile(url_ *url.URL) (fpath string, exists bool, err error) {
-	return t.serve_file(url_)
-}
 
 
 
@@ -166,10 +156,10 @@ func (t *Thumbs) append(thumb *thumb_.Thumb) *Thumbs {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	t.thumbs[thumb.GetHREF()] = thumb
+	t.thumbs[thumb.URLPathGet()] = thumb
 	return t
 }
-
+/*
 func (t *Thumbs) set_folder_work(folder string) *Thumbs {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -183,36 +173,6 @@ func (t *Thumbs) get_folder_work() typ_.Folder {
 
 	return t.folder_work
 }
-
-/*
-... это всё в storage
-func (t *Thumbs) set_filepath_source_svg(fpath string) *Thumbs {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-
-	t.source_svg = typ_.FilePath(fpath)
-	return t
-}
-func (t *Thumbs) get_filepath_source_svg() typ_.FilePath {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
-
-	return t.source_svg
-}
-func (t *Thumbs) set_filepath_source_img(fpath string) *Thumbs {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-
-	t.source_img = typ_.FilePath(fpath)
-	return t
-}
-func (t *Thumbs) get_filepath_source_img() typ_.FilePath {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
-
-	return t.source_img
-}
-.....
 */
 
 func (t *Thumbs) handle() {
@@ -224,45 +184,40 @@ func (t *Thumbs) handle() {
 			return
 		}
 
-		reader, name, exists, err := t.ServeFile(r.URL)
+		content, modtime, name, exists, err := t.thumbFile(r.URL.Path)
 		if err != nil {
 			log.Println(t.l.Error(logT01, err))
 			w.WriteHeader(http.StatusInternalServerError)
 		} else if !exists {
 			w.WriteHeader(http.StatusNotFound)
 		} else {
-			// http.ServeContent(w, r, name string, modtime time.Time, content io.ReadSeeker)
+			http.ServeContent(w, r, name, modtime, content)
 		}
 	}))
 }
 
-func (t *Thumbs) serve_file(url_ *url.URL) (content io.ReadSeekCloser, name string, exists bool, err error) {
+// func (t *Thumbs) contentFile(url_ *url.URL) (content io.ReadSeekCloser, modtime time.Time, name string, exists bool, err error) {
 
-	if manifest, exists, err := t.server_file_manifest(url_); err != nil {
-		return ``, false, t.l.Error(logTP, logT02, err)
-	} else if exists {
-		return manifest.String(), true, nil
-	}
+// 	if c,tm,n,e,er := t.thumbFile(url_); err != nil {
+// 		err = t.l.Error(logTP, logT03, er)
+// 		return
+// 	} else if exists {
+// 		return c,tm,n,e,err
+// 	}
+// 	return ``, false, nil
+// }
 
-	if c,n,e,err := t.thumbFile(url_); err != nil {
-		return nil, ``, false, t.l.Error(logTP, logT03, err)
-	} else if exists {
-		return c,n,e,err
-	}
-	return ``, false, nil
-}
-
-func (t *Thumbs) thumbFile(url_ *url.URL) (content io.ReadSeekCloser, name string, exists bool, err error) {
+func (t *Thumbs) thumbFile(urlPath string) (content io.ReadSeekCloser, modtime time.Time, name string, exists bool, err error) {
 
 	t.mu.RLock()
-	thumb, exists := thumb_.URLExists(url_, t.thumbs)
+	thumb, exists := thumb_.URLPath_Get(urlPath, t.thumbs)
 	t.mu.RUnlock()
 
 	if !exists {
 		return
 	}
-
-	_, name = filepath.Split(url_.Path)
+	modtime = thumb.ModTime()
+	_, name = filepath.Split(urlPath)
 
 	content, err = thumb.Read()
 	if err != nil {
@@ -271,18 +226,18 @@ func (t *Thumbs) thumbFile(url_ *url.URL) (content io.ReadSeekCloser, name strin
 	return
 }
 
-func (t *Thumbs) server_file_manifest(url_ *url.URL) (manifest typ_.FilePath, exists bool, err error) {
+// func (t *Thumbs) server_file_manifest(url_ *url.URL) (manifest typ_.FilePath, exists bool, err error) {
 
-	if !t.manifest.URLExists(url_) {
-		return ``, false, nil
-	}
+// 	if !t.manifest.URLExists(url_) {
+// 		return ``, false, nil
+// 	}
 
-	manifest, exists, err = t.manifest.GetFile(t.get_folder_work(), t.thumbs)
-	if err != nil {
-		return ``, false, t.l.Error(logTP, logT05, err)
-	}
-	return manifest, exists, nil
-}
+// 	manifest, exists, err = t.manifest.GetFile(t.get_folder_work(), t.thumbs)
+// 	if err != nil {
+// 		return ``, false, t.l.Error(logTP, logT05, err)
+// 	}
+// 	return manifest, exists, nil
+// }
 
 // func (T *Thumbs) manifest_url_exists( URLpath string ) ( fpath string, exists bool, err error )
 // func (t *Thumbs) get_thumbs() map[types_.URLHref/*clear*/]*thumb_.Thumb
@@ -301,17 +256,17 @@ func (t *Thumbs) tags_html() string {
 	return tags.String()
 }
 
-func (t *Thumbs) getThumb(u typ_.URLHref) (*thumb_.Thumb, bool) {
+func (t *Thumbs) getThumb(u typ_.URLPath) (*thumb_.Thumb, bool) {
 	tb, ok := t.thumbs[u]
 	return tb, ok
 }
 
 func default_list() *Thumbs {
 	return &Thumbs{
-		thumbs: func() map[typ_.URLHref]*thumb_.Thumb {
-			m := map[typ_.URLHref]*thumb_.Thumb{}
+		thumbs: func() map[typ_.URLPath]*thumb_.Thumb {
+			m := map[typ_.URLPath]*thumb_.Thumb{}
 			for _, thumb := range defaults_.Defaults() {
-				m[thumb.GetHREF()] = thumb
+				m[thumb.URLPathGet()] = thumb
 			}
 			return m
 		}(),
@@ -321,10 +276,10 @@ func default_list() *Thumbs {
 
 func custom_list(thumbs ...*thumb_.Thumb) *Thumbs {
 	return &Thumbs{
-		thumbs: func() map[typ_.URLHref]*thumb_.Thumb {
-			m := map[typ_.URLHref]*thumb_.Thumb{}
+		thumbs: func() map[typ_.URLPath]*thumb_.Thumb {
+			m := map[typ_.URLPath]*thumb_.Thumb{}
 			for _, thumb := range thumbs {
-				m[thumb.GetHREF()] = thumb
+				m[thumb.URLPathGet()] = thumb
 			}
 			return m
 		}(),

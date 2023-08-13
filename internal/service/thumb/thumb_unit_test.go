@@ -640,7 +640,7 @@ func Test_Cache( t *testing.T ) {
 	require.Equal(t, expectTag, ``)
 }
 
-func Test_URLExist( t *testing.T ) {
+func Test_URLPath_Get( t *testing.T ) {
 
 	href := `https://domain.org/stories/icon.png`
 	u, err := url.ParseRequestURI(href)
@@ -651,7 +651,7 @@ func Test_URLExist( t *testing.T ) {
 		`/stories/icon.png`: &instanceThumb,
 	}
 
-	expectThumb, exist := thumb_.URLExists(u, m)
+	expectThumb, exist := thumb_.URLPath_Get(u.Path, m)
 	require.True(t, exist, u.Path)
 	require.Equal(t, *expectThumb, instanceThumb)
 }
