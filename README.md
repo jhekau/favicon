@@ -8,12 +8,55 @@ doc
 
 ...
 
-### How to run
+### Quick start
 ```
 go run ...
 ```
 
+### Использование альтернативной реализации логгера:
+```
+import (
+    github.com/jhekau/favicon/pkg/thumbs
+    github.com/jhekau/favicon/pkg/models/logger
+)
+
+# check implementation
+var _ logger.Logger = (YourLogger)(nil)
+
+t := thumbs.NewThumbs()
+t.LoggerSet( YourLogger )
+```
+
+### Использование альтернативной системы хранения:
+```
+import (
+    github.com/jhekau/favicon/pkg/thumbs
+    github.com/jhekau/favicon/pkg/models/storage
+)
+
+# check implementation
+var _ storage.Storage = (YourStorage)(nil)
+
+t := thumbs.NewThumbs()
+t.StorageSet( YourStorage )
+```
+
+### Использование альтернативного конвертера для создания превьюх:
+```
+import (
+    github.com/jhekau/favicon/pkg/thumbs
+    github.com/jhekau/favicon/pkg/models/converter
+)
+
+# check implementation
+var _ storage.Converter = (YourConverter)(nil)
+
+t := thumbs.NewThumbs()
+t.ConvertSet( YourConverter )
+```
+
+
 #### Chapters
 
-- v0.0.0: PoC version.
-- v0.0.1: set architecture project, added dependency inversion, unit test, integration test.
+- v0.0.1: set architecture project, added dependency inversion, unit test, integration test;
+- v0.0.0: PoC version;
