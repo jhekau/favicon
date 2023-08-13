@@ -64,17 +64,27 @@ type cache interface{
 
 ///
 ///
-type attr_size_state int
+// type attr_size_state int
+// const (
+// 	attr_size_state_empty attr_size_state = -1
+// 	attr_size_state_default attr_size_state = 0
+// 	attr_size_state_custom attr_size_state = 1
+// )
 
+// type attr_size struct {
+// 	state attr_size_state
+// 	value string
+// }
+
+type attrSizeState int
 const (
-	attr_size_state_empty attr_size_state = -1
-	attr_size_state_default attr_size_state = 0
-	attr_size_state_custom attr_size_state = 1
+	attrSizeEmpty = iota-1
+	attrSizeDefault
+	attrSizeCustom
 )
-
-type attr_size struct {
-	state attr_size_state
-	value string
+type attrSize struct {
+	state attrSizeState
+	val string
 }
 
 // Оригинальное изображение, с которого нарезается превьюха
@@ -110,26 +120,27 @@ type Thumb struct {
 	original *original
 	thumb storage_.StorageOBJ
 
-	size_px int
-	size_attr_value attr_size
+	attrSize attrSize
+	attrRel string
+
+	sizePX int
 	comment string // <!-- comment -->
 	urlPath typ_.URLPath // domain{/name_url}, first -> `/`
-	tag_rel string
 	manifest bool
 	mimetype types_.FileType
 	
 }
 
 func (t *Thumb) SetSize(px int) *Thumb {
-	return t.set_size(px)
+	return t.sizeSet(px)
 }
 
 func (t *Thumb) GetSize() int {
-	return t.get_size()
+	return t.sizeGet()
 }
 
 func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
-	return t.set_tag_rel(tagRel)
+	return t.attrRelSet(tagRel)
 }
 
 // Добавлять ли превью в список манифеста
@@ -162,18 +173,18 @@ func (t *Thumb) GetTAG() string {
 }
 
 // аттрибут size не будет добавлен в тег
-func (t *Thumb) SetSizeAttrEmpty() *Thumb {
-	return t.set_size_attr_empty()
+func (t *Thumb) SizeAttr_SetEmpty() *Thumb {
+	return t.attrSize_SetEmpty()
 }
 
 // аттрибут size будет добавлен только в том случае, если указан размер превью
-func (t *Thumb) SetSizeAttrDefault() *Thumb {
-	return t.set_size_attr_default()
+func (t *Thumb) SizeAttr_SetDefault() *Thumb {
+	return t.attrSize_SetDefault()
 }
 
 // аттрибут size будет содержать кастомное значение val
-func (t *Thumb) SetSizeAttrCustom(val string) *Thumb {
-	return t.set_size_attr_custom(val)
+func (t *Thumb) SizeAttr_SetCustom(val string) *Thumb {
+	return t.attrSize_SetCustom(val)
 }
 
 func (t *Thumb) GetOriginalKey() string{
@@ -252,7 +263,7 @@ func (t *Thumb) thumb_create() error {
 		return t.l.Error(logTP, logT03)
 	}
 
-	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.mimetype, int(t.size_px))
+	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.mimetype, int(t.sizePX))
 	if err != nil {
 		return t.l.Error(logTP, logT01, err)
 	}
@@ -291,39 +302,32 @@ func (t *Thumb) read() (io.ReadSeekCloser, error) {
 }
 
 // ...
-func (t *Thumb) set_size(px int) *Thumb {
+func (t *Thumb) sizeSet(px int) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.cacheClean()
-	t.size_px = px
+	t.sizePX = px
 	return t
 }
 
-func (t *Thumb) get_size() int {
+func (t *Thumb) sizeGet() int {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 
-	return t.size_px
+	return t.sizePX
 }
 
 // ...
-// func (t *Thumb) SetNameURL( nameURL string ) *Thumb {
-// 	t.cacheClean()
-// 	t.url_path = nameURL
-// 	return t
-// }
-
-// ...
-func (t *Thumb) set_tag_rel( tagRel string ) *Thumb {
+func (t *Thumb) attrRelSet( tagRel string ) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.cacheClean()
-	t.tag_rel = tagRel
+	t.attrRel = tagRel
 	return t
 }
 
@@ -401,15 +405,15 @@ func (t *Thumb) tagGet() string {
 	attr := map[string]string{}
 
 	// size
-	switch t.size_attr_value.state {
-	case attr_size_state_empty:
-	case attr_size_state_default:
-		sz := strconv.Itoa(int(t.size_px))
-		if t.size_px > 0 {
+	switch t.attrSize.state {
+	case attrSizeEmpty:
+	case attrSizeDefault:
+		sz := strconv.Itoa(int(t.sizePX))
+		if t.sizePX > 0 {
 			attr[`sizes`] = sz+`x`+sz
 		}
-	case attr_size_state_custom:
-		attr[`sizes`] = html.EscapeString(t.size_attr_value.value)
+	case attrSizeCustom:
+		attr[`sizes`] = html.EscapeString(t.attrSize.val)
 	}
 
 	// href
@@ -418,8 +422,8 @@ func (t *Thumb) tagGet() string {
 	}
 
 	// rel
-	if t.tag_rel != `` {
-		attr[`rel`] = html.EscapeString(t.tag_rel)
+	if t.attrRel != `` {
+		attr[`rel`] = html.EscapeString(t.attrRel)
 	}
 	
 	// type
@@ -460,39 +464,39 @@ func (t *Thumb) tagCacheSet( s string ) {
 }
 
 // ...
-func (t *Thumb) set_size_attr_empty() *Thumb {
+func (t *Thumb) attrSize_SetEmpty() *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.cacheClean()
-	t.size_attr_value = attr_size{
-		state: attr_size_state_empty,
+	t.attrSize = attrSize{
+		state: attrSizeEmpty,
 	}
 	return t
 }
 
-func (t *Thumb) set_size_attr_default() *Thumb {
+func (t *Thumb) attrSize_SetDefault() *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.cacheClean()
-	t.size_attr_value = attr_size{
-		state: attr_size_state_default,
+	t.attrSize = attrSize{
+		state: attrSizeDefault,
 	}
 	return t
 }
 
-func (t *Thumb) set_size_attr_custom(val string) *Thumb {
+func (t *Thumb) attrSize_SetCustom(val string) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.cacheClean()
-	t.size_attr_value = attr_size{
-		state: attr_size_state_custom,
-		value: val,
+	t.attrSize = attrSize{
+		state: attrSizeCustom,
+		val: val,
 	}
 	return t
 }

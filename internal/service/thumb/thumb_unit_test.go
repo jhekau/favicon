@@ -335,7 +335,7 @@ func Test_SizeAttr( t *testing.T ) {
 		SetSize(size).
 		SetTagRel(`apple-touch-icon`)
 
-	thumb.SetSizeAttrEmpty()
+	thumb.SizeAttr_SetEmpty()
 	tag := thumb.GetTAG()
 	require.Equal(t, tag, `<link rel="apple-touch-icon" >`)
 
@@ -345,7 +345,7 @@ func Test_SizeAttr( t *testing.T ) {
 		TestCacheSwap(cache).
 		SetSize(size)
 
-	thumb.SetSizeAttrDefault()
+	thumb.SizeAttr_SetDefault()
 	tag = thumb.GetTAG()
 	require.Equal(t, tag, fmt.Sprintf(`<link sizes="%vx%v" >`, size, size), 
 		fmt.Sprintf(`size: '%v'`, thumb.GetSize()))
@@ -357,7 +357,7 @@ func Test_SizeAttr( t *testing.T ) {
 		TestCacheSwap(cache).
 		SetSize(size)
 
-	thumb.SetSizeAttrCustom(attrCustom)
+	thumb.SizeAttr_SetCustom(attrCustom)
 	tag = thumb.GetTAG()
 	require.Equal(t, tag, fmt.Sprintf(`<link sizes="%s" >`, attrCustom))
 

@@ -106,7 +106,7 @@ type Thumbs struct {
 	source_svg  typ_.FilePath
 	source_img  typ_.FilePath
 	folder_work typ_.Folder
-	thumbs      map[typ_.URLHref]*thumb_.Thumb
+	thumbs      map[typ_.URLPath]*thumb_.Thumb
 	manifest    manifest_.Manifest
 }
 
