@@ -42,10 +42,6 @@ const (
 var (
 	TypePNG = thumb_.PNG
 	TypeICO = thumb_.ICO
-
-	// ThumbNEW = func() *thumb_.Thumb {
-	// 	return thumb_.NewThumb(key string, typThumb thumb_.Typ, l logger_.Logger, s storage_.Storage, c converter_.Converter)
-	// }
 )
 
 // создание пустого набора превьюх для одного оригинального изображения
