@@ -6,29 +6,90 @@ package defaults
  */
 import (
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
-	"github.com/jhekau/favicon/internal/core/types"
+	typ_ "github.com/jhekau/favicon/internal/core/types"
 )
 
+type attrSize struct{
+	empty bool
+	customVal string
+}
+
 func Defaults() []*thumb_.Thumb {
-	return []*thumb_.Thumb{
+
+	t := make([]*thumb_.Thumb, 0)
+	for _, d := range []struct{
+		key string
+		typ thumb_.Typ
+		urlPath typ_.URLPath
+		size int
+		attrRel string
+		attrSize attrSize
+	}{
 		// Нам нужны sizes="any" для <link> на файл .ico, 
 		// чтобы исправить ошибку Chrome, из-за которой он выбирает файл ICO вместо SVG.
 		// <link rel="icon" href="/favicon.ico" sizes="any"><!-- 32×32 -->
-		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/favicon.ico`).SetSize(32).SetType(types.ICO()).SetSizeAttrCustom(`any`),
+		{
+			key: `icons/favicon.ico`, 
+			urlPath: `/favicon.ico`, 
+			typ: thumb_.ICO, 
+			size: 32, 
+			attrRel: `icon`, 
+			attrSize: attrSize{ customVal: `any`},
+		},
 
-		// SVG
-		// <link rel="icon" href="/icon.svg" type="image/svg+xml">
-		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/icon.svg`).SetType(types.SVG()).SetSizeAttrEmpty(),
+		// SVG: <link rel="icon" href="/icon.svg" type="image/svg+xml">
+		{
+			key: `icons/favicon.ico`, 
+			urlPath: `/icon.svg`, 
+			typ: thumb_.SVG, 
+			attrRel: `icon`, 
+			attrSize: attrSize{ empty: true },
+		},
 
 		// APPLE
+
 		// <link rel="apple-touch-icon" href="/touch-icon-iphone.png"> <!-- 180x180 -->
+		{
+			key: `icons/touch-icon-iphone.png`, 
+			urlPath: `/touch-icon-iphone.png`, 
+			size: 180, 
+			typ: thumb_.PNG, 
+			attrRel: `apple-touch-icon`, 
+			attrSize: attrSize{ empty: true },
+		},
+		
 		// <link rel="apple-touch-icon" sizes="152x152" href="/touch-icon-ipad.png">
+		{
+			key: `icons/touch-icon-ipad.png`, 
+			urlPath: `/touch-icon-ipad.png`, 
+			size: 152, 
+			typ: thumb_.PNG, 
+			attrRel: `apple-touch-icon`, 
+		},
+
 		// <link rel="apple-touch-icon" sizes="180x180" href="/touch-icon-iphone-retina.png">
+		{
+			key: `icons/touch-icon-iphone-retina.png`, 
+			urlPath: `/touch-icon-iphone-retina.png`, 
+			size: 180, 
+			typ: thumb_.PNG, 
+			attrRel: `apple-touch-icon`, 
+		},
+
 		// <link rel="apple-touch-icon" sizes="167x167" href="/touch-icon-ipad-retina.png">
-		(&thumb_.Thumb{}).SetTagRel(`apple-touch-icon`).URLPathSet(`/touch-icon-iphone.png`).SetSize(180).SetType(types.PNG()).SetSizeAttrEmpty(),
-		(&thumb_.Thumb{}).SetTagRel(`apple-touch-icon`).URLPathSet(`/touch-icon-ipad.png`).SetSize(152).SetType(types.PNG()),
-		(&thumb_.Thumb{}).SetTagRel(`apple-touch-icon`).URLPathSet(`/touch-icon-iphone-retina.png`).SetSize(180).SetType(types.PNG()),
-		(&thumb_.Thumb{}).SetTagRel(`apple-touch-icon`).URLPathSet(`/touch-icon-ipad-retina.png`).SetSize(167).SetType(types.PNG()),
+		{
+			key: `icons/touch-icon-ipad-retina.png`, 
+			urlPath: `/touch-icon-ipad-retina.png`, 
+			size: 167, 
+			typ: thumb_.PNG, 
+			attrRel: `apple-touch-icon`, 
+		},
+
+	}{
+
+	}
+
+	return []*thumb_.Thumb{
 
 		// For all browsers
 		// <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">

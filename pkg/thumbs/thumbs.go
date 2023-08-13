@@ -42,6 +42,7 @@ const (
 var (
 	TypePNG = thumb_.PNG
 	TypeICO = thumb_.ICO
+	TypeSVG = thumb_.SVG
 )
 
 // создание пустого набора превьюх для одного оригинального изображения
@@ -145,7 +146,7 @@ func (t *Thumbs) append(thumb *thumb_.Thumb) *Thumbs {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	t.thumbs[thumb.URLPathGet()] = thumb
+	t.thumbs[thumb.GetURLPath()] = thumb
 	return t
 }
 

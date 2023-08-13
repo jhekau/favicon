@@ -264,7 +264,7 @@ func Test_TypeThumb( t *testing.T ) {
 	tag := thumb.GetTAG()
 	require.Equal(t, expect, tag)
 
-	mimetype := thumb.TypeGet()
+	mimetype := thumb.GetType()
 	require.Equal(t, mimetype, typ)
 
 }
@@ -296,12 +296,12 @@ func Test_Href( t *testing.T ) {
 	href := `/path/thumbs/image.png`
 	expect := `<link href="`+string(href)+`" >`
 
-	thumb.URLPathSet(href)
+	thumb.SetURLPath(href)
 
 	tag := thumb.GetTAG()
 	require.Equal(t, expect, tag)
 
-	h := thumb.URLPathGet()
+	h := thumb.GetURLPath()
 	require.Equal(t, href, string(h))
 }
 
@@ -335,7 +335,7 @@ func Test_SizeAttr( t *testing.T ) {
 		SetSize(size).
 		SetTagRel(`apple-touch-icon`)
 
-	thumb.SizeAttr_SetEmpty()
+	thumb.SetAttrSize_Empty()
 	tag := thumb.GetTAG()
 	require.Equal(t, tag, `<link rel="apple-touch-icon" >`)
 
@@ -345,7 +345,7 @@ func Test_SizeAttr( t *testing.T ) {
 		TestCacheSwap(cache).
 		SetSize(size)
 
-	thumb.SizeAttr_SetDefault()
+	thumb.SetAttrSize_Default()
 	tag = thumb.GetTAG()
 	require.Equal(t, tag, fmt.Sprintf(`<link sizes="%vx%v" >`, size, size), 
 		fmt.Sprintf(`size: '%v'`, thumb.GetSize()))
@@ -357,7 +357,7 @@ func Test_SizeAttr( t *testing.T ) {
 		TestCacheSwap(cache).
 		SetSize(size)
 
-	thumb.SizeAttr_SetCustom(attrCustom)
+	thumb.SetAttrSize_Custom(attrCustom)
 	tag = thumb.GetTAG()
 	require.Equal(t, tag, fmt.Sprintf(`<link sizes="%s" >`, attrCustom))
 
@@ -386,7 +386,7 @@ func Test_OriginalCustomSet( t *testing.T ) {
 	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
 	thumb.
 		TestCacheSwap(cache). 
-		OriginalCustomSet(obj)
+		SetOriginal(obj)
 
 	objExpect := thumb.GetOriginalStorageObj()
 	require.Equal(t, obj, objExpect)
@@ -395,7 +395,7 @@ func Test_OriginalCustomSet( t *testing.T ) {
 	thumb, _ = thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
 	thumb.
 		TestCacheSwap(cache). 
-		OriginalCustomSetSVG(obj)
+		SetOriginal(obj)
 
 	objExpect = thumb.GetOriginalStorageObj()
 	require.Equal(t, obj, objExpect)
@@ -530,7 +530,7 @@ func Test_Read_Create( t *testing.T ) {
 	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), size).Return((error)(nil))
 
 	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
-	thumb.TestCacheSwap(cache).OriginalCustomSet(originalObj).SetSize(16)
+	thumb.TestCacheSwap(cache).SetOriginal(originalObj).SetSize(16)
 
 	_, err := thumb.Read()
 	require.Equal(t, err, (error)(nil))
@@ -564,7 +564,7 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), size).Return( convErr )
 
 	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
-	thumb.TestCacheSwap(cache).OriginalCustomSet(originalObj).SetSize(16)
+	thumb.TestCacheSwap(cache).SetOriginal(originalObj).SetSize(16)
 
 	_, err := thumb.Read()
 	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT11, logger.Error(thumb_.LogTP, thumb_.LogT01, convErr)))
@@ -599,7 +599,7 @@ func Test_OriginalKeyGet( t *testing.T ) {
 	require.Equal(t, expectKey, `` )
 
 	//
-	thumb.OriginalCustomSet(originalObj)
+	thumb.SetOriginal(originalObj)
 
 	expectKey = thumb.GetOriginalKey()
 	require.Equal(t, expectKey, string(instanceKey) )

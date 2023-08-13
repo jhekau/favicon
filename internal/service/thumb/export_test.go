@@ -26,5 +26,5 @@ func (t *Thumb) TestCacheSwap( c cache ) *Thumb {
 	return t
 }
 func (t *Thumb) GetOriginalStorageObj() storage_.StorageOBJ {
-	return t.original_get().obj
+	return t.getOriginal().obj
 }

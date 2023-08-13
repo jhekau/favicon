@@ -108,7 +108,7 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 	require.Equal(t, err, (error)(nil))
 	require.NotNil(t, thumb)
 
-	thumb.TestCacheSwap(cache).OriginalCustomSet(originalOBJ).SetSize(thumbSize)
+	thumb.TestCacheSwap(cache).SetOriginal(originalOBJ).SetSize(thumbSize)
 
 	_, err = thumb.Read()
 	require.Equal(t, err, (error)(nil))
@@ -171,7 +171,7 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 	require.Equal(t, err, (error)(nil))
 	require.NotNil(t, thumb)
 
-	thumb.TestCacheSwap(cache).OriginalCustomSet(originalOBJ).SetSize(thumbSize)
+	thumb.TestCacheSwap(cache).SetOriginal(originalOBJ).SetSize(thumbSize)
 
 	_, err = thumb.Read()
 	require.Equal(t, err, (error)(nil))
@@ -255,7 +255,7 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 	require.Equal(t, err, (error)(nil))
 	require.NotNil(t, thumb)
 
-	thumb.TestCacheSwap(cache).OriginalCustomSet(originalOBJ).SetSize(thumbSize)
+	thumb.TestCacheSwap(cache).SetOriginal(originalOBJ).SetSize(thumbSize)
 
 	_, err = thumb.Read()
 	require.Equal(t, err, (error)(nil))
@@ -333,7 +333,7 @@ func Test_Inegration_ConverterConverters( t *testing.T ) {
 	require.Equal(t, err, (error)(nil))
 	require.NotNil(t, thumb)
 
-	thumb.TestCacheSwap(cache).OriginalCustomSet(originalOBJ).SetSize(thumbSize)
+	thumb.TestCacheSwap(cache).SetOriginal(originalOBJ).SetSize(thumbSize)
 
 	_, err = thumb.Read()
 	require.Equal(t, err, (error)(nil))

@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	typ_ "github.com/jhekau/favicon/internal/core/types"
-	files_ "github.com/jhekau/favicon/internal/storage/files"
+	// files_ "github.com/jhekau/favicon/internal/storage/files"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/models/logger"
@@ -52,6 +52,7 @@ type Typ types_.FileType
 var (
 	ICO Typ = Typ(types_.ICO())
 	PNG Typ = Typ(types_.PNG())
+	SVG Typ = Typ(types_.SVG())
 )
 
 
@@ -80,6 +81,8 @@ type original struct {
 	obj storage_.StorageOBJ
 }
 
+// внимание! ключь, если используется файловая система в качестве
+// хранилища по умолчанию, используется как filepath для хранения превьюхи
 func NewThumb(key string, typThumb Typ, l logger_.Logger, s storage_.Storage, c converter_.Converter) (*Thumb, error) {
 	t, err := s.NewObject(key)
 	if err != nil {
@@ -119,63 +122,63 @@ type Thumb struct {
 }
 
 func (t *Thumb) SetSize(px int) *Thumb {
-	return t.sizeSet(px)
+	return t.setSize(px)
 }
 
 func (t *Thumb) GetSize() int {
-	return t.sizeGet()
+	return t.getSize()
 }
 
 func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
-	return t.attrRelSet(tagRel)
+	return t.setAttrRel(tagRel)
 }
 
 // Добавлять ли превью в список манифеста
 func (t *Thumb) SetManifestUsed() *Thumb {
-	return t.set_manifest_used()
+	return t.setManifestUsed()
 }
 
 func (t *Thumb) SetHTMLComment(comment string) *Thumb {
-	return t.set_html_comment(comment)
+	return t.setHTMLComment(comment)
 }
 
-func (t *Thumb) TypeGet() types_.FileType {
-	return t.typeGet()
+func (t *Thumb) GetType() types_.FileType {
+	return t.getType()
 }
 
-func (t *Thumb) URLPathSet(src string) *Thumb {
-	return t.urlPathSet(src)
+func (t *Thumb) SetURLPath(src string) *Thumb {
+	return t.setURLPath(src)
 }
 
-func (t *Thumb) URLPathGet() typ_.URLPath {
-	return t.urlPathGet()
+func (t *Thumb) GetURLPath() typ_.URLPath {
+	return t.getURLPath()
 }
 
 func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
-	return t.status_manifest()
+	return t.statusManifest()
 }
 
 func (t *Thumb) GetTAG() string {
-	return t.tagGet()
+	return t.getTag()
 }
 
 // аттрибут size не будет добавлен в тег
-func (t *Thumb) SizeAttr_SetEmpty() *Thumb {
-	return t.attrSize_SetEmpty()
+func (t *Thumb) SetAttrSize_Empty() *Thumb {
+	return t.setAttrSize_Empty()
 }
 
 // аттрибут size будет добавлен только в том случае, если указан размер превью
-func (t *Thumb) SizeAttr_SetDefault() *Thumb {
-	return t.attrSize_SetDefault()
+func (t *Thumb) SetAttrSize_Default() *Thumb {
+	return t.setAttrSize_Default()
 }
 
 // аттрибут size будет содержать кастомное значение val
-func (t *Thumb) SizeAttr_SetCustom(val string) *Thumb {
-	return t.attrSize_SetCustom(val)
+func (t *Thumb) SetAttrSize_Custom(val string) *Thumb {
+	return t.setAttrSize_Custom(val)
 }
 
 func (t *Thumb) GetOriginalKey() string{
-	return t.get_original_key()
+	return t.getOriginalKEY()
 }
 
 func (t *Thumb) Read() (io.ReadSeekCloser, error) {
@@ -190,30 +193,32 @@ func (t *Thumb) ModTime() time.Time {
 
 
 // Используется по умолчанию файловое хранилище для изображений
-func (t *Thumb) OriginalFileSet( filepath string ) *Thumb {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+// func (t *Thumb) SetOriginalFile( filepath string ) *Thumb {
+// 	t.mu.Lock()
+// 	defer t.mu.Unlock()
 
-	file, _ := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
-	t.original = &original{
-		obj: file,
-	}
-	return t
-}
+// 	file, _ := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
+// 	t.original = &original{
+// 		obj: file,
+// 	}
+// 	return t
+// }
 
-// Используется по умолчанию файловое хранилище для изображений
-func (t *Thumb) OriginalFileSetSVG( filepath string ) *Thumb {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+// // Используется по умолчанию файловое хранилище для изображений
+// func (t *Thumb) SetOriginalFileSVG( filepath string ) *Thumb {
+// 	t.mu.Lock()
+// 	defer t.mu.Unlock()
 
-	file, _ := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
-	t.original = &original{
-		typSVG: true,
-		obj: file,
-	}
-	return t
-}
-func (t *Thumb) OriginalCustomSet( obj storage_.StorageOBJ ) *Thumb {
+// 	file, _ := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
+// 	t.original = &original{
+// 		typSVG: true,
+// 		obj: file,
+// 	}
+// 	return t
+// }
+
+// добавление оригинального изображения для нарезки превьюхи
+func (t *Thumb) SetOriginal( obj storage_.StorageOBJ ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -222,7 +227,9 @@ func (t *Thumb) OriginalCustomSet( obj storage_.StorageOBJ ) *Thumb {
 	}
 	return t
 }
-func (t *Thumb) OriginalCustomSetSVG( obj storage_.StorageOBJ ) *Thumb {
+
+// добавление оригинального изображения SVG для нарезки превьюхи
+func (t *Thumb) SetOriginalSVG( obj storage_.StorageOBJ ) *Thumb {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -235,7 +242,7 @@ func (t *Thumb) OriginalCustomSetSVG( obj storage_.StorageOBJ ) *Thumb {
 
 
 
-func (t *Thumb) original_get() *original {
+func (t *Thumb) getOriginal() *original {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	return t.original
@@ -270,7 +277,7 @@ func (t *Thumb) thumb_create() error {
 	return nil
 }
 
-func (t *Thumb) get_original_key() string {
+func (t *Thumb) getOriginalKEY() string {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 
@@ -302,7 +309,7 @@ func (t *Thumb) read() (io.ReadSeekCloser, error) {
 }
 
 // ...
-func (t *Thumb) sizeSet(px int) *Thumb {
+func (t *Thumb) setSize(px int) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -312,7 +319,7 @@ func (t *Thumb) sizeSet(px int) *Thumb {
 	return t
 }
 
-func (t *Thumb) sizeGet() int {
+func (t *Thumb) getSize() int {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -321,7 +328,7 @@ func (t *Thumb) sizeGet() int {
 }
 
 // ...
-func (t *Thumb) attrRelSet( tagRel string ) *Thumb {
+func (t *Thumb) setAttrRel( tagRel string ) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -332,7 +339,7 @@ func (t *Thumb) attrRelSet( tagRel string ) *Thumb {
 }
 
 // ...
-func (t *Thumb) set_manifest_used() *Thumb {
+func (t *Thumb) setManifestUsed() *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -343,7 +350,7 @@ func (t *Thumb) set_manifest_used() *Thumb {
 }
 
 // <!-- comment -->
-func (t *Thumb) set_html_comment(comment string) *Thumb {
+func (t *Thumb) setHTMLComment(comment string) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -352,7 +359,7 @@ func (t *Thumb) set_html_comment(comment string) *Thumb {
 	return t
 }
 
-func (t *Thumb) typeGet() types_.FileType {
+func (t *Thumb) getType() types_.FileType {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -361,7 +368,7 @@ func (t *Thumb) typeGet() types_.FileType {
 }
 
 // ...
-func (t *Thumb) urlPathSet(src string) *Thumb {
+func (t *Thumb) setURLPath(src string) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -372,7 +379,7 @@ func (t *Thumb) urlPathSet(src string) *Thumb {
 	return t
 }
 
-func (t *Thumb) urlPathGet() typ_.URLPath {
+func (t *Thumb) getURLPath() typ_.URLPath {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -382,7 +389,7 @@ func (t *Thumb) urlPathGet() typ_.URLPath {
 
 
 // ...
-func (t *Thumb) status_manifest() bool { // ( string, bool /*true - used*/ )
+func (t *Thumb) statusManifest() bool { // ( string, bool /*true - used*/ )
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -391,7 +398,7 @@ func (t *Thumb) status_manifest() bool { // ( string, bool /*true - used*/ )
 }
 
 // ...
-func (t *Thumb) tagGet() string {
+func (t *Thumb) getTag() string {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -464,7 +471,7 @@ func (t *Thumb) tagCacheSet( s string ) {
 }
 
 // ...
-func (t *Thumb) attrSize_SetEmpty() *Thumb {
+func (t *Thumb) setAttrSize_Empty() *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -476,7 +483,7 @@ func (t *Thumb) attrSize_SetEmpty() *Thumb {
 	return t
 }
 
-func (t *Thumb) attrSize_SetDefault() *Thumb {
+func (t *Thumb) setAttrSize_Default() *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -488,7 +495,7 @@ func (t *Thumb) attrSize_SetDefault() *Thumb {
 	return t
 }
 
-func (t *Thumb) attrSize_SetCustom(val string) *Thumb {
+func (t *Thumb) setAttrSize_Custom(val string) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
