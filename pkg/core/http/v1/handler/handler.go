@@ -28,7 +28,7 @@ type Hanler struct {
 func (h *Hanler) Handle(w http.ResponseWriter, req *http.Request, c ...Content) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet || r.Method != http.MethodHead {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
