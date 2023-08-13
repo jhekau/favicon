@@ -29,7 +29,7 @@ const (
 	// logT05 = `T05: `
 	// logT06 = `T06: `
 	// logT07 = `T07: `
-	logT08 = `T08: url parse standart template domain.com`
+	// logT08 = `T08: `
 	// logT09 = `T09: create new storage object`
 
 	logT10 = `T10: thumb check is exists`
@@ -113,7 +113,7 @@ type Thumb struct {
 	size_px int
 	size_attr_value attr_size
 	comment string // <!-- comment -->
-	url_href typ_.URLHref // domain{/name_url}, first -> `/`
+	urlPath typ_.URLPath // domain{/name_url}, first -> `/`
 	tag_rel string
 	manifest bool
 	mimetype types_.FileType
@@ -141,20 +141,16 @@ func (t *Thumb) SetHTMLComment(comment string) *Thumb {
 	return t.set_html_comment(comment)
 }
 
-// func (t *Thumb) SetType(mimetype types_.FileType) *Thumb {
-// 	return t.set_type(mimetype)
-// }
-
-func (t *Thumb) GetType() types_.FileType {
-	return t.get_type()
+func (t *Thumb) TypeGet() types_.FileType {
+	return t.typeGet()
 }
 
-func (t *Thumb) SetHREF(src string) *Thumb {
-	return t.set_href(src)
+func (t *Thumb) URLPathSet(src string) *Thumb {
+	return t.urlPathSet(src)
 }
 
-func (t *Thumb) GetHREF() typ_.URLHref {
-	return t.get_href()
+func (t *Thumb) URLPathGet() typ_.URLPath {
+	return t.urlPathGet()
 }
 
 func (t *Thumb) StatusManifest() bool { // ( string, bool /*true - used*/ )
@@ -184,7 +180,7 @@ func (t *Thumb) GetOriginalKey() string{
 	return t.get_original_key()
 }
 
-func (t *Thumb) Read() (io.ReadCloser, error) {
+func (t *Thumb) Read() (io.ReadSeekCloser, error) {
 	return t.read()
 }
 
@@ -273,7 +269,7 @@ func (t *Thumb) get_original_key() string {
 	return string(t.original.obj.Key())
 }
 
-func (t *Thumb) read() (io.ReadCloser, error) {
+func (t *Thumb) read() (io.ReadSeekCloser, error) {
 	
 	t.mu.RLock()
 	thumb := t.thumb
@@ -352,18 +348,7 @@ func (t *Thumb) set_html_comment(comment string) *Thumb {
 	return t
 }
 
-// ...
-// func (t *Thumb) set_type(mimetype types_.FileType) *Thumb {
-
-// 	t.mu.Lock()
-// 	defer t.mu.Unlock()
-
-// 	t.cacheClean()
-// 	t.mimetype = mimetype
-// 	return t
-// }
-
-func (t *Thumb) get_type() types_.FileType {
+func (t *Thumb) typeGet() types_.FileType {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -372,39 +357,24 @@ func (t *Thumb) get_type() types_.FileType {
 }
 
 // ...
-func (t *Thumb) set_href(src string) *Thumb {
+func (t *Thumb) urlPathSet(src string) *Thumb {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.cacheClean()
-	t.url_href = typ_.URLHref(src)
-	// {
-	// 	u, err := url.Parse(`http://domain.com`)
-	// 	if err != nil {
-	// 		log.Println( t.l.Error(logTP, logT08, err) )
-	// 	} else {
-	// 		t.url_href_clear = types_.URLHref(u.JoinPath(src).Path)
-	// 	}
-	// }
+	t.urlPath = typ_.URLPath(src)
+
 	return t
 }
 
-func (t *Thumb) get_href() typ_.URLHref {
+func (t *Thumb) urlPathGet() typ_.URLPath {
 
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 
-	return t.url_href
+	return t.urlPath
 }
-// func (t *Thumb) get_href_clear() types_.URLHref {
-
-// 	t.mu.RLock()
-// 	defer t.mu.RUnlock()
-
-// 	return t.url_href_clear
-// }
-
 
 
 // ...
@@ -443,7 +413,7 @@ func (t *Thumb) tagGet() string {
 	}
 
 	// href
-	if s := t.url_href.String(); s != `` {
+	if s := t.urlPath.String(); s != `` {
 		attr[`href`] = html.EscapeString(s)
 	}
 
@@ -546,8 +516,8 @@ func (t *Thumb) cacheClean() {
 
 // url_Exists : проверка наличия превьюхи в запросе 
 // http.Request.URL.Path -> URLpath
-func urlExists( url_ *url.URL, thumbs map[typ_.URLHref]*Thumb ) ( *Thumb, bool /*exists*/ ) {
-	t, ok := thumbs[typ_.URLHref(url_.Path)]
+func urlExists( url_ *url.URL, thumbs map[typ_.URLPath]*Thumb ) ( *Thumb, bool /*exists*/ ) {
+	t, ok := thumbs[typ_.URLPath(url_.Path)]
 	return t, ok
 }
 

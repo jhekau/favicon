@@ -264,7 +264,7 @@ func Test_TypeThumb( t *testing.T ) {
 	tag := thumb.GetTAG()
 	require.Equal(t, expect, tag)
 
-	mimetype := thumb.GetType()
+	mimetype := thumb.TypeGet()
 	require.Equal(t, mimetype, typ)
 
 }
@@ -296,12 +296,12 @@ func Test_Href( t *testing.T ) {
 	href := `/path/thumbs/image.png`
 	expect := `<link href="`+string(href)+`" >`
 
-	thumb.SetHREF(href)
+	thumb.URLPathSet(href)
 
 	tag := thumb.GetTAG()
 	require.Equal(t, expect, tag)
 
-	h := thumb.GetHREF()
+	h := thumb.URLPathGet()
 	require.Equal(t, href, string(h))
 }
 
@@ -647,7 +647,7 @@ func Test_URLExist( t *testing.T ) {
 	require.Equal(t, err, (error)(nil))
 
 	instanceThumb := thumb_.Thumb{}
-	m := map[typ_.URLHref]*thumb_.Thumb{
+	m := map[typ_.URLPath]*thumb_.Thumb{
 		`/stories/icon.png`: &instanceThumb,
 	}
 

@@ -5,9 +5,11 @@ package favicon
  * 09 March 2023
  */
 import (
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -229,12 +231,12 @@ func (t *Thumbs) handle() {
 		} else if !exists {
 			w.WriteHeader(http.StatusNotFound)
 		} else {
-			http.ServeContent(w, r, name string, modtime time.Time, content io.ReadSeeker)
+			// http.ServeContent(w, r, name string, modtime time.Time, content io.ReadSeeker)
 		}
 	}))
 }
 
-func (t *Thumbs) serve_file(url_ *url.URL) (fpath string, exists bool, err error) {
+func (t *Thumbs) serve_file(url_ *url.URL) (content io.ReadSeekCloser, name string, exists bool, err error) {
 
 	if manifest, exists, err := t.server_file_manifest(url_); err != nil {
 		return ``, false, t.l.Error(logTP, logT02, err)
@@ -242,35 +244,31 @@ func (t *Thumbs) serve_file(url_ *url.URL) (fpath string, exists bool, err error
 		return manifest.String(), true, nil
 	}
 
-	if thumb, exists, err := t.server_file_thumb(url_, conv); err != nil {
-		return ``, false, t.l.Error(logTP, logT03, err)
+	if c,n,e,err := t.thumbFile(url_); err != nil {
+		return nil, ``, false, t.l.Error(logTP, logT03, err)
 	} else if exists {
-		return thumb.String(), true, nil
+		return c,n,e,err
 	}
 	return ``, false, nil
 }
 
-func (t *Thumbs) server_file_thumb(url_ *url.URL, conv convert_.Converter) (fpath typ_.FilePath, exists bool, err error) {
+func (t *Thumbs) thumbFile(url_ *url.URL) (content io.ReadSeekCloser, name string, exists bool, err error) {
 
 	t.mu.RLock()
 	thumb, exists := thumb_.URLExists(url_, t.thumbs)
 	t.mu.RUnlock()
 
 	if !exists {
-		return ``, false, nil
+		return
 	}
 
-	fpath, err = thumb.GetFile(
-		t.get_folder_work(),
-		t.get_filepath_source_img(),
-		t.get_filepath_source_svg(),
-		conv,
-	)
+	_, name = filepath.Split(url_.Path)
+
+	content, err = thumb.Read()
 	if err != nil {
-		return ``, false, t.l.Error(logTP, logT04, err)
+		err = t.l.Error(logTP, logT04, err)
 	}
-
-	return fpath, true, nil
+	return
 }
 
 func (t *Thumbs) server_file_manifest(url_ *url.URL) (manifest typ_.FilePath, exists bool, err error) {

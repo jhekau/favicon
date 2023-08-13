@@ -34,7 +34,7 @@ func (f Folder) String() string {
 
 
 //
-type URLHref string
-func (n URLHref) String() string {
+type URLPath string
+func (n URLPath) String() string {
 	return string(n)
 }
