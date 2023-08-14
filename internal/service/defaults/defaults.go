@@ -6,7 +6,14 @@ package defaults
  */
 import (
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
-	typ_ "github.com/jhekau/favicon/internal/core/types"
+	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+)
+
+const (
+	logP = `github.com/jhekau/favicon/internal/service/defaults/defaults.go`
+	logD1 = `D1: create new thumb`
 )
 
 type attrSize struct{
@@ -14,16 +21,17 @@ type attrSize struct{
 	customVal string
 }
 
-func Defaults() []*thumb_.Thumb {
+func Defaults(l logger_.Logger, s storage_.Storage, c converter_.Converter) ([]*thumb_.Thumb, error) {
 
 	t := make([]*thumb_.Thumb, 0)
 	for _, d := range []struct{
 		key string
 		typ thumb_.Typ
-		urlPath typ_.URLPath
+		urlPath string
 		size int
 		attrRel string
 		attrSize attrSize
+		manifest bool
 	}{
 		// Нам нужны sizes="any" для <link> на файл .ico, 
 		// чтобы исправить ошибку Chrome, из-за которой он выбирает файл ICO вместо SVG.
@@ -90,23 +98,60 @@ func Defaults() []*thumb_.Thumb {
 		},
 
 		// <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-
-	}{
-
-	}
-
-	return []*thumb_.Thumb{
-
-
-		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/favicon-32x32.png`).SetSize(32).SetType(types.PNG()),
-		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/favicon-16x16.png`).SetSize(13).SetType(types.PNG()),
+		{
+			urlPath: `/favicon-16x16.png`, 
+			size: 16, 
+			typ: thumb_.PNG, 
+			attrRel: `icon`, 
+		},
 
 		// For Google and Chrome
+
 		// <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+		{
+			urlPath: `/favicon-48x48.png`, 
+			size: 48, 
+			typ: thumb_.PNG, 
+			attrRel: `icon`, 
+		},
+
 		// <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+		{
+			urlPath: `/favicon-192x192.png`, 
+			size: 192, 
+			typ: thumb_.PNG, 
+			attrRel: `icon`, 
+			manifest: true,
+		},
+
 		// <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
-		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/favicon-48x48.png`).SetSize(48).SetType(types.PNG()),
-		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/favicon-192x192.png`).SetSize(192).SetType(types.PNG()).SetManifestUsed(),
-		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/favicon-512x512.png`).SetSize(512).SetType(types.PNG()).SetManifestUsed(),
+		{
+			urlPath: `/favicon-512x512.png`, 
+			size: 512, 
+			typ: thumb_.PNG, 
+			attrRel: `icon`, 
+			manifest: true,
+		},
+	}{
+		tb, err := thumb_.NewThumb(d.urlPath, d.typ, l, s, c)
+		if err != nil {
+			return nil, l.Error(logP, logD1, err)
+		}
+		tb.SetSize(d.size)
+		tb.SetAttrRel(d.attrRel)
+		tb.SetURLPath(d.urlPath)
+
+		if v := d.attrSize.customVal; v != `` {
+			tb.SetAttrSize_Custom(v)
+		} else if d.attrSize.empty {
+			tb.SetAttrSize_Empty()
+		}
+		
+		if d.manifest {
+			tb.SetManifestUsed()
+		}
+
+		t = append(t, tb)
 	}
+	return t, nil
 }
