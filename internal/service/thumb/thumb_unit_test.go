@@ -129,7 +129,7 @@ func Test_SetTagRel( t *testing.T ) {
 	tagRel := `apple-touch-icon`
 	expect := `<link rel="apple-touch-icon" >`
 
-	thumb.SetTagRel(tagRel)
+	thumb.SetAttrRel(tagRel)
 
 	tag := thumb.GetTAG()
 	require.Equal(t, expect, tag)
@@ -164,7 +164,7 @@ func Test_HTMLComment( t *testing.T ) {
 	expect := `<link rel="`+tagRel+`" ><!-- `+htmlComment+` -->`
 
 	thumb.
-		SetTagRel(tagRel).
+		SetAttrRel(tagRel).
 		SetHTMLComment(htmlComment)
 
 	tag := thumb.GetTAG()
@@ -333,7 +333,7 @@ func Test_SizeAttr( t *testing.T ) {
 	thumb.
 		TestCacheSwap(cache).
 		SetSize(size).
-		SetTagRel(`apple-touch-icon`)
+		SetAttrRel(`apple-touch-icon`)
 
 	thumb.SetAttrSize_Empty()
 	tag := thumb.GetTAG()
