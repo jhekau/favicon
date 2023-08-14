@@ -129,7 +129,7 @@ func (t *Thumb) GetSize() int {
 	return t.getSize()
 }
 
-func (t *Thumb) SetTagRel( tagRel string ) *Thumb {
+func (t *Thumb) SetAttrRel( tagRel string ) *Thumb {
 	return t.setAttrRel(tagRel)
 }
 
