@@ -25,7 +25,7 @@ type Handler struct {
 	L logger.Logger
 }
 
-func (h *Handler) Handle(w http.ResponseWriter, req *http.Request, c ...Content) http.HandlerFunc {
+func (h *Handler) Handle(c ...Content) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
