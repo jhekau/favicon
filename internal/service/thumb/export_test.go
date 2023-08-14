@@ -1,7 +1,7 @@
 package thumb
 
 import (
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )
 
 /* *

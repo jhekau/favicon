@@ -14,8 +14,8 @@ import (
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	"github.com/stretchr/testify/require"
 )
 

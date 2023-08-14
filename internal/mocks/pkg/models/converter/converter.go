@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	types "github.com/jhekau/favicon/pkg/core/types"
-	storage "github.com/jhekau/favicon/pkg/models/storage"
+	storage "github.com/jhekau/favicon/pkg/core/models/storage"
 	gomock "go.uber.org/mock/gomock"
 )
 

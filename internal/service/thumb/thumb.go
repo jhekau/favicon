@@ -15,9 +15,9 @@ import (
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	// files_ "github.com/jhekau/favicon/internal/storage/files"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	converter_ "github.com/jhekau/favicon/pkg/models/converter"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )
 
 const (
@@ -190,32 +190,6 @@ func (t *Thumb) ModTime() time.Time {
 }
 
 
-
-
-// Используется по умолчанию файловое хранилище для изображений
-// func (t *Thumb) SetOriginalFile( filepath string ) *Thumb {
-// 	t.mu.Lock()
-// 	defer t.mu.Unlock()
-
-// 	file, _ := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
-// 	t.original = &original{
-// 		obj: file,
-// 	}
-// 	return t
-// }
-
-// // Используется по умолчанию файловое хранилище для изображений
-// func (t *Thumb) SetOriginalFileSVG( filepath string ) *Thumb {
-// 	t.mu.Lock()
-// 	defer t.mu.Unlock()
-
-// 	file, _ := (&files_.Files{L: t.l}).NewObject(typ_.FilePath(filepath))
-// 	t.original = &original{
-// 		typSVG: true,
-// 		obj: file,
-// 	}
-// 	return t
-// }
 
 // добавление оригинального изображения для нарезки превьюхи
 func (t *Thumb) SetOriginal( obj storage_.StorageOBJ ) *Thumb {

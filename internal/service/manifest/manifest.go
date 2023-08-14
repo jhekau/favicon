@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	types_ "github.com/jhekau/favicon/internal/core/types"
 )

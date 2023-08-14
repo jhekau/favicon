@@ -7,7 +7,7 @@ package checks
 import (
 	"fmt"
 	"sync"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )
 
 type CacheStatus struct {

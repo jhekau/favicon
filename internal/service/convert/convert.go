@@ -5,10 +5,10 @@ package convert
  * 1 August 2023
  */
 import (
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	converter_ "github.com/jhekau/favicon/pkg/models/converter"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )
 
 const (

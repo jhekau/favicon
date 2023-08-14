@@ -8,13 +8,13 @@ import (
 	"io"
 	"testing"
 
-	// logger_ "github.com/jhekau/favicon/pkg/models/logger"
-	// logger_ "github.com/jhekau/favicon/pkg/models/logger"
+	// logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	// logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
 	mock_checks_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert/checks"
-	converter_ "github.com/jhekau/favicon/pkg/models/converter"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	"github.com/stretchr/testify/require"
 
 	mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"

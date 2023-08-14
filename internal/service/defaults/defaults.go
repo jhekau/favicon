@@ -29,7 +29,6 @@ func Defaults() []*thumb_.Thumb {
 		// чтобы исправить ошибку Chrome, из-за которой он выбирает файл ICO вместо SVG.
 		// <link rel="icon" href="/favicon.ico" sizes="any"><!-- 32×32 -->
 		{
-			key: `icons/favicon.ico`, 
 			urlPath: `/favicon.ico`, 
 			typ: thumb_.ICO, 
 			size: 32, 
@@ -39,7 +38,6 @@ func Defaults() []*thumb_.Thumb {
 
 		// SVG: <link rel="icon" href="/icon.svg" type="image/svg+xml">
 		{
-			key: `icons/favicon.ico`, 
 			urlPath: `/icon.svg`, 
 			typ: thumb_.SVG, 
 			attrRel: `icon`, 
@@ -50,7 +48,6 @@ func Defaults() []*thumb_.Thumb {
 
 		// <link rel="apple-touch-icon" href="/touch-icon-iphone.png"> <!-- 180x180 -->
 		{
-			key: `icons/touch-icon-iphone.png`, 
 			urlPath: `/touch-icon-iphone.png`, 
 			size: 180, 
 			typ: thumb_.PNG, 
@@ -59,8 +56,7 @@ func Defaults() []*thumb_.Thumb {
 		},
 		
 		// <link rel="apple-touch-icon" sizes="152x152" href="/touch-icon-ipad.png">
-		{
-			key: `icons/touch-icon-ipad.png`, 
+		{ 
 			urlPath: `/touch-icon-ipad.png`, 
 			size: 152, 
 			typ: thumb_.PNG, 
@@ -69,7 +65,6 @@ func Defaults() []*thumb_.Thumb {
 
 		// <link rel="apple-touch-icon" sizes="180x180" href="/touch-icon-iphone-retina.png">
 		{
-			key: `icons/touch-icon-iphone-retina.png`, 
 			urlPath: `/touch-icon-iphone-retina.png`, 
 			size: 180, 
 			typ: thumb_.PNG, 
@@ -78,12 +73,23 @@ func Defaults() []*thumb_.Thumb {
 
 		// <link rel="apple-touch-icon" sizes="167x167" href="/touch-icon-ipad-retina.png">
 		{
-			key: `icons/touch-icon-ipad-retina.png`, 
 			urlPath: `/touch-icon-ipad-retina.png`, 
 			size: 167, 
 			typ: thumb_.PNG, 
 			attrRel: `apple-touch-icon`, 
 		},
+
+		// For all browsers
+
+		// <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		{
+			urlPath: `/favicon-32x32.png`, 
+			size: 32, 
+			typ: thumb_.PNG, 
+			attrRel: `icon`, 
+		},
+
+		// <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
 	}{
 
@@ -91,9 +97,7 @@ func Defaults() []*thumb_.Thumb {
 
 	return []*thumb_.Thumb{
 
-		// For all browsers
-		// <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-		// <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
 		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/favicon-32x32.png`).SetSize(32).SetType(types.PNG()),
 		(&thumb_.Thumb{}).SetTagRel(`icon`).URLPathSet(`/favicon-16x16.png`).SetSize(13).SetType(types.PNG()),
 

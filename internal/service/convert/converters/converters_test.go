@@ -16,8 +16,8 @@ import (
 	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

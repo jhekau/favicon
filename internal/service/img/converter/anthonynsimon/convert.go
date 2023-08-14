@@ -13,9 +13,9 @@ import (
 	ico_ "github.com/Kodeworks/golang-image-ico"
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )
 
 const (

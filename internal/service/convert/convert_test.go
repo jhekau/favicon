@@ -17,11 +17,11 @@ import (
 	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	converter_ "github.com/jhekau/favicon/pkg/models/converter"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 
-	// storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	// storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

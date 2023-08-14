@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 )
 

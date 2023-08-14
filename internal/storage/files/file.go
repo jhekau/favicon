@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"time"
 
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )
 
 const (
@@ -30,8 +30,7 @@ var (
 	osStat = os.Stat
 )
 
-const defaultFolder = `icons`
-var folderIcons = ``
+var folderIcons = `icons` // default
 
 func SetFolderIcons(f string) {
 	folderIcons = f

@@ -17,8 +17,8 @@ import (
 	converter_exec_anthonynsimon_ "github.com/jhekau/favicon/internal/service/img/converter/anthonynsimon"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	"github.com/pressly/goico"
 	"github.com/stretchr/testify/require"
 )

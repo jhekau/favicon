@@ -7,7 +7,7 @@ package mock_checks
 import (
 	reflect "reflect"
 
-	storage "github.com/jhekau/favicon/pkg/models/storage"
+	storage "github.com/jhekau/favicon/pkg/core/models/storage"
 	gomock "go.uber.org/mock/gomock"
 )
 

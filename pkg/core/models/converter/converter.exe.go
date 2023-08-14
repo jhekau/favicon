@@ -6,7 +6,7 @@ package converter
  */
 import (
 	"github.com/jhekau/favicon/pkg/core/types"
-	"github.com/jhekau/favicon/pkg/models/storage"
+	"github.com/jhekau/favicon/pkg/core/models/storage"
 )
 
 type ConverterExec interface{

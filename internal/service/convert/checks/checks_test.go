@@ -15,7 +15,7 @@ import (
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	"github.com/stretchr/testify/require"
 )
 

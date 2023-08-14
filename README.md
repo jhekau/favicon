@@ -17,7 +17,7 @@ go run ...
 ```
 import (
     github.com/jhekau/favicon/pkg/thumbs
-    github.com/jhekau/favicon/pkg/models/logger
+    github.com/jhekau/favicon/pkg/core/models/logger
 )
 
 # check implementation
@@ -31,7 +31,7 @@ t.LoggerSet( YourLogger )
 ```
 import (
     github.com/jhekau/favicon/pkg/thumbs
-    github.com/jhekau/favicon/pkg/models/storage
+    github.com/jhekau/favicon/pkg/core/models/storage
 )
 
 # check implementation
@@ -45,7 +45,7 @@ t.StorageSet( YourStorage )
 ```
 import (
     github.com/jhekau/favicon/pkg/thumbs
-    github.com/jhekau/favicon/pkg/models/converter
+    github.com/jhekau/favicon/pkg/core/models/converter
 )
 
 # check implementation

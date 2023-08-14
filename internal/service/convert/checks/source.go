@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logger_ "github.com/jhekau/favicon/pkg/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/models/storage"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )
 
 const (
