@@ -21,11 +21,11 @@ type Content interface {
 	File(urlPath string) (content io.ReadSeekCloser, modtime time.Time, name string, exists bool, err error)
 }
 
-type Hanler struct {
+type Handler struct {
 	L logger.Logger
 }
 
-func (h *Hanler) Handle(w http.ResponseWriter, req *http.Request, c ...Content) http.HandlerFunc {
+func (h *Handler) Handle(w http.ResponseWriter, req *http.Request, c ...Content) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
