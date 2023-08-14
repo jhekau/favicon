@@ -7,9 +7,9 @@ package files
 import (
 	"io"
 	"os"
+	"path/filepath"
 	"time"
 
-	typ_ "github.com/jhekau/favicon/internal/core/types"
 	logger_ "github.com/jhekau/favicon/pkg/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/models/storage"
 )
@@ -30,13 +30,17 @@ var (
 	osStat = os.Stat
 )
 
+const defaultFolder = `icons`
+var folderIcons = ``
 
+func SetFolderIcons(f string) {
+	folderIcons = f
+}
 
 // storage object
 type file struct{
 	l logger_.Logger
-	filepath typ_.FilePath
-	// f *os.File
+	key string
 }
 
 // storage
@@ -45,14 +49,14 @@ type Files struct{
 }
 
 func (s *file) Reader() (io.ReadSeekCloser, error) {
-	f, err := osOpen(s.filepath.String())
+	f, err := osOpen( filepath.Join(folderIcons, s.key) )
 	if err != nil {
 		return nil, s.l.Error(logP, logS02, err)
 	}
 	return f, nil
 }
 func (s *file) Writer() (io.WriteCloser, error){
-	f, err := os.OpenFile(s.filepath.String(), os.O_CREATE|os.O_TRUNC, 0777)
+	f, err := os.OpenFile(filepath.Join(folderIcons, s.key), os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		return nil, s.l.Error(logP, logS05, err)
 	}
@@ -65,7 +69,7 @@ func (s *file) IsExists() ( bool, error ) {
 		return false, nil
 	}
 	
-	if f, err := osStat(s.filepath.String()); err != nil {
+	if f, err := osStat( filepath.Join(folderIcons, s.key) ); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
@@ -79,15 +83,15 @@ func (s *file) IsExists() ( bool, error ) {
 }
 
 func (s *file) Key() storage_.StorageKey {
-	return storage_.StorageKey(s.filepath.String())
+	return storage_.StorageKey(s.key)
 }
 
 func (s *file) ModTime() time.Time {
 
-	if s.filepath == `` {
+	if s.key == `` {
 		return time.Time{}
 	}
-	st, err := osStat(s.filepath.String())
+	st, err := osStat(filepath.Join(folderIcons, s.key))
 	if err != nil {
 		s.l.Error(logP, logS06, err)
 		return time.Time{}
@@ -100,10 +104,10 @@ func (s *file) ModTime() time.Time {
 // func (s *File) Delete()....
 
 // получаем интерфейсы на объект в storage
-func (fl Files) NewObject( filepath any ) (storage_.StorageOBJ, error) {
+func (fl Files) NewObject( key any ) (storage_.StorageOBJ, error) {
 	return &file{
 		l: fl.L,
-		filepath: filepath.(typ_.FilePath),
+		key: key.(string),
 	}, nil
 }
 
