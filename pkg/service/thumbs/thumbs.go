@@ -37,6 +37,7 @@ const (
 	logT05 = `T05: get file manifest`
 	logT06 = `T06: error read original`
 	logT07 = `T07: get new thumb`
+	logT08 = `T08: get list defaults`
 )
 
 var (
@@ -74,9 +75,19 @@ func NewThumbs() *Thumbs {
 }
 
 // создание набора превьюх по умолчанию для оригинала
-func NewThumbs_DefaultsIcons() *Thumbs {
+func NewThumbs_DefaultsIcons() (*Thumbs, error) {
+	
 	t := NewThumbs()
-	return t
+
+	icons, err := defaults_.Defaults(t.l, t.storage, t.conv)
+	if err != nil {
+		return nil, t.l.Error(logTP, logT08, err)
+	}
+
+	for _, tb := range icons {
+		t.AppendThumb(tb)
+	}
+	return t, nil
 }
 
 type original struct {
