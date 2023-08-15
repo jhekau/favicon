@@ -16,12 +16,13 @@ import (
 
 const (
 	logP = `/internal/storage/files/stat.go`
-	// logS01 = `S01: `
+	logS01 = `S01: can't get path`
 	logS02 = `S02: failed open file`
 	logS03 = `S03: os stat source image`
 	logS04 = `S04: save thumb image is a folder`
 	logS05 = `S05: failed open file`
 	logS06 = `S06: os stat source image`
+	logS07 = `S07: can't get path`
 )
 
 // for test 
@@ -48,14 +49,25 @@ type Files struct{
 }
 
 func (s *file) Reader() (io.ReadSeekCloser, error) {
-	f, err := osOpen( filepath.Join(folderIcons, s.key) )
+
+	filename, err := filepath.Abs(filepath.Join(folderIcons, s.key))
+	if err != nil {
+		return nil, s.l.Error(logP, logS01, err)
+	}
+	f, err := osOpen(filename)
 	if err != nil {
 		return nil, s.l.Error(logP, logS02, err)
 	}
 	return f, nil
 }
+
 func (s *file) Writer() (io.WriteCloser, error){
-	f, err := os.OpenFile(filepath.Join(folderIcons, s.key), os.O_CREATE|os.O_TRUNC, 0777)
+	
+	filename, err := filepath.Abs(filepath.Join(folderIcons, s.key))
+	if err != nil {
+		return nil, s.l.Error(logP, logS07, err)
+	}
+	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		return nil, s.l.Error(logP, logS05, err)
 	}

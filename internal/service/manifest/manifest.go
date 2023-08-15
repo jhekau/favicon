@@ -4,6 +4,7 @@ package manifest
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
  * 14 March 2023
  */
+
 import (
 	"encoding/json"
 	// "io/ioutil"
