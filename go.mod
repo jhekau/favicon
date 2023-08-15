@@ -1,11 +1,11 @@
 module github.com/jhekau/favicon
 
-go 1.21
+go 1.21.0
 
 require (
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/anthonynsimon/bild v0.13.0
-	github.com/jhekau/gdown v0.0.1
+	github.com/jhekau/gdown v0.0.2-0.20230815080823-673ca0f8159f
 	github.com/pressly/goico v0.0.0-20150316210446-e9cfaf32013b
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/mock v0.2.0

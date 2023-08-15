@@ -5,7 +5,7 @@ package adapter_http_v1
  * 27 July 2023
  */
 import (
-	"net/http"
+	"github.com/jhekau/gdown"
 
 	logger_default_ "github.com/jhekau/favicon/internal/core/logs/default"
 	handler_ "github.com/jhekau/favicon/pkg/core/http/v1/handler"
@@ -25,10 +25,10 @@ func Run() {
 	icons.LoggerSet(logger)
 	// manifest
 
-	handle := (&handler_.Handler{}).Handle(icons)
-	err = http.ListenAndServe(`\`, handle)
-	if err != nil {
-		// error
-	}
+	handler := (&handler_.Handler{}).Handle(icons)
+	server, _ := gdown.HTTPNewServerWithHandler(handler)
+    if err := server.ListenAndServe(); err != nil {
+        panic(err)
+    }
 
 }
