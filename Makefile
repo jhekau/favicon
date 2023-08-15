@@ -3,6 +3,8 @@ ifndef $(GOPATH)
     export GOPATH
 endif
 
+APP_NAME?=afav
+
 
 # *****
 # solves the problem on the windows platform
@@ -17,6 +19,15 @@ SHELL := powershell.exe
 endif
 
 
+
+clean_httpv1:
+	rm -f ${APP_NAME}_httpv1
+
+build_httpv1: clean_httpv1
+	go build -o ${APP_NAME}_httpv1
+
+run_httpv1: build_httpv1
+	./${APP_NAME}_httpv1 -adapter="httpv1" conf="conf_httpv1.yaml"
 
 
 .PHONY: cover
