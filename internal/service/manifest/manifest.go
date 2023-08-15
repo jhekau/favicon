@@ -5,6 +5,9 @@ package manifest
  * 14 March 2023
  */
 
+type Manifest struct {}
+
+/*
 import (
 	"encoding/json"
 	// "io/ioutil"
@@ -171,7 +174,7 @@ func (m *Manifest) generate(
 			{ "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" }
 		]
 	}
-	/* -------------------------------------------------------------------- */
+	/* -------------------------------------------------------------------- * /
 	type icon struct {
 		Src string `json:"src"`
 		Type string `json:"type"`
@@ -302,7 +305,7 @@ func (m *Manifest) url_exists(url_ *url.URL) bool {
 	} else if src[0] != '/' && `/`+src == manifest {
 		return true
 	}
-	*/
+	* /
 	return url_.Path == m.GetNameURLClear().String()
 }
 
@@ -352,3 +355,5 @@ func (c *cache) get_filepath() types_.FilePath {
 	c.s.RUnlock()
 	return filepath
 }
+*/
+
