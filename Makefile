@@ -44,13 +44,13 @@ cover:
 # ренейм для вложенных папок назначения - "internal", такая сложнота нужна, в противном случае импортировать моки будет нереал
 # <!> go install go.uber.org/mock/mockgen@latest
 
-MOCKS_FILEPATH = pkg/models/converter/converter.exe.go $\
-pkg/models/converter/converter.type.go $\
-pkg/models/converter/converter.go $\
-pkg/models/storage/storage.go $\
-pkg/models/storage/storage.key.go $\
-pkg/models/storage/storage.obj.go $\
-pkg/models/logger/logger.go $\
+MOCKS_FILEPATH = pkg/core/models/converter/converter.exe.go $\
+pkg/core/models/converter/converter.type.go $\
+pkg/core/models/converter/converter.go $\
+pkg/core/models/storage/storage.go $\
+pkg/core/models/storage/storage.key.go $\
+pkg/core/models/storage/storage.obj.go $\
+pkg/core/models/logger/logger.go $\
 internal/service/thumb/thumb.go $\
 internal/service/convert/convert.go $\
 internal/service/convert/checks/source.go

@@ -18,8 +18,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"
-	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
-	mock_storage_ "github.com/jhekau/favicon/internal/mocks/pkg/models/storage"
+	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
+	mock_storage_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/storage"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"

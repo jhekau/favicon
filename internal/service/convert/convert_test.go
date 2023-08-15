@@ -14,7 +14,7 @@ import (
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
-	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
+	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"

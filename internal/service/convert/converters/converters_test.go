@@ -13,7 +13,7 @@ import (
 
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
-	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
+	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"

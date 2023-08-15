@@ -17,8 +17,8 @@ import (
 	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 
 	typ_ "github.com/jhekau/favicon/internal/core/types"
-	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/models/converter"
-	mock_storage_ "github.com/jhekau/favicon/internal/mocks/pkg/models/storage"
+	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
+	mock_storage_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/storage"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 
@@ -404,7 +404,12 @@ func Test_OriginalCustomSet( t *testing.T ) {
 
 
 
-
+type reader struct {
+	io.ReadCloser
+}
+func (r reader) Seek(offset int64, whence int) (int64, error){
+	return 0,nil
+}
 
 func Test_Read( t *testing.T ) {
 
@@ -415,9 +420,9 @@ func Test_Read( t *testing.T ) {
 
 	keyThumb := `123`
 	instanceData := []byte(`1234`)
-	instanceReader := io.NopCloser(bytes.NewBuffer(instanceData))
+	instanceReader := reader{io.NopCloser(bytes.NewBuffer(instanceData))}
 
-	storageObj :=mock_storage_.NewMockStorageOBJ(ctrl)
+	storageObj := mock_storage_.NewMockStorageOBJ(ctrl)
 	storageObj.EXPECT().IsExists().Return(true, (error)(nil))
 	storageObj.EXPECT().Reader().Return(instanceReader, nil)
 	
