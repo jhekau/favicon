@@ -26,7 +26,9 @@ func Run() {
 	// manifest
 
 	handler := (&handler_.Handler{}).Handle(icons)
-	server, _ := gdown.HTTPNewServerWithHandler(handler)
+	server, s := gdown.HTTPNewServerWithHandler(handler)
+	s.Logger(logger)
+	
     if err := server.ListenAndServe(); err != nil {
         panic(err)
     }
