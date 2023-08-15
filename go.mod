@@ -9,6 +9,7 @@ require (
 	github.com/pressly/goico v0.0.0-20150316210446-e9cfaf32013b
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/mock v0.2.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -16,5 +17,4 @@ require (
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/image v0.11.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
