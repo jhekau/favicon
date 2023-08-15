@@ -6,6 +6,9 @@ package manifest
  */
 
 type Manifest struct {}
+func (m *Manifest) GetTAG() string {
+	return ``
+}
 
 /*
 import (
