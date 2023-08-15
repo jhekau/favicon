@@ -16,7 +16,7 @@ go run ...
 
 ### Изменения директории хранения нарезанных иконок стандартной системы хранения
 Новые иконки хранятся по умолчанию в директории icons рабочего бинарника, чтобы изменить место хранения:
-```
+```Go
 import (
     github.com/jhekau/favicon/pkg/service/storage_default
 )
@@ -24,7 +24,7 @@ storagedefault.SetFolderIcons(YourFolder)
 ```
 
 ### Использование альтернативной реализации логгера:
-```
+```Go
 import (
     github.com/jhekau/favicon/pkg/thumbs
     github.com/jhekau/favicon/pkg/core/models/logger
@@ -38,7 +38,7 @@ t.LoggerSet( YourLogger )
 ```
 
 ### Использование альтернативной системы хранения:
-```
+```Go
 import (
     github.com/jhekau/favicon/pkg/thumbs
     github.com/jhekau/favicon/pkg/core/models/storage
@@ -52,7 +52,7 @@ t.StorageSet( YourStorage )
 ```
 
 ### Использование альтернативного конвертера для создания превьюх:
-```
+```Go
 import (
     github.com/jhekau/favicon/pkg/thumbs
     github.com/jhekau/favicon/pkg/core/models/converter
