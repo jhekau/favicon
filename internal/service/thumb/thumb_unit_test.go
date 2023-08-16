@@ -13,14 +13,13 @@ import (
 	"sync"
 	"testing"
 
-	// logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
-
+	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
 	mock_storage_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/storage"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 
 	mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
@@ -35,7 +34,7 @@ func Test_NewThumb( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -45,7 +44,7 @@ func Test_NewThumb( t *testing.T ) {
 	conv := mock_converter_.NewMockConverter(ctrl)
 
 	//
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 
 	require.IsType(t, thumb, &thumb_.Thumb{}, fmt.Sprintf(`%T`, thumb))
 }
@@ -55,7 +54,7 @@ func Test_NewThumbError( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -66,9 +65,9 @@ func Test_NewThumbError( t *testing.T ) {
 	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(nil, nil, false, nil, 0).AnyTimes()
 
-	_, err := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	_, err := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 
-	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT02, instanceErr))
+	require.Equal(t, err, err_.Err(logs, thumb_.LogTP, thumb_.LogT02, instanceErr))
 }
 
 func Test_Size( t *testing.T ) {
@@ -76,7 +75,7 @@ func Test_Size( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -93,7 +92,7 @@ func Test_Size( t *testing.T ) {
 	cache.EXPECT().Store(nil, nil).AnyTimes()
 
 	size := 16
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 
 	thumb.TestCacheSwap(cache)
 	thumb.SetSize(size)
@@ -107,7 +106,7 @@ func Test_SetTagRel( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -123,7 +122,7 @@ func Test_SetTagRel( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() )
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	tagRel := `apple-touch-icon`
@@ -140,7 +139,7 @@ func Test_HTMLComment( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -156,7 +155,7 @@ func Test_HTMLComment( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	tagRel := `apple-touch-icon`
@@ -176,7 +175,7 @@ func Test_HTMLCommentEmptyTag( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -192,7 +191,7 @@ func Test_HTMLCommentEmptyTag( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	htmlComment := `hello`
@@ -209,7 +208,7 @@ func Test_ManifestUsed( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -225,7 +224,7 @@ func Test_ManifestUsed( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() )
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	thumb.SetManifestUsed()
@@ -239,7 +238,7 @@ func Test_TypeThumb( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -256,7 +255,7 @@ func Test_TypeThumb( t *testing.T ) {
 
 	typ := types_.PNG()
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.Typ(typ), logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.Typ(typ), logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	expect := `<link type="`+string(typ)+`" >`
@@ -274,7 +273,7 @@ func Test_Href( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -290,7 +289,7 @@ func Test_Href( t *testing.T ) {
 	cache.EXPECT().Range( gomock.Any() )
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
-	thumb,  _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb,  _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	href := `/path/thumbs/image.png`
@@ -310,7 +309,7 @@ func Test_SizeAttr( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -329,7 +328,7 @@ func Test_SizeAttr( t *testing.T ) {
 	size := 16
 
 	//
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logs, storage, conv)
 	thumb.
 		TestCacheSwap(cache).
 		SetSize(size).
@@ -340,7 +339,7 @@ func Test_SizeAttr( t *testing.T ) {
 	require.Equal(t, tag, `<link rel="apple-touch-icon" >`)
 
 	//
-	thumb, _ = thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb, _ = thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logs, storage, conv)
 	thumb.
 		TestCacheSwap(cache).
 		SetSize(size)
@@ -352,7 +351,7 @@ func Test_SizeAttr( t *testing.T ) {
 
 	//
 	attrCustom := `1000xYYYY`
-	thumb, _ = thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb, _ = thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logs, storage, conv)
 	thumb.
 		TestCacheSwap(cache).
 		SetSize(size)
@@ -369,7 +368,7 @@ func Test_OriginalCustomSet( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -383,7 +382,7 @@ func Test_OriginalCustomSet( t *testing.T ) {
 	cache := mock_thumb_.NewMockcache(ctrl)
 
 	//
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.
 		TestCacheSwap(cache). 
 		SetOriginal(obj)
@@ -392,7 +391,7 @@ func Test_OriginalCustomSet( t *testing.T ) {
 	require.Equal(t, obj, objExpect)
 
 	//
-	thumb, _ = thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ = thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.
 		TestCacheSwap(cache). 
 		SetOriginal(obj)
@@ -416,7 +415,7 @@ func Test_Read( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 	instanceData := []byte(`1234`)
@@ -435,7 +434,7 @@ func Test_Read( t *testing.T ) {
 	cache := mock_thumb_.NewMockcache(ctrl)
 
 	//
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	expectReader, err := thumb.Read()
@@ -452,7 +451,7 @@ func Test_Read_ExistError( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -468,11 +467,11 @@ func Test_Read_ExistError( t *testing.T ) {
 	cache := mock_thumb_.NewMockcache(ctrl)
 
 	//
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	_, err := thumb.Read()
-	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT10, errors.New(`error exist`)))
+	require.Equal(t, err, err_.Err(logs, thumb_.LogTP, thumb_.LogT10, errors.New(`error exist`)))
 
 }
 
@@ -481,7 +480,7 @@ func Test_Read_CreateOriginalIsNil( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -499,11 +498,11 @@ func Test_Read_CreateOriginalIsNil( t *testing.T ) {
 	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), 16).Return((error)(nil)).AnyTimes()
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	_, err := thumb.Read()
-	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT11, logger.Error(thumb_.LogTP, thumb_.LogT03)))
+	require.Equal(t, err, err_.Err(logs, thumb_.LogTP, thumb_.LogT11, err_.Err(logs, thumb_.LogTP, thumb_.LogT03)))
 
 }
 
@@ -513,7 +512,7 @@ func Test_Read_Create( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 	size := 16
@@ -534,7 +533,7 @@ func Test_Read_Create( t *testing.T ) {
 	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), size).Return((error)(nil))
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.TestCacheSwap(cache).SetOriginal(originalObj).SetSize(16)
 
 	_, err := thumb.Read()
@@ -547,7 +546,7 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 	size := 16
@@ -568,11 +567,11 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 	conv := mock_converter_.NewMockConverter(ctrl)
 	conv.EXPECT().Do(originalObj, thumbObj, false, types_.ICO(), size).Return( convErr )
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.TestCacheSwap(cache).SetOriginal(originalObj).SetSize(16)
 
 	_, err := thumb.Read()
-	require.Equal(t, err, logger.Error(thumb_.LogTP, thumb_.LogT11, logger.Error(thumb_.LogTP, thumb_.LogT01, convErr)))
+	require.Equal(t, err, err_.Err(logs, thumb_.LogTP, thumb_.LogT11, err_.Err(logs, thumb_.LogTP, thumb_.LogT01, convErr)))
 
 }
 
@@ -581,7 +580,7 @@ func Test_OriginalKeyGet( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -597,7 +596,7 @@ func Test_OriginalKeyGet( t *testing.T ) {
 	cache := mock_thumb_.NewMockcache(ctrl)
 	conv := mock_converter_.NewMockConverter(ctrl)
 
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.ICO, logs, storage, conv)
 	thumb.TestCacheSwap(cache)
 
 	expectKey := thumb.GetOriginalKey()
@@ -615,7 +614,7 @@ func Test_Cache( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
 
 	keyThumb := `123`
 
@@ -631,7 +630,7 @@ func Test_Cache( t *testing.T ) {
 	instanceTag := `<link test />`
 	var cache sync.Map
 	
-	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logger, storage, conv)
+	thumb, _ := thumb_.NewThumb(keyThumb, thumb_.TestTypEmpty, logs, storage, conv)
 	thumb.TestCacheSwap(&cache)
 
 	//

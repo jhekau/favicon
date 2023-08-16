@@ -12,15 +12,16 @@ import (
 	"testing"
 	"time"
 
-	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
+	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
 	converter_exec_anthonynsimon_ "github.com/jhekau/favicon/internal/service/img/converter/anthonynsimon"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
 	"github.com/pressly/goico"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 
@@ -69,21 +70,25 @@ func (s *storage) ModTime() time.Time {
 //
 func TestConvert_CreatePNG( t *testing.T ) {
 
-	// Data
-	logger := &logs_mock_.LoggerErrorf{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	original := &storage{l: logger, obj: &obj{} }
+	logs := mock_logger_.NewMockLogger(ctrl)
+	 
+
+	// Data
+	original := &storage{l: logs, obj: &obj{} }
 	original_size := 32
 
-	save := &storage{l: logger, obj: &obj{}}
+	save := &storage{l: logs, obj: &obj{}}
 	thumb_size := 16
 
 	errNil := (error)(nil)
 
-	r, err := image_test_data_.GetFileReader(image_test_data_.PNG_32x32, logger)
+	r, err := image_test_data_.GetFileReader(image_test_data_.PNG_32x32, logs)
 	require.Equal(t, err, errNil)
 	io.Copy(original.obj, r)
-	res := resolution_.Resolution{L: logger}
+	res := resolution_.Resolution{L: logs}
 		
 	// check original size
 	w, h, err := res.Get(original)
@@ -92,7 +97,7 @@ func TestConvert_CreatePNG( t *testing.T ) {
 	require.Equal(t, h, original_size)
 
 	// check convert
-	err = (&converter_exec_anthonynsimon_.Exec{logger}).Proc(original, save, thumb_size, types_.PNG())
+	err = (&converter_exec_anthonynsimon_.Exec{logs}).Proc(original, save, thumb_size, types_.PNG())
 	require.Equal(t, err, errNil, fmt.Sprintf(`err: %v, %v`, err, original.obj.Bytes()))
 
 	// check save thumb size
@@ -105,21 +110,25 @@ func TestConvert_CreatePNG( t *testing.T ) {
 
 func TestConvert_CreateICO( t *testing.T ) {
 
-	// Data
-	logger := &logs_mock_.LoggerErrorf{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	original := &storage{l: logger, obj: &obj{} }
+	logs := mock_logger_.NewMockLogger(ctrl)
+	 
+
+	// Data
+	original := &storage{l: logs, obj: &obj{} }
 	original_size := 32
 
-	save := &storage{l: logger, obj: &obj{}}
+	save := &storage{l: logs, obj: &obj{}}
 	thumb_size := 16
 
 	errNil := (error)(nil)
 
-	r, err := image_test_data_.GetFileReader(image_test_data_.PNG_32x32, logger)
+	r, err := image_test_data_.GetFileReader(image_test_data_.PNG_32x32, logs)
 	require.Equal(t, err, errNil)
 	io.Copy(original.obj, r)
-	res := resolution_.Resolution{L: logger}
+	res := resolution_.Resolution{L: logs}
 		
 	// check original size
 	w, h, err := res.Get(original)
@@ -128,7 +137,7 @@ func TestConvert_CreateICO( t *testing.T ) {
 	require.Equal(t, h, original_size)
 
 	// check convert
-	err = (&converter_exec_anthonynsimon_.Exec{logger}).Proc(original, save, thumb_size, types_.ICO())
+	err = (&converter_exec_anthonynsimon_.Exec{logs}).Proc(original, save, thumb_size, types_.ICO())
 	require.Equal(t, err, errNil, fmt.Sprintf(`err: %v, %v`, err, original.obj.Bytes()))
 
 	// check save thumb size
