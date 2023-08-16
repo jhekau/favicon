@@ -12,15 +12,19 @@ import (
 	"time"
 
 	config_ "github.com/jhekau/favicon/internal/config"
-	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
+	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 
 func TestCheckPreviewUnit( t *testing.T ) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
 	for _, ts := range []struct{
 		size int
@@ -37,8 +41,12 @@ func TestCheckPreviewUnit( t *testing.T ) {
 		{ config_.ImagePreviewResolutionMax, 	types_.PNG(), nil },
 		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), errors.New(`error`) },
 	}{
+		logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
+		 
+
 		err := checks_.Preview{
-			&logs_mock_.LoggerErrorf{},
+			logs,
 		}.Check( ts.typ, ts.size)
 
 		if (err == nil && ts.err != nil) || (err != nil && ts.err == nil) {
@@ -148,6 +156,9 @@ func (r resolution) Get(_ storage_.StorageOBJ) (w int, h int, err error){
 
 func TestCheckSourceUnit( t *testing.T ) {
 
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
 	// enable and disable cache ******************
 	type cache interface {
 		Status(_ storage_.StorageKey, _ bool, _ int) (bool, error)
@@ -256,9 +267,12 @@ func TestCheckSourceUnit( t *testing.T ) {
 			errors.New(`error`),
 		},
 	}{
+		logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
+		 
 
 		err := (&checks_.Source{
-			L: &logs_mock_.LoggerErrorf{},
+			L: logs,
 			Cache: dt.cache,
 			Resolution: resolution{ dt.file_resolution },
 		}).

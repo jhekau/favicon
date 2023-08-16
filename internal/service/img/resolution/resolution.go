@@ -10,6 +10,7 @@ import (
 
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 const (
@@ -29,13 +30,13 @@ func (r *Resolution) Get(obj storage_.StorageOBJ) ( w,h int, err error ) {
 
 	read, err := obj.Reader()
 	if err != nil {
-		return 0,0, r.L.Error(logRP, logR02, err)
+		return 0,0, err_.Err(r.L, logRP, logR02, err)
 	}
 	defer read.Close()
 
 	image, _, err := image.DecodeConfig(read)
     if err != nil {
-		return 0,0, r.L.Error(logRP, logR01, err)
+		return 0,0, err_.Err(r.L, logRP, logR01, err)
     }
     return image.Width, image.Height, nil
 }

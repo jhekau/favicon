@@ -11,12 +11,13 @@ import (
 	"testing"
 	"time"
 
-	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
+	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
 	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 type storageReader struct{
@@ -67,7 +68,13 @@ func (s *storage) ModTime() time.Time {
 
 func TestGetResolution(t *testing.T){
 	
-	logger := &logs_mock_.LoggerErrorf{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
+	 
+
 	errNil := (error)(nil)
 
 	for _, d := range []struct{
@@ -82,13 +89,13 @@ func TestGetResolution(t *testing.T){
 		{image_test_data_.JPG_10001_10001, 10001, 10001, nil},
 		{image_test_data_.SVG, 0, 0, errors.New(`image: unknown format`)},
 	}{
-		img := &storage{l: logger, obj: &obj{} }
+		img := &storage{l: logs, obj: &obj{} }
 
-		r, err := image_test_data_.GetFileReader(d.img, logger)
+		r, err := image_test_data_.GetFileReader(d.img, logs)
 		require.Equal(t, err, errNil)
 		io.Copy(img.obj, r)
 
-		w, h, err := (&resolution_.Resolution{logger}).Get(img)
+		w, h, err := (&resolution_.Resolution{logs}).Get(img)
 		
 		if (err == nil && d.err != nil) || (err != nil && d.err == nil) {
 			t.Fatalf(`TestGetResolution - error: '%v' data: %#v`, err, d)

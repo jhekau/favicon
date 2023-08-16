@@ -9,6 +9,7 @@ import (
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 const (
@@ -135,7 +136,7 @@ func Defaults(l logger_.Logger, s storage_.Storage, c converter_.Converter) ([]*
 	}{
 		tb, err := thumb_.NewThumb(d.urlPath, d.typ, l, s, c)
 		if err != nil {
-			return nil, l.Error(logP, logD1, err)
+			return nil, err_.Err(l, logP, logD1, err)
 		}
 		tb.SetSize(d.size)
 		tb.SetAttrRel(d.attrRel)

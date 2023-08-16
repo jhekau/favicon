@@ -8,9 +8,7 @@ import (
 	"io"
 	"testing"
 
-	// logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	// logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
+	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
 	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
 	mock_checks_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert/checks"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
@@ -28,29 +26,6 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-// conv Converter
-
-/*
-
-
-
-// Integration
-func (t *Thumb) OriginalFileSet( filepath string ) {
-	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
-	t.original = &original{
-		obj: file,
-	}
-}
-func (t *Thumb) OriginalFileSetSVG( filepath string ) {
-	file := (&files_.Files{L: t.l}).NewObject(types_.FilePath(filepath))
-	t.original = &original{
-		typSVG: true,
-		obj: file,
-	}
-}
-
-
-*/
 
 /*
 go test ./internal/service/thumb/ -v -short -count=1 -race -coverprofile="coverage.out" -coverpkg='./internal/service/thumb,./internal/service/convert' -run="Test_Inegration_ConverterOnly" ;`
@@ -63,7 +38,9 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
+	 
 
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()
@@ -95,7 +72,7 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 	checkSource.EXPECT().Check(originalOBJ, false, thumbSize).Return((error)(nil))
 
 	conv := &convert_.Converter{
-		L            : logger,
+		L            : logs,
 		Converters   : []converter_.ConverterTyp{ 
 			converterTyp,
 		},
@@ -104,7 +81,7 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 	}
 
 	//
-	thumb, err := thumb_.NewThumb(thumbKey, thumb_.Typ(thumbTyp), logger, storage, conv)
+	thumb, err := thumb_.NewThumb(thumbKey, thumb_.Typ(thumbTyp), logs, storage, conv)
 	require.Equal(t, err, (error)(nil))
 	require.NotNil(t, thumb)
 
@@ -127,7 +104,9 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
+	 
 
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()
@@ -152,13 +131,13 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 	converterTyp := mock_converter_.NewMockConverterTyp(ctrl)
 	converterTyp.EXPECT().Do(originalOBJ, thumbOBJ, thumbSize, thumbTyp).Return(true, (error)(nil))	
 
-	checkPreview := checks_.Preview{L: logger}
+	checkPreview := checks_.Preview{L: logs}
 
 	checkSource  := mock_convert_.NewMockCheckSource(ctrl)
 	checkSource.EXPECT().Check(originalOBJ, false, thumbSize).Return((error)(nil))
 
 	conv := &convert_.Converter{
-		L            : logger,
+		L            : logs,
 		Converters   : []converter_.ConverterTyp{ 
 			converterTyp,
 		},
@@ -167,7 +146,7 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 	}
 
 	//
-	thumb, err := thumb_.NewThumb(thumbKey, thumb_.Typ(thumbTyp), logger, storage, conv)
+	thumb, err := thumb_.NewThumb(thumbKey, thumb_.Typ(thumbTyp), logs, storage, conv)
 	require.Equal(t, err, (error)(nil))
 	require.NotNil(t, thumb)
 
@@ -196,8 +175,10 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
-
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
+	 
+	
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()
 	cache.EXPECT().Load(gomock.Any()).Return(nil, false).AnyTimes()
@@ -236,13 +217,13 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 	checkSource_MockResolution.EXPECT().Get(originalOBJ).Return(thumbSize, thumbSize, (error)(nil))
 
 	checkSource  := checks_.Source{
-		L : logger,
+		L : logs,
 		Cache : checkSource_MockCache,
 		Resolution : checkSource_MockResolution,
 	}
 
 	conv := &convert_.Converter{
-		L            : logger,
+		L            : logs,
 		Converters   : []converter_.ConverterTyp{ 
 			converterTyp,
 		},
@@ -251,7 +232,7 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 	}
 
 	//
-	thumb, err := thumb_.NewThumb(thumbKey, thumb_.Typ(thumbTyp), logger, storage, conv)
+	thumb, err := thumb_.NewThumb(thumbKey, thumb_.Typ(thumbTyp), logs, storage, conv)
 	require.Equal(t, err, (error)(nil))
 	require.NotNil(t, thumb)
 
@@ -273,7 +254,8 @@ func Test_Inegration_ConverterConverters( t *testing.T ) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()
@@ -313,23 +295,23 @@ func Test_Inegration_ConverterConverters( t *testing.T ) {
 	checkSource_MockResolution.EXPECT().Get(originalOBJ).Return(thumbSize, thumbSize, (error)(nil))
 
 	checkSource  := checks_.Source{
-		L : logger,
+		L : logs,
 		Cache : checkSource_MockCache,
 		Resolution : checkSource_MockResolution,
 	}
 
 	conv := &convert_.Converter{
-		L            : logger,
+		L            : logs,
 		Converters   : []converter_.ConverterTyp{ 
-			&converters_.ConverterPNG{L: logger, ConverterExec: converterExec},
-			&converters_.ConverterICO{L: logger, ConverterExec: converterExec},
+			&converters_.ConverterPNG{L: logs, ConverterExec: converterExec},
+			&converters_.ConverterICO{L: logs, ConverterExec: converterExec},
 		},
 		CheckPreview : checkPreview,
 		CheckSource  : &checkSource,
 	}
 
 	//
-	thumb, err := thumb_.NewThumb(thumbKey, thumb_.Typ(thumbTyp), logger, storage, conv)
+	thumb, err := thumb_.NewThumb(thumbKey, thumb_.Typ(thumbTyp), logs, storage, conv)
 	require.Equal(t, err, (error)(nil))
 	require.NotNil(t, thumb)
 

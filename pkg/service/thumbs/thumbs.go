@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	logger_default_ "github.com/jhekau/favicon/internal/core/logs/default"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
 	convert_ "github.com/jhekau/favicon/internal/service/convert"
 	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
@@ -26,6 +26,7 @@ import (
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 const (
@@ -48,7 +49,7 @@ var (
 
 // создание пустого набора превьюх для одного оригинального изображения
 func NewThumbs() *Thumbs {
-	logger := &logger_default_.Logger{}
+	logger := &logs_.Logger{}
 	return &Thumbs{
 		l: logger,
 		storage: files_.Files{L: logger},
@@ -81,7 +82,7 @@ func NewThumbs_DefaultsIcons() (*Thumbs, error) {
 
 	icons, err := defaults_.Defaults(t.l, t.storage, t.conv)
 	if err != nil {
-		return nil, t.l.Error(logTP, logT08, err)
+		return nil, err_.Err(t.l, logTP, logT08, err)
 	}
 
 	for _, tb := range icons {
@@ -130,7 +131,7 @@ func (t *Thumbs) ConvertSet( conv converter_.Converter ) {
 func (t *Thumbs) NewThumb(key string, typThumb thumb_.Typ) (*thumb_.Thumb, error) {
 	tb, err := thumb_.NewThumb(key, typThumb, t.l, t.storage, t.conv)
 	if err != nil {
-		return nil, t.l.Error(logTP, logT07, err)
+		return nil, err_.Err(t.l, logTP, logT07, err)
 	}
 	return tb, nil
 }
@@ -175,7 +176,7 @@ func (t *Thumbs) thumbFile(urlPath string) (content io.ReadSeekCloser, modtime t
 
 	content, err = thumb.Read()
 	if err != nil {
-		err = t.l.Error(logTP, logT04, err)
+		err = err_.Err(t.l, logTP, logT04, err)
 	}
 	return
 }

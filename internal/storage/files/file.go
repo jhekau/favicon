@@ -12,6 +12,7 @@ import (
 
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 const (
@@ -52,11 +53,11 @@ func (s *file) Reader() (io.ReadSeekCloser, error) {
 
 	filename, err := filepath.Abs(filepath.Join(folderIcons, s.key))
 	if err != nil {
-		return nil, s.l.Error(logP, logS01, err)
+		return nil, err_.Err(s.l, logP, logS01, err)
 	}
 	f, err := osOpen(filename)
 	if err != nil {
-		return nil, s.l.Error(logP, logS02, err)
+		return nil, err_.Err(s.l, logP, logS02, err)
 	}
 	return f, nil
 }
@@ -65,11 +66,11 @@ func (s *file) Writer() (io.WriteCloser, error){
 	
 	filename, err := filepath.Abs(filepath.Join(folderIcons, s.key))
 	if err != nil {
-		return nil, s.l.Error(logP, logS07, err)
+		return nil, err_.Err(s.l, logP, logS07, err)
 	}
 	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
-		return nil, s.l.Error(logP, logS05, err)
+		return nil, err_.Err(s.l, logP, logS05, err)
 	}
 	return f, nil
 }
@@ -84,10 +85,10 @@ func (s *file) IsExists() ( bool, error ) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		return false, s.l.Error(logP, logS03, err)
+		return false, err_.Err(s.l, logP, logS03, err)
 
 	} else if f.IsDir() {
-		return false, s.l.Error(logP, logS04)
+		return false, err_.Err(s.l, logP, logS04)
 	}
 
 	return true, nil
@@ -104,7 +105,7 @@ func (s *file) ModTime() time.Time {
 	}
 	st, err := osStat(filepath.Join(folderIcons, s.key))
 	if err != nil {
-		s.l.Error(logP, logS06, err)
+		err_.Err(s.l, logP, logS06, err)
 		return time.Time{}
 	}
 	

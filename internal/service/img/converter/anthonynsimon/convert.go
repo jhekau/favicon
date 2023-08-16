@@ -16,6 +16,7 @@ import (
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 const (
@@ -36,12 +37,12 @@ func (e *Exec) Proc(original, save storage_.StorageOBJ , size_px int, thumbTyp t
 
 	r, err := original.Reader()
 	if err != nil {
-		return e.L.Error(logC, logC01, err)
+		return err_.Err(e.L, logC, logC01, err)
 	}
 	
 	img, _, err := image.Decode(r)
 	if err != nil {
-		return e.L.Error(logC, logC02, err)
+		return err_.Err(e.L, logC, logC02, err)
 	}
 
 	encoder := imgio.PNGEncoder()
@@ -51,13 +52,13 @@ func (e *Exec) Proc(original, save storage_.StorageOBJ , size_px int, thumbTyp t
 
 	w, err := save.Writer()
 	if err != nil {
-		return e.L.Error(logC, logC03, err)
+		return err_.Err(e.L, logC, logC03, err)
 	}
 	defer w.Close()
 
 	err = encoder(w, transform.Resize(img, size_px, size_px, transform.Linear))
 	if err != nil {
-		return e.L.Error(logC, logC04, err)
+		return err_.Err(e.L, logC, logC04, err)
 	}
 
 	return nil

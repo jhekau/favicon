@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
+	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
 	image_test_data_ "github.com/jhekau/favicon/internal/core/test_data/image"
 	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
 	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
@@ -79,9 +79,12 @@ func TestConverterICOUnit(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
+	 
+
 	png16 := image_test_data_.PNG_16x16
 	errNil := (error)(nil)
-	logger := &logs_mock_.LoggerErrorf{}
 
 	for _, d := range []struct {
 		source          image_test_data_.Imgb64
@@ -98,7 +101,7 @@ func TestConverterICOUnit(t *testing.T) {
 		{png16, `1_preview.png`, 16, types_.ICO(), errors.New(`error`), false, errors.New(`error`)},
 	} {
 
-		orig, err := readTestImage(d.source, logger)
+		orig, err := readTestImage(d.source, logs)
 		require.Equal(t, err, errNil)
 
 		save := &storage{key: d.save_key}
@@ -107,7 +110,7 @@ func TestConverterICOUnit(t *testing.T) {
 		convExec.EXPECT().Proc(orig, save, d.size_px, d.typ).Return(d.converter_error).AnyTimes()
 
 		res, err := (&converters_.ConverterICO{
-			L:             &logs_mock_.LoggerErrorf{},
+			L: logs,
 			ConverterExec: convExec,
 		}).Do(orig, save, d.size_px, d.typ)
 
@@ -127,7 +130,10 @@ func TestConverterPNGUnit(t *testing.T) {
 
 	png16 := image_test_data_.PNG_16x16
 	errNil := (error)(nil)
-	logger := &logs_mock_.LoggerErrorf{}
+	
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
+	 
 
 	for _, d := range []struct {
 		source          image_test_data_.Imgb64
@@ -144,7 +150,7 @@ func TestConverterPNGUnit(t *testing.T) {
 		{png16, `1_preview.png`, 16, types_.PNG(), errors.New(`error`), false, errors.New(`error`)},
 	} {
 
-		orig, err := readTestImage(d.source, logger)
+		orig, err := readTestImage(d.source, logs)
 		require.Equal(t, err, errNil)
 
 		save := &storage{key: d.save_key}
@@ -153,7 +159,7 @@ func TestConverterPNGUnit(t *testing.T) {
 		convExec.EXPECT().Proc(orig, save, d.size_px, d.typ).Return(d.converter_error).AnyTimes()
 
 		res, err := (&converters_.ConverterPNG{
-			L:             &logs_mock_.LoggerErrorf{},
+			L: logs,
 			ConverterExec: convExec,
 		}).Do(orig, save, d.size_px, d.typ)
 

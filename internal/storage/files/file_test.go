@@ -13,8 +13,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 
-	logs_mock_ "github.com/jhekau/favicon/internal/core/logs/mock"
+	err_ "github.com/jhekau/favicon/internal/core/err"
+	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 )
 
@@ -39,7 +41,11 @@ func TestIsExists(t *testing.T) {
 		*files_.OsOpen = backupOsOpen
 	}()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	for _, d := range []struct {
 		osOpen        func(_ string) (*os.File, error)
@@ -55,7 +61,7 @@ func TestIsExists(t *testing.T) {
 		{ // true, nil, IsDir -> false, error				!если директория
 			func(_ string) (*os.File, error) { return nil, nil },
 			func(_ string) (fs.FileInfo, error) { return &file_info{true}, nil }, // exist, not error
-			false, logger.Error(files_.LogP, files_.LogS04),
+			false, err_.Err(logs, files_.LogP, files_.LogS04),
 		},
 		{ // false, error(os.ErrNotExist) -> false, nil	!если файла нет
 			func(_ string) (*os.File, error) { return nil, nil },
@@ -65,13 +71,13 @@ func TestIsExists(t *testing.T) {
 		{ // false, error(error) -> false, error
 			func(_ string) (*os.File, error) { return nil, nil },
 			func(_ string) (fs.FileInfo, error) { return &file_info{}, errors.New(`error`) }, // exist, error
-			false, logger.Error(files_.LogP, files_.LogS03, errors.New(`error`)),
+			false, err_.Err(logs, files_.LogP, files_.LogS03, errors.New(`error`)),
 		},
 	} {
 		*files_.OsStat = d.osStat
 		*files_.OsOpen = d.osOpen
 
-		obj, _ := (&files_.Files{L: logger}).NewObject(``)
+		obj, _ := (&files_.Files{L: logs}).NewObject(``)
 		isExist, err := obj.IsExists()
 
 		require.Equal(t, err, d.resultError, fmt.Sprintf(
@@ -91,7 +97,11 @@ func TestRead(t *testing.T) {
 		*files_.OsOpen = backupOsOpen
 	}()
 
-	logger := &logs_mock_.LoggerErrorf{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	for _, d := range []struct {
 		osOpen        func(_ string) (*os.File, error)
@@ -109,11 +119,11 @@ func TestRead(t *testing.T) {
 		{
 			func(_ string) (*os.File, error) { return nil, errors.New(`error`) },
 			nil,
-			logger.Error(files_.LogP, files_.LogS02, errors.New(`error`))},
+			err_.Err(logs, files_.LogP, files_.LogS02, errors.New(`error`))},
 	} {
 		*files_.OsOpen = d.osOpen
 
-		obj, _ := (&files_.Files{L: logger}).NewObject(``)
+		obj, _ := (&files_.Files{L: logs}).NewObject(``)
 		f, err := obj.Reader()
 
 		require.Equal(t, err, d.resultError,
