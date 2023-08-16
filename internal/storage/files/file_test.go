@@ -45,6 +45,7 @@ func TestIsExists(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	for _, d := range []struct {
 		osOpen        func(_ string) (*os.File, error)
@@ -100,6 +101,7 @@ func TestRead(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	for _, d := range []struct {
 		osOpen        func(_ string) (*os.File, error)

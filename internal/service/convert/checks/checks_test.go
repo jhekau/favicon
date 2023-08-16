@@ -42,6 +42,7 @@ func TestCheckPreviewUnit( t *testing.T ) {
 		{ config_.ImagePreviewResolutionMax+1, 	types_.PNG(), errors.New(`error`) },
 	}{
 		logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 		 
 
 		err := checks_.Preview{
@@ -267,6 +268,7 @@ func TestCheckSourceUnit( t *testing.T ) {
 		},
 	}{
 		logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 		 
 
 		err := (&checks_.Source{

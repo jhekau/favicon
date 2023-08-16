@@ -74,6 +74,7 @@ func TestConvert_CreatePNG( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	// Data
@@ -114,6 +115,7 @@ func TestConvert_CreateICO( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	// Data

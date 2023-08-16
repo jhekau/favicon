@@ -39,6 +39,7 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -104,6 +105,7 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -174,6 +176,7 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 	
 	cache := mock_thumb_.NewMockcache(ctrl)
@@ -252,6 +255,7 @@ func Test_Inegration_ConverterConverters( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()

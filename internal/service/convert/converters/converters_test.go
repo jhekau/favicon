@@ -80,6 +80,7 @@ func TestConverterICOUnit(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	png16 := image_test_data_.PNG_16x16
@@ -131,6 +132,7 @@ func TestConverterPNGUnit(t *testing.T) {
 	errNil := (error)(nil)
 	
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	for _, d := range []struct {

@@ -72,6 +72,7 @@ func TestUnit_Convert_JPGxICO(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	// Data
 	original := &storage{
@@ -124,6 +125,7 @@ func TestUnit_Convert_CoverterError(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 	// Data
 	original := &storage{
@@ -177,6 +179,7 @@ func TestUnit_Convert_CoverterMulti(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	// Data
@@ -233,6 +236,7 @@ func TestUnit_Convert_NoConverters(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	// Data
@@ -281,6 +285,7 @@ func TestUnit_Convert_SizePX0(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	// Data
@@ -328,6 +333,7 @@ func TestUnit_Convert_PreviewCheckError(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	// Data
@@ -379,7 +385,7 @@ func TestUnit_Convert_OriginalCheckError(t *testing.T) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
-	 
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	// Data
 	original := &storage{

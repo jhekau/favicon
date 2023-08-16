@@ -35,6 +35,7 @@ func Test_NewThumb( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -55,6 +56,7 @@ func Test_NewThumbError( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -76,6 +78,7 @@ func Test_Size( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -107,6 +110,7 @@ func Test_SetTagRel( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -140,6 +144,7 @@ func Test_HTMLComment( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -176,6 +181,7 @@ func Test_HTMLCommentEmptyTag( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -209,6 +215,7 @@ func Test_ManifestUsed( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -239,6 +246,7 @@ func Test_TypeThumb( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -274,6 +282,7 @@ func Test_Href( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -310,6 +319,7 @@ func Test_SizeAttr( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -369,6 +379,7 @@ func Test_OriginalCustomSet( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -416,6 +427,7 @@ func Test_Read( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 	instanceData := []byte(`1234`)
@@ -452,6 +464,7 @@ func Test_Read_ExistError( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -481,6 +494,7 @@ func Test_Read_CreateOriginalIsNil( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -513,6 +527,7 @@ func Test_Read_Create( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 	size := 16
@@ -547,6 +562,7 @@ func Test_Read_CreateConverterError( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 	size := 16
@@ -581,6 +597,7 @@ func Test_OriginalKeyGet( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 
@@ -615,6 +632,7 @@ func Test_Cache( t *testing.T ) {
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 
 	keyThumb := `123`
 

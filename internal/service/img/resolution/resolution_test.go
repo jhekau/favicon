@@ -72,6 +72,7 @@ func TestGetResolution(t *testing.T){
 	defer ctrl.Finish()
 
 	logs := mock_logger_.NewMockLogger(ctrl)
+	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
 	 
 
 	errNil := (error)(nil)
