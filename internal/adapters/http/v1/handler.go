@@ -11,9 +11,10 @@ import (
 	"github.com/jhekau/gdown"
 
 	config_ "github.com/jhekau/favicon/internal/adapters/http/v1/config"
-	logger_default_ "github.com/jhekau/favicon/internal/core/logs/default"
+	logs_ "github.com/jhekau/favicon/internal/core/logs"
 	handler_ "github.com/jhekau/favicon/pkg/core/http/v1/handler"
 	thumbs_ "github.com/jhekau/favicon/pkg/service/thumbs"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 const (
@@ -31,7 +32,7 @@ const (
 
 func Run() bool {
 
-	log := &logger_default_.Logger{}
+	log := &logs_.Logger{}
 
 	workOption := flag.String(`adapter`, ``, `worker option`)
 	yamlFile := flag.String("conf", ``, `config yaml file`)
@@ -45,7 +46,7 @@ func Run() bool {
 	//
 	conf, err := config_.Parse(*yamlFile)
 	if err != nil {
-		panic(log.Error(logP, logR1, err))
+		panic(err_.Err(log, logP, logR1, err))
 	}
 	if conf.Port == `` {
 		conf.Port = appPort
@@ -54,7 +55,7 @@ func Run() bool {
 	//
 	icons, err := thumbs_.NewThumbs_DefaultsIcons()
 	if err != nil {
-		panic(log.Error(logP, logR1, err))
+		panic(err_.Err(log, logP, logR2, err))
 	}
 	icons.LoggerSet(log)
 	// manifest

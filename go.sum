@@ -17,6 +17,8 @@ github.com/jhekau/gdown v0.0.2-0.20230815080456-99f77bdc92f6 h1:I0XeIsoUdhdfxvP8
 github.com/jhekau/gdown v0.0.2-0.20230815080456-99f77bdc92f6/go.mod h1:B8gp2TrkkY8IOFBCNaVsunp+9X9IJyV5YQNNPQMaB6g=
 github.com/jhekau/gdown v0.0.2-0.20230815080823-673ca0f8159f h1:d/XRbt+N+KkGZLvBO1jiLwCPr6B+LQs7haPiLvXErnU=
 github.com/jhekau/gdown v0.0.2-0.20230815080823-673ca0f8159f/go.mod h1:B8gp2TrkkY8IOFBCNaVsunp+9X9IJyV5YQNNPQMaB6g=
+github.com/jhekau/gdown v0.0.2-0.20230816105843-fe0df728c578 h1:PZvCUKylNXGz3rcxqPasLZVBveOYWqxSM/PTE7dr77g=
+github.com/jhekau/gdown v0.0.2-0.20230816105843-fe0df728c578/go.mod h1:B8gp2TrkkY8IOFBCNaVsunp+9X9IJyV5YQNNPQMaB6g=
 github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 h1:YLvr1eE6cdCqjOe972w/cYF+FjW34v27+9Vo5106B4M=
 github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25/go.mod h1:kLgvv7o6UM+0QSf0QjAse3wReFDsb9qbZJdfexWlrQw=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=

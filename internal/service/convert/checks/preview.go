@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	config_ "github.com/jhekau/favicon/internal/config"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 )
@@ -34,7 +35,8 @@ func (p Preview) Check(typ types_.FileType, size_px int) error {
 
 	if 	size_px < config_.ImagePreviewResolutionMin || 
 		size_px > config_.ImagePreviewResolutionMax {
-		return p.L.Error(
+		return err_.Err(
+			p.L,
 			logPP,
 			fmt.Sprintf(
 				`Minimum Resolution: %d, Maximum Resolution %d, Current Value: %d`,

@@ -9,6 +9,7 @@ import (
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 const (
@@ -20,20 +21,6 @@ const (
 	logF05 = `F05: the resolution is 0`
 	logF06 = `F06: there is no suitable converter for image modification`
 )
-
-// хранимые объекты
-// type StorageOBJ interface{
-// 	IsExists() ( bool, error )
-// 	Key() storage_.StorageKey
-// 	Reader() (io.ReadCloser, error)
-// 	Writer() (io.WriteCloser, error)
-// }
-
-
-// конвертер для конкретного типа
-// type ConverterT interface{
-// 	Do(source, save StorageOBJ, size_px int, typ types_.FileType) (complete bool, err error)
-// }
 
 // проверка валидности запрашиваемой превьюхи
 type CheckPreview interface {
@@ -67,27 +54,27 @@ func (c *Converter) Do(
 ){
 
 	if size_px <= 0 {
-		return c.L.Error(logFP, logF05)
+		return err_.Err(c.L, logFP, logF05)
 	}
 
 	err = c.CheckPreview.Check(typThumb, size_px)
 	if err != nil {
-		return c.L.Error(logFP, logF02, err)
+		return err_.Err(c.L, logFP, logF02, err)
 	}
 
 	err = c.CheckSource.Check(source, originalSVG, size_px)
 	if err != nil {
-		return c.L.Error(logFP, logF04, err)
+		return err_.Err(c.L, logFP, logF04, err)
 	}
 
 	for _, fn := range c.Converters {
 		if ok, err := fn.Do(source, save, size_px, typThumb); err != nil {
-			return c.L.Error(logFP, logF03, err)
+			return err_.Err(c.L, logFP, logF03, err)
 		} else if ok {
 			return nil
 		}
 	}
-	return c.L.Error(logFP, logF06)
+	return err_.Err(c.L, logFP, logF06)
 }
 
 

@@ -10,6 +10,7 @@ import (
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 //
@@ -31,7 +32,7 @@ func (t *ConverterICO) Do(source, save storage_.StorageOBJ, size_px int, typ typ
 		return false, nil
 	}
     if err := t.ConverterExec.Proc(source, save, size_px, typ); err != nil {
-		return false, t.L.Error( logFI, logFI01, err )
+		return false, err_.Err( t.L, logFI, logFI01, err )
 	}
 	return true, nil
 }

@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	config_ "github.com/jhekau/favicon/internal/config"
+	err_ "github.com/jhekau/favicon/internal/core/err"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )
@@ -50,27 +51,27 @@ func (c *Source) Check( original storage_.StorageOBJ, originalSVG bool, thumb_si
 		if err == nil {
 			return nil
 		}
-		return c.L.Error(logCP, logC01, err)
+		return err_.Err(c.L, logCP, logC01, err)
 	}
 
 	exist, err := original.IsExists()
 	if err != nil {
-		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Error(logCP, logC02, err))
+		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC02, err))
 	}
 	if !exist {
-		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Error(logCP, logC03, err))
+		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC03, err))
 	}
 
 	if !originalSVG {
 
 		source_width, source_height, err := c.Resolution.Get(original)
 		if err != nil {
-			return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, c.L.Error(logCP, logC04, err))
+			return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC04, err))
 		}
 
 		if source_height < thumb_size || source_width < thumb_size {
 			return c.Cache.SetErr(
-				original.Key(), originalSVG, thumb_size, c.L.Error(logCP, 
+				original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, 
 					fmt.Sprintf(`Source: %vx%v, Preview: %v; %s`, source_width, source_height, thumb_size, logC05),
 					err),
 				)
@@ -82,7 +83,7 @@ func (c *Source) Check( original storage_.StorageOBJ, originalSVG bool, thumb_si
 			source_width > config_.ImageSourceResolutionMax {
 
 				return c.Cache.SetErr(
-					original.Key(), originalSVG, thumb_size, c.L.Error(logCP, 
+					original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, 
 						fmt.Sprintf(`Min Resolution: %v, Max Resolution: %v, Current Resolution: %vx%v`,
 						config_.ImageSourceResolutionMin,
 						config_.ImageSourceResolutionMax,

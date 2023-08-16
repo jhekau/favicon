@@ -7,7 +7,7 @@ package logger
 import()
 
 type Logger interface {
-	Info(path string, messages ...interface{}) error
-	Alert(path string, messages ...interface{}) error
-	Error(path string, messages ...interface{}) error
+	Info(path string, arg ...any)
+	Warn(path string, arg ...any)
+	Error(path string, arg ...any)
 }
