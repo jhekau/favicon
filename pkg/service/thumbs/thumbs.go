@@ -72,6 +72,7 @@ func NewThumbs() *Thumbs {
 				},
 			},
 		},
+		thumbs: make(map[typ_.URLPath]*thumb_.Thumb),
 	}
 }
 
