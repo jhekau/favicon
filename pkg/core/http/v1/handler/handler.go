@@ -18,7 +18,7 @@ const (
 )
 
 type Content interface {
-	File(urlPath string) (content io.ReadSeekCloser, modtime time.Time, name string, exists bool, err error)
+	ServeFile(urlPath string) (content io.ReadSeekCloser, modtime time.Time, name string, exists bool, err error)
 }
 
 type Handler struct {
@@ -33,7 +33,7 @@ func (h *Handler) Handle(c ...Content) http.HandlerFunc {
 			return
 		}
 		for _, c := range c {
-			content, modtime, name, exists, err := c.File(r.URL.Path)
+			content, modtime, name, exists, err := c.ServeFile(r.URL.Path)
 			if err != nil {
 				h.L.Error(logP, logH1, err)
 				w.WriteHeader(http.StatusInternalServerError)

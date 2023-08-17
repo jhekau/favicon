@@ -141,10 +141,16 @@ func (t *Thumbs) AppendThumb(tb *thumb_.Thumb) *Thumbs {
 	return t.append(tb)
 }
 
+func (t *Thumbs) SetOriginal(obj storage_.StorageOBJ) {
+	t.original = &original{obj, false}
+}
 
+func (t *Thumbs) SetOriginalSVG(obj storage_.StorageOBJ) {
+	t.original = &original{obj, true}
+}
 
 // получение конкретной превьюхи для отправки пользователю
-func (t *Thumbs) File(urlPath string) (content io.ReadSeekCloser, modtime time.Time, name string, exists bool, err error) {
+func (t *Thumbs) ServeFile(urlPath string) (content io.ReadSeekCloser, modtime time.Time, name string, exists bool, err error) {
 	return t.thumbFile(urlPath)
 }
 
