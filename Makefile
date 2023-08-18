@@ -3,7 +3,8 @@ ifndef $(GOPATH)
     export GOPATH
 endif
 
-APP_NAME?=afav
+APP_NAME?=autofav
+APP_PATH?=cmd/http/v1
 
 
 # *****
@@ -20,14 +21,14 @@ endif
 
 
 
-clean_httpv1:
-	rm -f ${APP_NAME}_httpv1
+clean:
+	rm -f ${APP_NAME}
 
-build_httpv1: clean_httpv1
-	go build -o ${APP_NAME}_httpv1
+build_httpv1: clean
+	go build -o ${APP_NAME} ./cmd/http/v1
 
 run_httpv1: build_httpv1
-	./${APP_NAME}_httpv1 -adapter="httpv1" -conf="conf_httpv1.yaml" -img="image.png" -svg="image.svg" 
+	./${APP_NAME} -conf="conf.yaml" -img="image.png" -svg="image.svg" 
 
 
 .PHONY: cover

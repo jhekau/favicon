@@ -7,8 +7,5 @@ package main
 import adapter_http_v1 "github.com/jhekau/favicon/internal/adapters/http/v1"
 
 func main(){
-
-	switch {
-	case adapter_http_v1.Run(): return
-	}
+	adapter_http_v1.Run()
 }

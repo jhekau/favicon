@@ -25,7 +25,7 @@ const (
 )
 
 const (
-	logP = `github.com/jhekau/favicon/internal/adapters/http/v1/handler.go`
+	logP = `github.com/jhekau/favicon/internal/adapters/http/v1/run.go`
 
 	logR1 = `R1: read yaml config`
 	logR2 = `R2: create defaults icons`
@@ -36,20 +36,14 @@ const (
 	logR7 = `R7: set object storage image`
 )
 
-func Run() bool {
+func Run() {
 
 	log := &logs_.Logger{}
 
-	workOption := flag.String(`adapter`, ``, `worker option`)
 	yamlFile := flag.String("conf", ``, `config yaml file`)
 	img := flag.String("img", ``, `original image`)
 	svg := flag.String("svg", ``, `original image`)
 	flag.Parse()
-
-	//
-	if *workOption != workOpt {
-		return false
-	}
 
 	//
 	conf, err := config_.Parse(*yamlFile)
@@ -110,7 +104,5 @@ func Run() bool {
     if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
         panic(err)
     }
-
-	return true
 }
 
