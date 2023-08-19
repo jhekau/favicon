@@ -2,4 +2,6 @@
 .vscode
 coverage.out
 *.jpg
+*.ico
+*.png
 autofav
