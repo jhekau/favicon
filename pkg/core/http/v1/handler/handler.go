@@ -37,6 +37,7 @@ func (h *Handler) Handle(c ...Content) http.HandlerFunc {
 			if err != nil {
 				h.L.Error(logP, logH1, err)
 				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 			if exists {
 				http.ServeContent(w, r, name, modtime, content)

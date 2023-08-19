@@ -93,8 +93,8 @@ func Run() {
 	}
 	// manifest
 
-	handler := (&handler_.Handler{}).Handle(icons)
-
+	handler := (&handler_.Handler{L: log}).Handle(icons)
+	
 	// graceful shutdown
 	server, s := gdown.HTTPNewServerWithHandler(handler)
 	server.Addr = conf.Port 
