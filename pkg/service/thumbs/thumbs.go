@@ -39,6 +39,7 @@ const (
 	logT06 = `T06: error read original`
 	logT07 = `T07: get new thumb`
 	logT08 = `T08: get list defaults`
+	logT09 = `T09: original empty`
 )
 
 var (
@@ -52,7 +53,7 @@ func NewThumbs() *Thumbs {
 	logger := &logs_.Logger{}
 	return &Thumbs{
 		l: logger,
-		storage: files_.Files{L: logger},
+		storage: files_.Storage{L: logger, Dir: files_.DirIconsDefault},
 		conv: &convert_.Converter{
 			L: logger,
 			Converters: []converter_.ConverterTyp{
@@ -178,13 +179,25 @@ func (t *Thumbs) thumbFile(urlPath string) (content io.ReadSeekCloser, modtime t
 	if !exists {
 		return
 	}
-	modtime = thumb.ModTime()
-	_, name = filepath.Split(urlPath)
+
+	if thumb.GetOriginalKey() == `` {
+		if t.original == nil {
+			err = err_.Err(t.l, logTP, logT09)
+			return
+		}
+		switch t.original.svg{
+		case false: thumb.SetOriginal(t.original.image)
+		case true: thumb.SetOriginalSVG(t.original.image)
+		}
+	}
 
 	content, err = thumb.Read()
 	if err != nil {
 		err = err_.Err(t.l, logTP, logT04, err)
 	}
+	modtime = thumb.ModTime()
+	name = filepath.Base(urlPath)
+
 	return
 }
 

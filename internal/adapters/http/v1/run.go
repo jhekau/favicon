@@ -78,14 +78,14 @@ func Run() {
 	}
 	icons.LoggerSet(log)
 	if imgF != `` {
-		img, err := files.Files{L:log}.NewObject(imgF)
+		img, err := files.Storage{L:log}.NewObject(imgF)
 		if err != nil {
 			panic(err_.Err(log, logP, logR6, err))
 		}
 		icons.SetOriginal(img)
 	}
 	if svgF != `` {
-		img, err := files.Files{L:log}.NewObject(svgF)
+		img, err := files.Storage{L:log}.NewObject(svgF)
 		if err != nil {
 			panic(err_.Err(log, logP, logR7, err))
 		}

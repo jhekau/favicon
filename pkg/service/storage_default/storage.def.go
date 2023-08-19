@@ -10,5 +10,5 @@ import (
 
 // Для определения директории, в которой будут храниться нарезанные иконки
 func SetFolderIcons(f string) {
-	files_.SetFolderIcons(f)
+	files_.DirIconsDefault = f
 }

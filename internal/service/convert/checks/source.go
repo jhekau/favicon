@@ -59,7 +59,7 @@ func (c *Source) Check( original storage_.StorageOBJ, originalSVG bool, thumb_si
 		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC02, err))
 	}
 	if !exist {
-		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC03, err))
+		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC03))
 	}
 
 	if !originalSVG {

@@ -24,6 +24,7 @@ const (
 	logS05 = `S05: failed open file`
 	logS06 = `S06: os stat source image`
 	logS07 = `S07: can't get path`
+	logS08 = `S08: can't create dir`
 )
 
 // for test 
@@ -32,30 +33,26 @@ var (
 	osStat = os.Stat
 )
 
-var folderIcons = `icons` // default
+var DirIconsDefault = `icons` // default
 
-func SetFolderIcons(f string) {
-	folderIcons = f
-}
+// func SetFolderIcons(f string) {
+// 	folderIcons = f
+// }
 
 // storage object
 type file struct{
 	l logger_.Logger
 	key string
-}
-
-// storage
-type Files struct{
-	L logger_.Logger
+	dir string
 }
 
 func (s *file) Reader() (io.ReadSeekCloser, error) {
 
-	filename, err := filepath.Abs(filepath.Join(folderIcons, s.key))
+	fpath, err := filepath.Abs(filepath.Join(s.dir, s.key))
 	if err != nil {
 		return nil, err_.Err(s.l, logP, logS01, err)
 	}
-	f, err := osOpen(filename)
+	f, err := osOpen(fpath)
 	if err != nil {
 		return nil, err_.Err(s.l, logP, logS02, err)
 	}
@@ -64,11 +61,17 @@ func (s *file) Reader() (io.ReadSeekCloser, error) {
 
 func (s *file) Writer() (io.WriteCloser, error){
 	
-	filename, err := filepath.Abs(filepath.Join(folderIcons, s.key))
+	fpath, err := filepath.Abs(filepath.Join(s.dir, s.key))
 	if err != nil {
 		return nil, err_.Err(s.l, logP, logS07, err)
 	}
-	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC, 0777)
+	
+	err = os.MkdirAll(filepath.Dir(fpath), 0775)
+	if err != nil {
+		return nil, err_.Err(s.l, logP, logS08, err)
+	}
+	
+	f, err := os.OpenFile(fpath, os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		return nil, err_.Err(s.l, logP, logS05, err)
 	}
@@ -81,7 +84,7 @@ func (s *file) IsExists() ( bool, error ) {
 		return false, nil
 	}
 	
-	if f, err := osStat( filepath.Join(folderIcons, s.key) ); err != nil {
+	if f, err := osStat( filepath.Join(s.dir, s.key) ); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
@@ -103,7 +106,7 @@ func (s *file) ModTime() time.Time {
 	if s.key == `` {
 		return time.Time{}
 	}
-	st, err := osStat(filepath.Join(folderIcons, s.key))
+	st, err := osStat(filepath.Join(s.dir, s.key))
 	if err != nil {
 		err_.Err(s.l, logP, logS06, err)
 		return time.Time{}
@@ -115,11 +118,19 @@ func (s *file) ModTime() time.Time {
 // TODO ?
 // func (s *File) Delete()....
 
+
+// storage
+type Storage struct{
+	Dir string
+	L logger_.Logger
+}
+
 // получаем интерфейсы на объект в storage
-func (fl Files) NewObject( key any ) (storage_.StorageOBJ, error) {
+func (s Storage) NewObject( key any ) (storage_.StorageOBJ, error) {
 	return &file{
-		l: fl.L,
+		l: s.L,
 		key: key.(string),
+		dir: s.Dir,
 	}, nil
 }
 
