@@ -24,10 +24,10 @@ endif
 clean:
 	rm -f ${APP_NAME}
 
-build_httpv1: clean
+build_http_v1: clean
 	go build -o ${APP_NAME} ./cmd/http/v1
 
-run_httpv1: build_httpv1
+run_http_v1: build_httpv1
 	./${APP_NAME} -conf="conf.yaml" -img="image.png" -svg="image.svg" 
 
 
