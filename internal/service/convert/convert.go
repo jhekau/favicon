@@ -5,8 +5,6 @@ package convert
  * 1 August 2023
  */
 import (
-	"fmt"
-
 	err_ "github.com/jhekau/favicon/internal/core/err"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
@@ -71,7 +69,6 @@ func (c *Converter) Do(
 
 	for _, fn := range c.Converters {
 		if ok, err := fn.Do(source, save, size_px, typThumb); err != nil {
-fmt.Println(` !!!! DEBUG !!!!! `, save.Key(), logFP)
 			return err_.Err(c.L, logFP, logF03, err)
 		} else if ok {
 			return nil

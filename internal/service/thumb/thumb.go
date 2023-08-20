@@ -5,7 +5,6 @@ package thumb
  * 10 March 2023
  */
 import (
-	"fmt"
 	"html"
 	"io"
 	"time"
@@ -246,7 +245,6 @@ func (t *Thumb) thumb_create() error {
 	}
 
 	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.mimetype, int(t.sizePX))
-fmt.Println(` +++++ DEBUG +++++ `, t.thumb.Key(), logTP )
 	if err != nil {
 		return err_.Err(t.l, logTP, logT01, err)
 	}
@@ -268,7 +266,7 @@ func (t *Thumb) read() (io.ReadSeekCloser, error) {
 	t.mu.RLock()
 	thumb := t.thumb
 	t.mu.RUnlock()
-fmt.Println(` +++++ DEBUG +++++ [00: READ] `, logTP )	
+
 	exist, err := thumb.IsExists()
 	if err != nil {
 		return nil, err_.Err(t.l, logTP, logT10, err)
@@ -276,7 +274,7 @@ fmt.Println(` +++++ DEBUG +++++ [00: READ] `, logTP )
 	if exist {
 		return thumb.Reader()
 	}
-fmt.Println(` +++++ DEBUG +++++ [01: READ] `, logTP )	
+		
 	err = t.thumb_create()
 	if err != nil {
 		return nil, err_.Err(t.l, logTP, logT11, err)

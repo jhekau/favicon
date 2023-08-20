@@ -60,24 +60,9 @@ func (e *Exec) Proc(original, save storage_.StorageOBJ , size_px int, thumbTyp t
 	}
 	defer w.Close()
 
-	// s := stor{ obj: &bytes.Buffer{} }
-	// w := s.Writer()
-
 	err = encoder(w, transform.Resize(img, size_px, size_px, transform.Linear))
 	if err != nil {
 		return err_.Err(e.L, logC, logC04, err)
 	}
-
-// fmt.Println(` >>>> DEBUG >>>> `, logC, fmt.Sprint( io.ReadAll(s.obj) ))
-
 	return nil
 }
-
-
-// type stor struct {
-// 	obj *bytes.Buffer
-// }
-
-// func (s *stor) Writer() io.Writer {
-// 	return s.obj
-// }

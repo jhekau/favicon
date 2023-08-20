@@ -35,10 +35,6 @@ var (
 
 var DirIconsDefault = `icons` // default
 
-// func SetFolderIcons(f string) {
-// 	folderIcons = f
-// }
-
 // storage object
 type file struct{
 	l logger_.Logger
@@ -127,57 +123,9 @@ type Storage struct{
 
 // получаем интерфейсы на объект в storage
 func (s Storage) NewObject( key any ) (storage_.StorageOBJ, error) {
-	// fmt.Println(` >>>> DEBUG >>>> [Open object] `, logP, key)
-	// if key.(string) != `/mnt/c/go/src/github.com/jhekau/favicon/img.jpg` {
-	// 	return &stor{
-	// 		key: key.(string),
-	// 		obj: &obj{},
-	// 	}, nil
-	// }
 	return &file{
 		l: s.L,
 		key: key.(string),
 		dir: s.Dir,
 	}, nil
 }
-
-/*
-
-type obj struct{
-	bytes.Buffer
-}
-func (o *obj) Close() error {
-	fmt.Println(` >>>> DEBUG >>>> `, logP, fmt.Sprint( io.ReadAll(o) ))
-	return nil
-}
-type reader struct {
-	io.ReadCloser
-}
-func (r *reader) Seek(offset int64, whence int) (int64, error){
-	return 0,nil
-}
-
-type stor struct {
-	key string
-	obj *obj
-}
-
-func (s *stor) Writer() (io.WriteCloser, error) {
-	fmt.Println(` >>>> DEBUG >>>> [Open Writer] `, logP,)
-	return s.obj, nil
-}
-// func (s *stor) print() {
-	
-// }
-func (s *stor) Reader() (io.ReadSeekCloser, error) { 
-	return &reader{
-		io.NopCloser(bytes.NewBuffer(make([]byte, 1024))),
-	}, nil 
-}
-func (s *stor) Key() storage_.StorageKey {
-	return storage_.StorageKey(s.key)
-}
-func (s *stor) IsExists() (bool, error) { return s.key == `/mnt/c/go/src/github.com/jhekau/favicon/img.jpg` , nil }
-func (s *stor) ModTime() time.Time { return time.Time{} }
-
-*/
