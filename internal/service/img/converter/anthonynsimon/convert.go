@@ -13,10 +13,11 @@ import (
 	ico_ "github.com/Kodeworks/golang-image-ico"
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	err_ "github.com/jhekau/favicon/internal/core/err"
+	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
+	"github.com/pressly/goico"
 )
 
 const (
@@ -28,6 +29,9 @@ const (
 )
 
 
+func init() {
+	image.RegisterFormat("ico", "\x00\x00\x01\x00", ico.Decode, ico.DecodeConfig)
+}
 
 type Exec struct{
 	L logger_.Logger
@@ -56,10 +60,24 @@ func (e *Exec) Proc(original, save storage_.StorageOBJ , size_px int, thumbTyp t
 	}
 	defer w.Close()
 
+	// s := stor{ obj: &bytes.Buffer{} }
+	// w := s.Writer()
+
 	err = encoder(w, transform.Resize(img, size_px, size_px, transform.Linear))
 	if err != nil {
 		return err_.Err(e.L, logC, logC04, err)
 	}
 
+// fmt.Println(` >>>> DEBUG >>>> `, logC, fmt.Sprint( io.ReadAll(s.obj) ))
+
 	return nil
 }
+
+
+// type stor struct {
+// 	obj *bytes.Buffer
+// }
+
+// func (s *stor) Writer() io.Writer {
+// 	return s.obj
+// }

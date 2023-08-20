@@ -58,10 +58,10 @@ func NewThumbs() *Thumbs {
 			L: logger,
 			Converters: []converter_.ConverterTyp{
 				&converters_.ConverterICO{
-					ConverterExec: &converter_exec_anthonynsimon_.Exec{},
+					ConverterExec: &converter_exec_anthonynsimon_.Exec{L: logger},
 				},
 				&converters_.ConverterPNG{
-					ConverterExec: &converter_exec_anthonynsimon_.Exec{},
+					ConverterExec: &converter_exec_anthonynsimon_.Exec{L: logger},
 				},
 			},
 			CheckPreview: checks_.Preview{},

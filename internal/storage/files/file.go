@@ -5,18 +5,20 @@ package files
  * 10 March 2023
  */
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"time"
 
+	err_ "github.com/jhekau/favicon/internal/core/err"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
-	err_ "github.com/jhekau/favicon/internal/core/err"
 )
 
 const (
-	logP = `/internal/storage/files/stat.go`
+	logP = `/internal/storage/files/file.go`
 	logS01 = `S01: can't get path`
 	logS02 = `S02: failed open file`
 	logS03 = `S03: os stat source image`
@@ -127,10 +129,54 @@ type Storage struct{
 
 // получаем интерфейсы на объект в storage
 func (s Storage) NewObject( key any ) (storage_.StorageOBJ, error) {
+	fmt.Println(` >>>> DEBUG >>>> [Open object] `, logP, key)
+	return &stor{
+		key: key.(string),
+		obj: &obj{},
+	}, nil
 	return &file{
 		l: s.L,
 		key: key.(string),
 		dir: s.Dir,
 	}, nil
 }
+
+
+
+type obj struct{
+	bytes.Buffer
+}
+func (o *obj) Close() error {
+	fmt.Println(` >>>> DEBUG >>>> `, logP, fmt.Sprint( io.ReadAll(o) ))
+	return nil
+}
+type reader struct {
+	io.ReadCloser
+}
+func (r *reader) Seek(offset int64, whence int) (int64, error){
+	return 0,nil
+}
+
+type stor struct {
+	key string
+	obj *obj
+}
+
+func (s *stor) Writer() (io.WriteCloser, error) {
+	fmt.Println(` >>>> DEBUG >>>> [Open Writer] `, logP,)
+	return s.obj, nil
+}
+// func (s *stor) print() {
+	
+// }
+func (s *stor) Reader() (io.ReadSeekCloser, error) { 
+	return &reader{
+		io.NopCloser(bytes.NewBuffer(make([]byte, 1024))),
+	}, nil 
+}
+func (s *stor) Key() storage_.StorageKey {
+	return storage_.StorageKey(s.key)
+}
+func (s *stor) IsExists() (bool, error) { return true, nil }
+func (s *stor) ModTime() time.Time { return time.Time{} }
 
