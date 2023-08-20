@@ -72,8 +72,8 @@ t.ConvertSet( YourConverter )
 - [x] clean arch;
 - [ ] scripts;
 - [ ] gRPC;
-- [ ] manifest;
-- [ ] Docker;
+- [ ] Thumb - manifest, test;
+- [ ] Docker - manifest, deploy;
 - [ ] other testing;
 - [ ] doc local;
 - [ ] doc other;
