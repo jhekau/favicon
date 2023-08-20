@@ -12,8 +12,8 @@ import (
 	"github.com/jhekau/gdown"
 
 	config_ "github.com/jhekau/favicon/internal/adapters/http/v1/config"
-	err_ "github.com/jhekau/favicon/internal/core/err"
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
+	logs_ "github.com/jhekau/favicon/internal/pkg/logs"
 	"github.com/jhekau/favicon/internal/storage/files"
 	handler_ "github.com/jhekau/favicon/pkg/core/http/v1/handler"
 	thumbs_ "github.com/jhekau/favicon/pkg/service/thumbs"

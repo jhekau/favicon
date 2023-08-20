@@ -15,12 +15,12 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 )
 
 const (
-	logIP  = `/favicon/internal/core/test_data/image/image_test_data.go.go`
+	logIP  = `/favicon/internal/pkg/test_data/image/image_test_data.go.go`
 	logI01 = `I01: incorrect base64 `
 	logI02 = `I02: read base64 string `
 	logI03 = `I03: get image conf `

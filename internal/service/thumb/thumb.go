@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"sync"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
-	typ_ "github.com/jhekau/favicon/internal/core/types"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
+	typ_ "github.com/jhekau/favicon/internal/pkg/types"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"

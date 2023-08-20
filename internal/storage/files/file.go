@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )

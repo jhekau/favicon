@@ -10,11 +10,11 @@ import (
 
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 )
 
 const (
-	logRP = `/favicon/internal/service/img/resolution/resolution.go`
+	logRP = `/favicon/internal/pkg/img/resolution/resolution.go`
 	logR01 = `R01: image decode config error`
 	logR02 = `R02: read object`
 	// logR03 = `R03: `

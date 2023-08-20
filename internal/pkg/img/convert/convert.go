@@ -5,7 +5,7 @@ package convert
  * 1 August 2023
  */
 import (
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"

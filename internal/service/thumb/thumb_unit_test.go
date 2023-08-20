@@ -14,12 +14,12 @@ import (
 	"testing"
 
 	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
-	typ_ "github.com/jhekau/favicon/internal/core/types"
+	typ_ "github.com/jhekau/favicon/internal/pkg/types"
 	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
 	mock_storage_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/storage"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 
 	mock_thumb_ "github.com/jhekau/favicon/internal/mocks/intr/service/thumb"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"

@@ -9,11 +9,11 @@ import (
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 )
 
 const (
-	logP = `github.com/jhekau/favicon/internal/service/defaults/defaults.go`
+	logP = `github.com/jhekau/favicon/internal/service/thumb/defaults/defaults.go`
 	logD1 = `D1: create new thumb`
 )
 

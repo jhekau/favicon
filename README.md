@@ -1,4 +1,5 @@
 # Favicon — automatic creation of popular icons for popular platform
+# Demo <!>
 
 
 ### Quick start

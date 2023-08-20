@@ -10,7 +10,7 @@ import (
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 )
 
 //

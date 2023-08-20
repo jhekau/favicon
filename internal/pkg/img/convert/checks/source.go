@@ -8,8 +8,8 @@ package checks
 import (
 	"fmt"
 
-	config_ "github.com/jhekau/favicon/internal/config"
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	config_ "github.com/jhekau/favicon/internal/pkg/img/config"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 )

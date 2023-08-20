@@ -11,14 +11,14 @@ import (
 	"sync"
 	"time"
 
-	logs_ "github.com/jhekau/favicon/internal/core/logs"
-	typ_ "github.com/jhekau/favicon/internal/core/types"
-	convert_ "github.com/jhekau/favicon/internal/service/convert"
-	checks_ "github.com/jhekau/favicon/internal/service/convert/checks"
-	converters_ "github.com/jhekau/favicon/internal/service/convert/converters"
-	defaults_ "github.com/jhekau/favicon/internal/service/defaults"
-	converter_exec_anthonynsimon_ "github.com/jhekau/favicon/internal/service/img/converter/anthonynsimon"
-	resolution_ "github.com/jhekau/favicon/internal/service/img/resolution"
+	logs_ "github.com/jhekau/favicon/internal/pkg/logs"
+	typ_ "github.com/jhekau/favicon/internal/pkg/types"
+	convert_ "github.com/jhekau/favicon/internal/pkg/img/convert"
+	checks_ "github.com/jhekau/favicon/internal/pkg/img/convert/checks"
+	converters_ "github.com/jhekau/favicon/internal/pkg/img/convert/converters"
+	defaults_ "github.com/jhekau/favicon/internal/service/thumb/defaults"
+	converter_exec_anthonynsimon_ "github.com/jhekau/favicon/internal/pkg/img/convert.exec/anthonynsimon"
+	resolution_ "github.com/jhekau/favicon/internal/pkg/img/resolution"
 	manifest_ "github.com/jhekau/favicon/internal/service/manifest"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
@@ -26,7 +26,7 @@ import (
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 )
 
 const (

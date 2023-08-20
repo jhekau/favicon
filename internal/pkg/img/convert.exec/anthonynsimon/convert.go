@@ -13,7 +13,7 @@ import (
 	ico_ "github.com/Kodeworks/golang-image-ico"
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
-	err_ "github.com/jhekau/favicon/internal/core/err"
+	err_ "github.com/jhekau/favicon/internal/pkg/err"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	logC   = `internal/service/img/converter/anthonynsimon/convert.go`
+	logC   = `internal/service/img/convert.exec/anthonynsimon/convert.go`
 	logC01 = `C01: error read source`
 	logC02 = `C02: error image decode`
 	logC03 = `C03: error open writer storage`
