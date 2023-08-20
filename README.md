@@ -66,9 +66,14 @@ t.ConvertSet( YourConverter )
 - v0.0.0: PoC version;
 
 #### TODO`s
+- [x] test unit;
+- [x] test integration (thumb-convert-conv.exec) (part);
+- [x] debug;
+- [x] clean arch;
 - [ ] scripts;
 - [ ] gRPC;
 - [ ] manifest;
+- [ ] Docker;
 - [ ] other testing;
 - [ ] doc local;
 - [ ] doc other;
