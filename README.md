@@ -64,3 +64,11 @@ t.ConvertSet( YourConverter )
 - v0.0.2: working version, partially tested;
 - v0.0.1: set architecture project, added dependency inversion, unit test, integration test;
 - v0.0.0: PoC version;
+
+#### TODO`s
+- [] scripts;
+- [] gRPC;
+- [] manifest;
+- [] other testing;
+- [] doc local;
+- [] doc other;
