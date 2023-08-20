@@ -61,6 +61,6 @@ t.ConvertSet( YourConverter )
 
 
 #### Chapters
-
+- v0.0.2: working version, partially tested;
 - v0.0.1: set architecture project, added dependency inversion, unit test, integration test;
 - v0.0.0: PoC version;
