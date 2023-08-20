@@ -5,8 +5,6 @@ package files
  * 10 March 2023
  */
 import (
-	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -73,7 +71,7 @@ func (s *file) Writer() (io.WriteCloser, error){
 		return nil, err_.Err(s.l, logP, logS08, err)
 	}
 	
-	f, err := os.OpenFile(fpath, os.O_CREATE|os.O_TRUNC, 0777)
+	f, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return nil, err_.Err(s.l, logP, logS05, err)
 	}
@@ -129,11 +127,13 @@ type Storage struct{
 
 // получаем интерфейсы на объект в storage
 func (s Storage) NewObject( key any ) (storage_.StorageOBJ, error) {
-	fmt.Println(` >>>> DEBUG >>>> [Open object] `, logP, key)
-	return &stor{
-		key: key.(string),
-		obj: &obj{},
-	}, nil
+	// fmt.Println(` >>>> DEBUG >>>> [Open object] `, logP, key)
+	// if key.(string) != `/mnt/c/go/src/github.com/jhekau/favicon/img.jpg` {
+	// 	return &stor{
+	// 		key: key.(string),
+	// 		obj: &obj{},
+	// 	}, nil
+	// }
 	return &file{
 		l: s.L,
 		key: key.(string),
@@ -141,7 +141,7 @@ func (s Storage) NewObject( key any ) (storage_.StorageOBJ, error) {
 	}, nil
 }
 
-
+/*
 
 type obj struct{
 	bytes.Buffer
@@ -177,6 +177,7 @@ func (s *stor) Reader() (io.ReadSeekCloser, error) {
 func (s *stor) Key() storage_.StorageKey {
 	return storage_.StorageKey(s.key)
 }
-func (s *stor) IsExists() (bool, error) { return true, nil }
+func (s *stor) IsExists() (bool, error) { return s.key == `/mnt/c/go/src/github.com/jhekau/favicon/img.jpg` , nil }
 func (s *stor) ModTime() time.Time { return time.Time{} }
 
+*/

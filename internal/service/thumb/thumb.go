@@ -5,6 +5,7 @@ package thumb
  * 10 March 2023
  */
 import (
+	"fmt"
 	"html"
 	"io"
 	"time"
@@ -12,12 +13,12 @@ import (
 	"strconv"
 	"sync"
 
+	err_ "github.com/jhekau/favicon/internal/core/err"
 	typ_ "github.com/jhekau/favicon/internal/core/types"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	err_ "github.com/jhekau/favicon/internal/core/err"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	types_ "github.com/jhekau/favicon/pkg/core/types"
 )
 
 const (
@@ -245,6 +246,7 @@ func (t *Thumb) thumb_create() error {
 	}
 
 	err := t.conv.Do(t.original.obj, t.thumb, t.original.typSVG, t.mimetype, int(t.sizePX))
+fmt.Println(` +++++ DEBUG +++++ `, t.thumb.Key(), logTP )
 	if err != nil {
 		return err_.Err(t.l, logTP, logT01, err)
 	}
@@ -266,7 +268,7 @@ func (t *Thumb) read() (io.ReadSeekCloser, error) {
 	t.mu.RLock()
 	thumb := t.thumb
 	t.mu.RUnlock()
-	
+fmt.Println(` +++++ DEBUG +++++ [00: READ] `, logTP )	
 	exist, err := thumb.IsExists()
 	if err != nil {
 		return nil, err_.Err(t.l, logTP, logT10, err)
@@ -274,7 +276,7 @@ func (t *Thumb) read() (io.ReadSeekCloser, error) {
 	if exist {
 		return thumb.Reader()
 	}
-
+fmt.Println(` +++++ DEBUG +++++ [01: READ] `, logTP )	
 	err = t.thumb_create()
 	if err != nil {
 		return nil, err_.Err(t.l, logTP, logT11, err)
