@@ -66,9 +66,9 @@ t.ConvertSet( YourConverter )
 - v0.0.0: PoC version;
 
 #### TODO`s
-- [] scripts;
-- [] gRPC;
-- [] manifest;
-- [] other testing;
-- [] doc local;
-- [] doc other;
+- [ ] scripts;
+- [ ] gRPC;
+- [ ] manifest;
+- [ ] other testing;
+- [ ] doc local;
+- [ ] doc other;
