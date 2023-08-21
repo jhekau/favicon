@@ -8,31 +8,30 @@ import (
 	"io"
 	"testing"
 
+	mock_convert_ "github.com/jhekau/favicon/internal/test/mocks/intr/pkg/img/convert"
+	mock_checks_ "github.com/jhekau/favicon/internal/test/mocks/intr/pkg/img/convert/checks"
 	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/logger"
-	mock_convert_ "github.com/jhekau/favicon/internal/test/mocks/intr/service/convert"
-	mock_checks_ "github.com/jhekau/favicon/internal/test/mocks/intr/service/convert/checks"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	"github.com/stretchr/testify/require"
 
-	mock_thumb_ "github.com/jhekau/favicon/internal/test/mocks/intr/service/thumb"
-	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/converter"
-	mock_storage_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/storage"
 	convert_ "github.com/jhekau/favicon/internal/pkg/img/convert"
 	checks_ "github.com/jhekau/favicon/internal/pkg/img/convert/checks"
 	converters_ "github.com/jhekau/favicon/internal/pkg/img/convert/converters"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
+	mock_thumb_ "github.com/jhekau/favicon/internal/test/mocks/intr/service/thumb"
+	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/converter"
+	mock_storage_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/storage"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	"go.uber.org/mock/gomock"
 )
-
 
 /*
 go test ./internal/service/thumb/ -v -short -count=1 -race -coverprofile="coverage.out" -coverpkg='./internal/service/thumb,./internal/service/convert' -run="Test_Inegration_ConverterOnly" ;`
 go tool cover -html="coverage.out" ;`
 rm coverage.out
 */
-func Test_Inegration_ConverterOnly( t *testing.T ) {
+func Test_Inegration_ConverterOnly(t *testing.T) {
 
 	// Data
 	ctrl := gomock.NewController(t)
@@ -40,12 +39,11 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 
 	logs := mock_logger_.NewMockLogger(ctrl)
 	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
-	 
 
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()
 	cache.EXPECT().Load(gomock.Any()).Return(nil, false).AnyTimes()
-	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
+	cache.EXPECT().Range(gomock.Any()).AnyTimes()
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
 	thumbKey := `123`
@@ -63,21 +61,21 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 
 	//
 	converterTyp := mock_converter_.NewMockConverterTyp(ctrl)
-	converterTyp.EXPECT().Do(originalOBJ, thumbOBJ, thumbSize, thumbTyp).Return(true, (error)(nil))	
+	converterTyp.EXPECT().Do(originalOBJ, thumbOBJ, thumbSize, thumbTyp).Return(true, (error)(nil))
 
 	checkPreview := mock_convert_.NewMockCheckPreview(ctrl)
 	checkPreview.EXPECT().Check(thumbTyp, thumbSize).Return((error)(nil))
 
-	checkSource  := mock_convert_.NewMockCheckSource(ctrl)
+	checkSource := mock_convert_.NewMockCheckSource(ctrl)
 	checkSource.EXPECT().Check(originalOBJ, false, thumbSize).Return((error)(nil))
 
 	conv := &convert_.Converter{
-		L            : logs,
-		Converters   : []converter_.ConverterTyp{ 
+		L: logs,
+		Converters: []converter_.ConverterTyp{
 			converterTyp,
 		},
-		CheckPreview : checkPreview,
-		CheckSource  : checkSource,
+		CheckPreview: checkPreview,
+		CheckSource:  checkSource,
 	}
 
 	//
@@ -91,14 +89,12 @@ func Test_Inegration_ConverterOnly( t *testing.T ) {
 	require.Equal(t, err, (error)(nil))
 }
 
-
-
 /*
 go test ./internal/service/thumb/ -v -short -count=1 -race -coverprofile="coverage.out" -coverpkg='./internal/service/thumb,./internal/service/convert,./internal/service/convert/checks' -run="Test_Inegration_ConverterCheckPreview" ;`
 go tool cover -html="coverage.out" ;`
 rm coverage.out
 */
-func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
+func Test_Inegration_ConverterCheckPreview(t *testing.T) {
 
 	// Data
 	ctrl := gomock.NewController(t)
@@ -106,12 +102,11 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 
 	logs := mock_logger_.NewMockLogger(ctrl)
 	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
-	 
 
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()
 	cache.EXPECT().Load(gomock.Any()).Return(nil, false).AnyTimes()
-	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
+	cache.EXPECT().Range(gomock.Any()).AnyTimes()
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
 	thumbKey := `123`
@@ -129,20 +124,20 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 
 	//
 	converterTyp := mock_converter_.NewMockConverterTyp(ctrl)
-	converterTyp.EXPECT().Do(originalOBJ, thumbOBJ, thumbSize, thumbTyp).Return(true, (error)(nil))	
+	converterTyp.EXPECT().Do(originalOBJ, thumbOBJ, thumbSize, thumbTyp).Return(true, (error)(nil))
 
 	checkPreview := checks_.Preview{L: logs}
 
-	checkSource  := mock_convert_.NewMockCheckSource(ctrl)
+	checkSource := mock_convert_.NewMockCheckSource(ctrl)
 	checkSource.EXPECT().Check(originalOBJ, false, thumbSize).Return((error)(nil))
 
 	conv := &convert_.Converter{
-		L            : logs,
-		Converters   : []converter_.ConverterTyp{ 
+		L: logs,
+		Converters: []converter_.ConverterTyp{
 			converterTyp,
 		},
-		CheckPreview : checkPreview,
-		CheckSource  : checkSource,
+		CheckPreview: checkPreview,
+		CheckSource:  checkSource,
 	}
 
 	//
@@ -162,14 +157,12 @@ func Test_Inegration_ConverterCheckPreview( t *testing.T ) {
 	require.NotEqual(t, err, (error)(nil))
 }
 
-
-
 /*
 go test ./internal/service/thumb/ -v -short -count=1 -race -coverprofile="coverage.out" -coverpkg='./internal/service/thumb,./internal/service/convert,./internal/service/convert/checks' -run="Test_Inegration_ConverterCheckSource" ;`
 go tool cover -html="coverage.out" ;`
 rm coverage.out
 */
-func Test_Inegration_ConverterCheckSource( t *testing.T ) {
+func Test_Inegration_ConverterCheckSource(t *testing.T) {
 
 	// Data
 	ctrl := gomock.NewController(t)
@@ -177,12 +170,11 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 
 	logs := mock_logger_.NewMockLogger(ctrl)
 	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
-	 
-	
+
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()
 	cache.EXPECT().Load(gomock.Any()).Return(nil, false).AnyTimes()
-	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
+	cache.EXPECT().Range(gomock.Any()).AnyTimes()
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
 	thumbKey := `123`
@@ -204,7 +196,7 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 
 	//
 	converterTyp := mock_converter_.NewMockConverterTyp(ctrl)
-	converterTyp.EXPECT().Do(originalOBJ, thumbOBJ, thumbSize, thumbTyp).Return(true, (error)(nil))	
+	converterTyp.EXPECT().Do(originalOBJ, thumbOBJ, thumbSize, thumbTyp).Return(true, (error)(nil))
 
 	checkPreview := mock_convert_.NewMockCheckPreview(ctrl)
 	checkPreview.EXPECT().Check(thumbTyp, thumbSize).Return((error)(nil))
@@ -216,19 +208,19 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 	checkSource_MockResolution := mock_checks_.NewMockResolution(ctrl)
 	checkSource_MockResolution.EXPECT().Get(originalOBJ).Return(thumbSize, thumbSize, (error)(nil))
 
-	checkSource  := checks_.Source{
-		L : logs,
-		Cache : checkSource_MockCache,
-		Resolution : checkSource_MockResolution,
+	checkSource := checks_.Source{
+		L:          logs,
+		Cache:      checkSource_MockCache,
+		Resolution: checkSource_MockResolution,
 	}
 
 	conv := &convert_.Converter{
-		L            : logs,
-		Converters   : []converter_.ConverterTyp{ 
+		L: logs,
+		Converters: []converter_.ConverterTyp{
 			converterTyp,
 		},
-		CheckPreview : checkPreview,
-		CheckSource  : &checkSource,
+		CheckPreview: checkPreview,
+		CheckSource:  &checkSource,
 	}
 
 	//
@@ -242,13 +234,12 @@ func Test_Inegration_ConverterCheckSource( t *testing.T ) {
 	require.Equal(t, err, (error)(nil))
 }
 
-
 /*
 go test ./internal/service/thumb/ -v -short -count=1 -race -coverprofile="coverage.out" -coverpkg='./internal/service/thumb,./internal/service/convert,./internal/service/convert/converters' -run="Test_Inegration_ConverterConverters" ;`
 go tool cover -html="coverage.out" ;`
 rm coverage.out
 */
-func Test_Inegration_ConverterConverters( t *testing.T ) {
+func Test_Inegration_ConverterConverters(t *testing.T) {
 
 	// Data
 	ctrl := gomock.NewController(t)
@@ -260,7 +251,7 @@ func Test_Inegration_ConverterConverters( t *testing.T ) {
 	cache := mock_thumb_.NewMockcache(ctrl)
 	cache.EXPECT().Delete(nil).AnyTimes()
 	cache.EXPECT().Load(gomock.Any()).Return(nil, false).AnyTimes()
-	cache.EXPECT().Range( gomock.Any() ).AnyTimes()
+	cache.EXPECT().Range(gomock.Any()).AnyTimes()
 	cache.EXPECT().Store(gomock.Any(), gomock.Any()).AnyTimes()
 
 	thumbKey := `123`
@@ -294,20 +285,20 @@ func Test_Inegration_ConverterConverters( t *testing.T ) {
 	checkSource_MockResolution := mock_checks_.NewMockResolution(ctrl)
 	checkSource_MockResolution.EXPECT().Get(originalOBJ).Return(thumbSize, thumbSize, (error)(nil))
 
-	checkSource  := checks_.Source{
-		L : logs,
-		Cache : checkSource_MockCache,
-		Resolution : checkSource_MockResolution,
+	checkSource := checks_.Source{
+		L:          logs,
+		Cache:      checkSource_MockCache,
+		Resolution: checkSource_MockResolution,
 	}
 
 	conv := &convert_.Converter{
-		L            : logs,
-		Converters   : []converter_.ConverterTyp{ 
+		L: logs,
+		Converters: []converter_.ConverterTyp{
 			&converters_.ConverterPNG{L: logs, ConverterExec: converterExec},
 			&converters_.ConverterICO{L: logs, ConverterExec: converterExec},
 		},
-		CheckPreview : checkPreview,
-		CheckSource  : &checkSource,
+		CheckPreview: checkPreview,
+		CheckSource:  &checkSource,
 	}
 
 	//
