@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	image_test_data_ "github.com/jhekau/favicon/internal/pkg/test_data/image"
+	image_test_data_ "github.com/jhekau/favicon/internal/pkg/test/test_data/image"
 	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
 	resolution_ "github.com/jhekau/favicon/internal/pkg/img/resolution"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
-	image_test_data_ "github.com/jhekau/favicon/internal/pkg/test_data/image"
+	image_test_data_ "github.com/jhekau/favicon/internal/pkg/test/test_data/image"
 	mock_convert_ "github.com/jhekau/favicon/internal/mocks/intr/service/convert"
 	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
 	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"

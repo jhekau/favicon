@@ -60,7 +60,7 @@ MOCKGEN ?= $(GOPATH)/bin/mockgen
 ifeq ($(OS),Windows_NT)
 MOCKGEN := $(GOPATH)"\bin\mockgen.exe"
 endif
-MOCKS_DESTINATION ?= internal/mocks
+MOCKS_DESTINATION ?= internal/test/mocks
 
 .PHONY: mockgen
 mockgen: $(MOCKS_FILEPATH)
