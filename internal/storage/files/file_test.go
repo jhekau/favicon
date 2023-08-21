@@ -16,7 +16,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
-	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
+	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/logger"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 )
 

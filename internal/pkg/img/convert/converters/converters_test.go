@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
-	image_test_data_ "github.com/jhekau/favicon/internal/pkg/test/test_data/image"
-	mock_converter_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/converter"
+	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/logger"
+	image_test_data_ "github.com/jhekau/favicon/internal/test/test_data/image"
+	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/converter"
 	converters_ "github.com/jhekau/favicon/internal/pkg/img/convert/converters"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"

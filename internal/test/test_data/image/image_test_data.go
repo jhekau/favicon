@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	logIP  = `/favicon/internal/pkg/test/test_data/image/image_test_data.go.go`
+	logIP  = `/favicon/internal/test/test_data/image/image_test_data.go.go`
 	logI01 = `I01: incorrect base64 `
 	logI02 = `I02: read base64 string `
 	logI03 = `I03: get image conf `

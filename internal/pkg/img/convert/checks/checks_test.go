@@ -12,7 +12,7 @@ import (
 	"time"
 
 	config_ "github.com/jhekau/favicon/internal/pkg/img/config"
-	mock_logger_ "github.com/jhekau/favicon/internal/mocks/pkg/core/models/logger"
+	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/logger"
 	checks_ "github.com/jhekau/favicon/internal/pkg/img/convert/checks"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
