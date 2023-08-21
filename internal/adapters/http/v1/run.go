@@ -11,11 +11,11 @@ import (
 
 	"github.com/jhekau/gdown"
 
-	config_ "github.com/jhekau/favicon/internal/adapters/http/v1/config"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
 	logs_ "github.com/jhekau/favicon/internal/pkg/logs"
+	yaml_ "github.com/jhekau/favicon/internal/pkg/yaml"
 	"github.com/jhekau/favicon/internal/storage/files"
-	handler_ "github.com/jhekau/favicon/pkg/core/http/v1/handler"
+	handler_ "github.com/jhekau/favicon/pkg/transport/http/v1/handler"
 	thumbs_ "github.com/jhekau/favicon/pkg/service/thumbs"
 )
 
@@ -36,6 +36,10 @@ const (
 	logR7 = `R7: set object storage image`
 )
 
+type Conf struct {
+	Port string `yaml:"port"` 
+}
+
 func Run() {
 
 	log := &logs_.Logger{}
@@ -45,8 +49,10 @@ func Run() {
 	svg := flag.String("svg", ``, `original image`)
 	flag.Parse()
 
+	
 	//
-	conf, err := config_.Parse(*yamlFile)
+	conf := Conf{}
+	err := yaml_.Parse(*yamlFile, &conf)
 	if err != nil {
 		panic(err_.Err(log, logP, logR1, err))
 	}
