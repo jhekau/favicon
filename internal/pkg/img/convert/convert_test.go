@@ -12,11 +12,11 @@ import (
 	"time"
 
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
-	image_test_data_ "github.com/jhekau/favicon/internal/test/test_data/image"
-	mock_convert_ "github.com/jhekau/favicon/internal/test/mocks/intr/service/convert"
+	convert_ "github.com/jhekau/favicon/internal/pkg/img/convert"
+	mock_convert_ "github.com/jhekau/favicon/internal/test/mocks/intr/pkg/img/convert"
 	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/converter"
 	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/logger"
-	convert_ "github.com/jhekau/favicon/internal/pkg/img/convert"
+	image_test_data_ "github.com/jhekau/favicon/internal/test/test_data/image"
 	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
 	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
 	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
@@ -43,11 +43,13 @@ func (s *storage) IsExists() (bool, error) {
 func (s *storage) Key() storage_.StorageKey {
 	return s.storageKey
 }
+
 type reader struct {
 	io.ReadCloser
 }
-func (r *reader) Seek(offset int64, whence int) (int64, error){
-	return 0,nil
+
+func (r *reader) Seek(offset int64, whence int) (int64, error) {
+	return 0, nil
 }
 
 func (s *storage) Reader() (io.ReadSeekCloser, error) {
@@ -67,7 +69,7 @@ func (s *storage) ModTime() time.Time {
 // Unit *******
 
 func TestUnit_Convert_JPGxICO(t *testing.T) {
-	
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -126,7 +128,7 @@ func TestUnit_Convert_CoverterError(t *testing.T) {
 
 	logs := mock_logger_.NewMockLogger(ctrl)
 	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
-	 
+
 	// Data
 	original := &storage{
 		l:          logs,
@@ -180,7 +182,6 @@ func TestUnit_Convert_CoverterMulti(t *testing.T) {
 
 	logs := mock_logger_.NewMockLogger(ctrl)
 	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
-	 
 
 	// Data
 	original := &storage{
@@ -237,7 +238,6 @@ func TestUnit_Convert_NoConverters(t *testing.T) {
 
 	logs := mock_logger_.NewMockLogger(ctrl)
 	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
-	 
 
 	// Data
 	original := &storage{
@@ -286,7 +286,6 @@ func TestUnit_Convert_SizePX0(t *testing.T) {
 
 	logs := mock_logger_.NewMockLogger(ctrl)
 	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
-	 
 
 	// Data
 	original := &storage{
@@ -334,7 +333,6 @@ func TestUnit_Convert_PreviewCheckError(t *testing.T) {
 
 	logs := mock_logger_.NewMockLogger(ctrl)
 	logs.EXPECT().Error(gomock.Any(), gomock.Any()).AnyTimes()
-	 
 
 	// Data
 	original := &storage{
