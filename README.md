@@ -70,7 +70,7 @@ t.ConvertSet( YourConverter )
 - [x] test integration (thumb-convert-conv.exec) (part);
 - [x] debug;
 - [x] clean arch;
-- [ ] scripts;
+- [x] scripts;
 - [ ] gRPC;
 - [ ] Thumb - manifest, test;
 - [ ] Docker - manifest, deploy;
