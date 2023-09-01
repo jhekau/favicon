@@ -25,7 +25,7 @@ build: clean
 	go build -o ${APP_NAME} ./cmd/http
 
 run: build
-	./${APP_NAME} -conf="conf.yaml" -img="img.jpg" -svg="image.svg" 
+	./${APP_NAME} -conf="http.yaml" -img="img.jpg" -svg="image.svg" 
 
 cover:
 	@echo "Generating coverprofile from test..."

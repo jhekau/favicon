@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	logPP  = `/internal/service/convert/checks/preview.go`
+	logPP  = `/internal/pkg/img/convert/checks/preview.go`
 	logP01 = `P01: incorrect resolution source file`
 	// logP02 = `P02: `
 	// logP03 = `P03: `

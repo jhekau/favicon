@@ -53,7 +53,7 @@ func NewThumbs() *Thumbs {
 	logger := &logs_.Logger{}
 	return &Thumbs{
 		l: logger,
-		storage: files_.NewStorage(``, logger),
+		storage: files_.NewStorage(``, logger).SetDirDefault(),
 		conv: &convert_.Converter{
 			L: logger,
 			Converters: []converter_.ConverterTyp{

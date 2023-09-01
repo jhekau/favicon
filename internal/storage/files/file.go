@@ -33,13 +33,10 @@ var (
 	osStat = os.Stat
 )
 
-var dirIconsDefault = `icons` // default
+const dirIconsDefault = `icons` // default
 
 //
 func NewStorage(dirIcons string, logger logger_.Logger) *storage {
-	if dirIcons == `` {
-		dirIcons = dirIconsDefault
-	}
 	return &storage{
 		dir: dirIcons,
 		l: logger,
@@ -133,10 +130,16 @@ type storage struct{
 }
 
 // получаем интерфейсы на объект в storage
-func (s storage) NewObject( key any ) (storage_.StorageOBJ, error) {
+func (s *storage) NewObject( key any ) (storage_.StorageOBJ, error) {
 	return &file{
 		l: s.l,
 		key: key.(string),
 		dir: s.dir,
 	}, nil
 }
+
+func (s *storage) SetDirDefault() *storage {
+	s.dir = dirIconsDefault
+	return s
+}
+

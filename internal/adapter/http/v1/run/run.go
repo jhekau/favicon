@@ -94,7 +94,7 @@ func Run() {
 		if err != nil {
 			panic(err_.Err(log, logP, logR7, err))
 		}
-		icons.SetOriginal(img)
+		icons.SetOriginalSVG(img)
 	}
 	// manifest
 
