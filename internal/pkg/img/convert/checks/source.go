@@ -15,13 +15,13 @@ import (
 )
 
 const (
-	logCP  = `/internal/service/convert/checks/source.go`
-	logC01 = `C01: check source`
-	logC02 = `C02: check is exists source file`
-	logC03 = `C03: file is not exist`
-	logC04 = `C04: get resolution source file`
-	logC05 = `C05: the resolution of the preview is larger than the original image`
-	logC06 = `C06: incorrect resolution source file`
+	logCP  = `/internal/pkg/img/convert/checks/source.go`
+	logC01 = `C01: check source `
+	logC02 = `C02: check is exists source file `
+	logC03 = `C03: file is not exist `
+	logC04 = `C04: get resolution source file `
+	logC05 = `C05: the resolution of the preview is larger than the original image `
+	logC06 = `C06: incorrect resolution source file `
 	// logC07 = `C07: `
 	// logC08 = `C08: `
 	// logC09 = `C09: `
@@ -59,7 +59,7 @@ func (c *Source) Check( original storage_.StorageOBJ, originalSVG bool, thumb_si
 		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC02, err))
 	}
 	if !exist {
-		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC03))
+		return c.Cache.SetErr(original.Key(), originalSVG, thumb_size, err_.Err(c.L, logCP, logC03, original.Key()))
 	}
 
 	if !originalSVG {

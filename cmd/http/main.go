@@ -4,8 +4,8 @@ package main
  * Copyright (c) 2023, @jhekau <mr.evgeny.u@gmail.com>
  * 20 July 2023
  */
-import adapter_http_v1 "github.com/jhekau/favicon/internal/adapters/http/v1"
+import adapter_ "github.com/jhekau/favicon/internal/adapter/http/v1/run"
 
 func main(){
-	adapter_http_v1.Run()
+	adapter_.Run()
 }
