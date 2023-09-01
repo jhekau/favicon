@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	logP = `github.com/jhekau/favicon/pkg/transport/http/v1/handler/handler.go`
+	logP = `github.com/jhekau/favicon/adapter/http/v1/handler.go`
 	logH1 = `H1: get file`
 )
 

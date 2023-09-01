@@ -15,17 +15,16 @@ import (
 	logs_ "github.com/jhekau/favicon/internal/pkg/logs"
 	yaml_ "github.com/jhekau/favicon/internal/pkg/yaml"
 	"github.com/jhekau/favicon/internal/storage/files"
-	handler_ "github.com/jhekau/favicon/pkg/transport/http/v1/handler"
+	handler_ "github.com/jhekau/favicon/internal/adapter/http/v1"
 	thumbs_ "github.com/jhekau/favicon/pkg/service/thumbs"
 )
 
 const (
-	appPort = ":80" // default
-	workOpt = `httpv1`
+	appPort = ":8080" // default
 )
 
 const (
-	logP = `github.com/jhekau/favicon/internal/adapters/http/v1/run.go`
+	logP = `github.com/jhekau/favicon/internal/adapter/http/v1/internal/run.go`
 
 	logR1 = `R1: read yaml config`
 	logR2 = `R2: create defaults icons`
