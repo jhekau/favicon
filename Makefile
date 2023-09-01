@@ -12,32 +12,27 @@ SHELL := powershell.exe
 endif
 
 
-
-
+##
+.PHONY: clean build run cover mockgen
 
 APP_NAME?=autofav
-APP_PATH?=cmd/http/v1
-
+APP_PATH?=cmd/http
 
 clean:
 	rm -f ${APP_NAME}
 
-build_http_v1: clean
-	go build -o ${APP_NAME} ./cmd/http/v1
+build: clean
+	go build -o ${APP_NAME} ./cmd/http
 
-# example
-# run_http_v1: build_httpv1
-# 	./${APP_NAME} -conf="conf.yaml" -img="image.png" -svg="image.svg" 
+run: build
+	./${APP_NAME} -conf="conf.yaml" -img="img.jpg" -svg="image.svg" 
 
-
-.PHONY: cover
 cover:
 	@echo "Generating coverprofile from test..."
 	go test -short -count=1 -race -coverprofile="coverage.out" ./...
 	go tool cover -html="coverage.out"
 	rm coverage.out
 
-.PHONY: mockgen
 mockgen: 
 	scripts/mockgen.sh
 
