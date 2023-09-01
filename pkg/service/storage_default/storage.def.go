@@ -8,7 +8,7 @@ import (
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 )
 
-// Для определения директории, в которой будут храниться нарезанные иконки
+// Для переопределния дефолтовой директории, в которой будут храниться нарезанные иконки для интегрированного storage
 func SetFolderIcons(f string) {
 	files_.DirIconsDefault = f
 }
