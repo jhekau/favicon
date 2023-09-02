@@ -7,8 +7,8 @@ package mock_convert
 import (
 	reflect "reflect"
 
-	storage "github.com/jhekau/favicon/pkg/core/models/storage"
-	types "github.com/jhekau/favicon/pkg/core/types"
+	types "github.com/jhekau/favicon/domain/types"
+	storage "github.com/jhekau/favicon/interfaces/storage"
 	gomock "go.uber.org/mock/gomock"
 )
 

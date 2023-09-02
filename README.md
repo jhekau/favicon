@@ -21,7 +21,7 @@ storagedefault.SetFolderIcons(YourFolder)
 ```Go
 import (
     github.com/jhekau/favicon/pkg/thumbs
-    github.com/jhekau/favicon/pkg/core/models/logger
+    github.com/jhekau/favicon/interfaces/logger
 )
 
 # check implementation
@@ -35,7 +35,7 @@ t.LoggerSet( YourLogger )
 ```Go
 import (
     github.com/jhekau/favicon/pkg/thumbs
-    github.com/jhekau/favicon/pkg/core/models/storage
+    github.com/jhekau/favicon/interfaces/storage
 )
 
 # check implementation
@@ -49,7 +49,7 @@ t.StorageSet( YourStorage )
 ```Go
 import (
     github.com/jhekau/favicon/pkg/thumbs
-    github.com/jhekau/favicon/pkg/core/models/converter
+    github.com/jhekau/favicon/interfaces/converter
 )
 
 # check implementation

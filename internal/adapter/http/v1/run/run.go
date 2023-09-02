@@ -16,7 +16,7 @@ import (
 	yaml_ "github.com/jhekau/favicon/internal/pkg/yaml"
 	"github.com/jhekau/favicon/internal/storage/files"
 	handler_ "github.com/jhekau/favicon/internal/adapter/http/v1"
-	thumbs_ "github.com/jhekau/favicon/pkg/service/thumbs"
+	thumbs_ "github.com/jhekau/favicon/service/thumbs"
 )
 
 const (
@@ -98,7 +98,7 @@ func Run() {
 	}
 	// manifest
 
-	handler := (&handler_.Handler{L: log}).Handle(icons)
+	handler := handler_.NewHandle(log, icons)
 	
 	// graceful shutdown
 	server, s := gdown.HTTPNewServerWithHandler(handler)

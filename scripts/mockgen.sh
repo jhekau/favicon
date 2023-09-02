@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# если возникла проблема с запускам срипта после редактирования под виндой:
+#   /bin/bash^M: bad interpreter: No such file or directory
+# запустить:
+#   sed -i -e 's/\r$//' scripts/mockgen.sh
+# команда заменит все символы переноса Windows на Linux
+
 if ! [ -v "${GOPATH}" ];
 then
     GOPATH=$(go env GOPATH)
@@ -7,13 +13,13 @@ then
 fi
 
 #
-FILES=(pkg/core/models/converter/converter.exe.go 
-pkg/core/models/converter/converter.type.go 
-pkg/core/models/converter/converter.go 
-pkg/core/models/storage/storage.go 
-pkg/core/models/storage/storage.key.go 
-pkg/core/models/storage/storage.obj.go 
-pkg/core/models/logger/logger.go 
+FILES=(interfaces/converter/converter.exe.go 
+interfaces/converter/converter.type.go 
+interfaces/converter/converter.go 
+interfaces/storage/storage.go 
+interfaces/storage/storage.key.go 
+interfaces/storage/storage.obj.go 
+interfaces/logger/logger.go 
 internal/service/thumb/thumb.go 
 internal/pkg/img/convert/convert.go 
 internal/pkg/img/convert/checks/source.go )

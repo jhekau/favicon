@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	types_ "github.com/jhekau/favicon/internal/pkg/types"
 )

@@ -23,14 +23,14 @@ import (
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	files_ "github.com/jhekau/favicon/internal/storage/files"
 
-	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	converter_ "github.com/jhekau/favicon/interfaces/converter"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
+	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
 )
 
 const (
-	logTP  = `pkg/thumbs.go`
+	logTP  = `service/thumbs/thumbs.go`
 	logT01 = `T01: get serve file`
 	logT02 = `T02: get file manifest`
 	logT03 = `T03: get file thumb`

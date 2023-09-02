@@ -7,7 +7,7 @@ package err
 import (
 	"fmt"
 
-	"github.com/jhekau/favicon/pkg/core/models/logger"
+	"github.com/jhekau/favicon/interfaces/logger"
 )
 
 func Err(log logger.Logger, path string, arg ...any) error {

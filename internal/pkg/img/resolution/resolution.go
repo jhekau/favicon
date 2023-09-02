@@ -8,8 +8,8 @@ package resolution
 import (
 	"image"
 
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
+	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
 )
 

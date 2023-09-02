@@ -14,9 +14,9 @@ import (
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
+	storage_ "github.com/jhekau/favicon/interfaces/storage"
+	types_ "github.com/jhekau/favicon/domain/types"
 	"github.com/pressly/goico"
 )
 

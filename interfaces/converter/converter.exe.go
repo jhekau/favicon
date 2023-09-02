@@ -5,8 +5,8 @@ package converter
  * 11 August 2023
  */
 import (
-	"github.com/jhekau/favicon/pkg/core/types"
-	"github.com/jhekau/favicon/pkg/core/models/storage"
+	"github.com/jhekau/favicon/domain/types"
+	"github.com/jhekau/favicon/interfaces/storage"
 )
 
 type ConverterExec interface{

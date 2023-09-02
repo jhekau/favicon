@@ -10,9 +10,9 @@ import (
 
 	mock_convert_ "github.com/jhekau/favicon/internal/test/mocks/intr/pkg/img/convert"
 	mock_checks_ "github.com/jhekau/favicon/internal/test/mocks/intr/pkg/img/convert/checks"
-	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/logger"
-	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/logger"
+	converter_ "github.com/jhekau/favicon/interfaces/converter"
+	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	"github.com/stretchr/testify/require"
 
 	convert_ "github.com/jhekau/favicon/internal/pkg/img/convert"
@@ -20,9 +20,9 @@ import (
 	converters_ "github.com/jhekau/favicon/internal/pkg/img/convert/converters"
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
 	mock_thumb_ "github.com/jhekau/favicon/internal/test/mocks/intr/service/thumb"
-	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/converter"
-	mock_storage_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/storage"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/converter"
+	mock_storage_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/storage"
+	types_ "github.com/jhekau/favicon/domain/types"
 	"go.uber.org/mock/gomock"
 )
 
