@@ -6,9 +6,9 @@ package defaults
  */
 import (
 	thumb_ "github.com/jhekau/favicon/internal/service/thumb"
-	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	converter_ "github.com/jhekau/favicon/interfaces/converter"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
+	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
 )
 

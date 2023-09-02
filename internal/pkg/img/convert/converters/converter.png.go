@@ -6,10 +6,10 @@ package converters
  * конвертер для создания PNG превьюх
  */
 import (
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
-	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	converter_ "github.com/jhekau/favicon/interfaces/converter"
+	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
 )
 

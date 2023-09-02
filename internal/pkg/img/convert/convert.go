@@ -6,9 +6,9 @@ package convert
  */
 import (
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
-	converter_ "github.com/jhekau/favicon/pkg/core/models/converter"
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	converter_ "github.com/jhekau/favicon/interfaces/converter"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
+	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	types_ "github.com/jhekau/favicon/pkg/core/types"
 )
 

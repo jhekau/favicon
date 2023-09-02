@@ -5,7 +5,7 @@ package converter
  * 11 August 2023
  */
 import (
-	"github.com/jhekau/favicon/pkg/core/models/storage"
+	"github.com/jhekau/favicon/interfaces/storage"
 	"github.com/jhekau/favicon/pkg/core/types"
 )
 

@@ -16,7 +16,7 @@ import (
 	_ "image/png"
 
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
 )
 
 const (

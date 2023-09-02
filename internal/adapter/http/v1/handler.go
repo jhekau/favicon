@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jhekau/favicon/pkg/core/models/logger"
+	"github.com/jhekau/favicon/interfaces/logger"
 )
 
 const (

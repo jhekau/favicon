@@ -12,10 +12,10 @@ import (
 	"time"
 
 	image_test_data_ "github.com/jhekau/favicon/internal/test/test_data/image"
-	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/pkg/core/models/logger"
+	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/logger"
 	resolution_ "github.com/jhekau/favicon/internal/pkg/img/resolution"
-	logger_ "github.com/jhekau/favicon/pkg/core/models/logger"
-	storage_ "github.com/jhekau/favicon/pkg/core/models/storage"
+	logger_ "github.com/jhekau/favicon/interfaces/logger"
+	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
