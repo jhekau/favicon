@@ -98,7 +98,7 @@ func Run() {
 	}
 	// manifest
 
-	handler := (&handler_.Handler{L: log}).Handle(icons)
+	handler := handler_.NewHandle(log, icons)
 	
 	// graceful shutdown
 	server, s := gdown.HTTPNewServerWithHandler(handler)

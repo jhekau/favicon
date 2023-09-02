@@ -21,11 +21,7 @@ type Content interface {
 	ServeFile(urlPath string) (content io.ReadSeekCloser, modtime time.Time, name string, exists bool, err error)
 }
 
-type Handler struct {
-	L logger.Logger
-}
-
-func (h *Handler) Handle(c ...Content) http.HandlerFunc {
+func NewHandle(l logger.Logger, c ...Content) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
@@ -35,7 +31,7 @@ func (h *Handler) Handle(c ...Content) http.HandlerFunc {
 		for _, c := range c {
 			content, modtime, name, exists, err := c.ServeFile(r.URL.Path)
 			if err != nil {
-				h.L.Error(logP, logH1, err)
+				l.Error(logP, logH1, err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
