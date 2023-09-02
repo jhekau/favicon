@@ -22,7 +22,7 @@ import (
 	mock_thumb_ "github.com/jhekau/favicon/internal/test/mocks/intr/service/thumb"
 	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/converter"
 	mock_storage_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/storage"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	types_ "github.com/jhekau/favicon/domain/types"
 	"go.uber.org/mock/gomock"
 )
 

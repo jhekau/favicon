@@ -7,7 +7,7 @@ package converters
  */
 import (
 	logger_ "github.com/jhekau/favicon/interfaces/logger"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	types_ "github.com/jhekau/favicon/domain/types"
 	converter_ "github.com/jhekau/favicon/interfaces/converter"
 	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"

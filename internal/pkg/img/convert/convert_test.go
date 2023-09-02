@@ -20,7 +20,7 @@ import (
 	converter_ "github.com/jhekau/favicon/interfaces/converter"
 	logger_ "github.com/jhekau/favicon/interfaces/logger"
 	storage_ "github.com/jhekau/favicon/interfaces/storage"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	types_ "github.com/jhekau/favicon/domain/types"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

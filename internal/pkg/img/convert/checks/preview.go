@@ -11,7 +11,7 @@ import (
 	config_ "github.com/jhekau/favicon/internal/pkg/img/config"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
 	logger_ "github.com/jhekau/favicon/interfaces/logger"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	types_ "github.com/jhekau/favicon/domain/types"
 )
 
 const (

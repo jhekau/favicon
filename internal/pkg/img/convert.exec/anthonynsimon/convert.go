@@ -16,7 +16,7 @@ import (
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
 	logger_ "github.com/jhekau/favicon/interfaces/logger"
 	storage_ "github.com/jhekau/favicon/interfaces/storage"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	types_ "github.com/jhekau/favicon/domain/types"
 	"github.com/pressly/goico"
 )
 

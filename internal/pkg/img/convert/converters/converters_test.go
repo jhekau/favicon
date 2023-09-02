@@ -15,7 +15,7 @@ import (
 	image_test_data_ "github.com/jhekau/favicon/internal/test/test_data/image"
 	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/converter"
 	converters_ "github.com/jhekau/favicon/internal/pkg/img/convert/converters"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	types_ "github.com/jhekau/favicon/domain/types"
 	logger_ "github.com/jhekau/favicon/interfaces/logger"
 	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	"github.com/stretchr/testify/require"

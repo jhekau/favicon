@@ -17,7 +17,7 @@ import (
 	typ_ "github.com/jhekau/favicon/internal/pkg/types"
 	mock_converter_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/converter"
 	mock_storage_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/storage"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	types_ "github.com/jhekau/favicon/domain/types"
 	storage_ "github.com/jhekau/favicon/interfaces/storage"
 	err_ "github.com/jhekau/favicon/internal/pkg/err"
 

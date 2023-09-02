@@ -15,7 +15,7 @@ import (
 	mock_logger_ "github.com/jhekau/favicon/internal/test/mocks/interfaces/logger"
 	checks_ "github.com/jhekau/favicon/internal/pkg/img/convert/checks"
 	storage_ "github.com/jhekau/favicon/interfaces/storage"
-	types_ "github.com/jhekau/favicon/pkg/core/types"
+	types_ "github.com/jhekau/favicon/domain/types"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
