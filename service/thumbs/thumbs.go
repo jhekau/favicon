@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	logTP  = `pkg/thumbs.go`
+	logTP  = `service/thumbs/thumbs.go`
 	logT01 = `T01: get serve file`
 	logT02 = `T02: get file manifest`
 	logT03 = `T03: get file thumb`
