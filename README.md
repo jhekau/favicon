@@ -1,5 +1,5 @@
 # Favicon — automatic creation of popular icons for popular platform
-# Demo <!>
+# Demo <!!!!>
 
 ### Introduction
 The program allows you to add a favicon to the project. It is enough to put the original images (svg, img) in the root of the site, launch the application. It will automatically cut previews for popular formats and raise the necessary service.
